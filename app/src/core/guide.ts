@@ -14,6 +14,7 @@ Você edita uma cena 3D de interiores/exteriores com MEDIDAS REAIS. Tudo em metr
   0 = frente para o sul · 90 = frente para o leste · 180 (ou -180) = frente para o norte · -90 = frente para o oeste.
 - position de objeto = [x, y, z] do CENTRO da BASE (y = altura do chão). dimensions = {width (X local), height, depth (Z local)}.
 - Paredes têm start→end; "right" (direita de quem anda de start para end) é o INTERIOR em ambientes criados por addRoom, "left" é o exterior.
+- Ambientes encostados dividem a parede: ao criar, mover ou redimensionar um ambiente colado em outro, a parede do trecho comum vira uma só (ligada aos dois ambientes, cada lado com o acabamento do seu ambiente). Para pôr uma porta entre eles, use roomId + roomSide de qualquer um dos dois: cai nessa parede única. Se só parte do lado é compartilhada, o lado tem mais de uma parede e o offset (medido do início do lado) escolhe a certa.
 - Paredes de um ambiente retangular: use roomId + roomSide ('north' | 'east' | 'south' | 'west') nos comandos addOpening e addObjectAtWall. O offset (distância ao centro) cresce no sentido de +X (norte/sul) ou +Z (leste/oeste), medido do lado oeste/norte.
 
 ## Fluxo recomendado
