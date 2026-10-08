@@ -5,6 +5,7 @@ Editor 3D interativo para criar e editar ambientes internos e externos com medid
 - **Plano, decisões e marcos:** [PLANO.md](PLANO.md)
 - **Formato da cena (contrato entre motor 3D, editor e IA):** [schema/README.md](schema/README.md)
 - **Como contribuir (branches, PRs, quem cuida do quê):** [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Distribuição (da família às lojas de app):** [DISTRIBUICAO.md](DISTRIBUICAO.md)
 
 ## Estrutura
 
