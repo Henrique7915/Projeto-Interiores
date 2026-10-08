@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { copyShareLink, exportJson } from '../state/actions'
 import { useEditor, type ViewMode } from '../state/store'
 import { download, Icon, IconButton, toast } from './common'
-import { captureView } from './ThreeHost'
+import { captureView, exportGLB } from './ThreeHost'
 import { HelpDialog, ProjectsDialog } from './Dialogs'
 
 export function TopBar({ onAi }: { onAi: () => void }) {
@@ -59,6 +59,18 @@ export function TopBar({ onAi }: { onAi: () => void }) {
                 }}
               >
                 Imagem 3D (.png)
+              </button>
+              <button
+                onClick={async () => {
+                  setMenu(false)
+                  try {
+                    download(`${scene.name || 'projeto'}.glb`, await exportGLB(), 'model/gltf-binary')
+                  } catch (e) {
+                    toast(e instanceof Error ? e.message : 'Falha ao exportar', 'err')
+                  }
+                }}
+              >
+                Modelo 3D (.glb)
               </button>
             </div>
           )}

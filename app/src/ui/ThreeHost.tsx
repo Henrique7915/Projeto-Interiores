@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { SceneView, type SceneViewHandle, type ScenePick, type ObjectPatch, type ViewPreset } from '../three'
+import { SceneView, type SceneViewHandle, type ViewPreset } from '../three'
 import { useEditor } from '../state/store'
 import type { Selection } from '../core'
 
@@ -12,27 +12,26 @@ export async function captureView(view?: ViewPreset): Promise<Blob> {
     handle.setView(view)
     await new Promise((r) => setTimeout(r, 700))
   }
-  const url = handle.capture()
-  return await (await fetch(url)).blob()
+  return handle.capture()
 }
 
-const toPick = (s: Selection): ScenePick | null => {
-  if (!s || s.kind === 'site') return null
-  if (s.kind === 'wall') return { type: 'wall', id: s.id, side: s.side ?? 'right' }
-  return { type: s.kind, id: s.id }
+/** GLB da cena inteira (Exportar). */
+export async function exportGLB(): Promise<Blob> {
+  if (!handle) throw new Error('A vista 3D não está aberta.')
+  return handle.exportGLB()
 }
-const fromPick = (p: ScenePick | null): Selection => (p ? (p.type === 'wall' ? { kind: 'wall', id: p.id, side: p.side } : { kind: p.type, id: p.id }) : null)
 
 /**
  * O motor seleciona o móvel em pointerdown, mas o piso/parede atrás dele também recebe o `click` logo depois
- * e trocaria a seleção para o cômodo. Ignoramos esse clique "fantasma" (pedido de correção enviado à Gráficos).
+ * e trocaria a seleção para o cômodo. Ignoramos esse clique "fantasma" até a Gráficos corrigir no motor
+ * (Items.tsx: `onClick={(e) => e.stopPropagation()}` no grupo do móvel).
  */
 let lastObjectPick = 0
-const onPickFiltered = (p: ScenePick | null, select: (s: Selection) => void) => {
+const onPickFiltered = (sel: Selection, select: (s: Selection) => void) => {
   const now = performance.now()
-  if (p?.type === 'object') lastObjectPick = now
-  else if (p && now - lastObjectPick < 400) return
-  select(fromPick(p))
+  if (sel?.kind === 'object') lastObjectPick = now
+  else if (sel && now - lastObjectPick < 400) return
+  select(sel)
 }
 
 const isMobile = () => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches
@@ -49,11 +48,9 @@ export function ThreeHost() {
   const [low] = useState(isMobile)
 
   const onDragEnd = useCallback(
-    (id: string, p: ObjectPatch) => {
-      const patch: Record<string, number> = {}
-      if (p.position) [patch.x, patch.y, patch.z] = p.position
-      if (p.rotationDeg !== undefined) patch.rotationDeg = p.rotationDeg
-      dispatch([{ op: 'updateObject', id, patch }])
+    (e: { id: string; position: [number, number, number]; rotationDeg?: number }) => {
+      const [x, y, z] = e.position
+      dispatch([{ op: 'updateObject', id: e.id, patch: { x, y, z, ...(e.rotationDeg !== undefined ? { rotationDeg: e.rotationDeg } : {}) } }])
     },
     [dispatch],
   )
@@ -82,8 +79,8 @@ export function ThreeHost() {
         handle = h
       }}
       scene={scene}
-      selection={toPick(selection)}
-      onPick={(p) => onPickFiltered(p, select)}
+      selection={selection}
+      onPick={(sel) => onPickFiltered(sel, select)}
       onDragEnd={onDragEnd}
       onDelete={onDelete}
       onTimeChange={onTimeChange}

@@ -30,7 +30,7 @@ describe('ops', () => {
   it('addObjectAtWall encosta e vira o móvel para dentro', () => {
     const s = applyOps(newScene(), [{ op: 'addRoom', id: 'r', name: 'R', x: 0, z: 0, width: 4, depth: 4 }]).scene
     const south = wallsOfRoom(s.levels[0], 'r')[2].id
-    const r = applyOps(s, [{ op: 'addObjectAtWall', id: 'sofa', catalogId: 'sofa/modern-3-seat', wallId: south, offset: 2 }])
+    const r = applyOps(s, [{ op: 'addObjectAtWall', id: 'sofa', catalogId: 'sofa/three-seat', wallId: south, offset: 2 }])
     expect(r.errors).toEqual([])
     const o = r.scene.levels[0].objects![0]
     expect(Math.abs(o.rotationDeg!)).toBe(180)
@@ -40,8 +40,8 @@ describe('ops', () => {
   it('detecta sobreposição de móveis', () => {
     const s = applyOps(newScene(), [
       { op: 'addRoom', name: 'S', x: 0, z: 0, width: 5, depth: 5 },
-      { op: 'addObject', catalogId: 'sofa/modern-3-seat', x: 2, z: 2 },
-      { op: 'addObject', catalogId: 'sofa/modern-3-seat', x: 2.2, z: 2.2 },
+      { op: 'addObject', catalogId: 'sofa/three-seat', x: 2, z: 2 },
+      { op: 'addObject', catalogId: 'sofa/three-seat', x: 2.2, z: 2.2 },
     ]).scene
     expect(analyzeScene(s).some((i) => i.type === 'sobreposicao')).toBe(true)
   })
