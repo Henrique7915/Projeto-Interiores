@@ -55,7 +55,7 @@ export function snapToWalls(p: Vec2, rotY: number, size: Vec3, walls: RWall[]): 
 function SelectionBox({ size }: { size: Vec3 }) {
   const geo = useMemo(() => new THREE.EdgesGeometry(new THREE.BoxGeometry(size[0] + 0.04, size[1] + 0.04, size[2] + 0.04)), [size])
   return (
-    <lineSegments geometry={geo} position={[0, size[1] / 2, 0]} renderOrder={20}>
+    <lineSegments userData={{ noExport: true }} geometry={geo} position={[0, size[1] / 2, 0]} renderOrder={20}>
       <lineBasicMaterial color="#ffb347" depthTest={false} transparent opacity={0.95} />
     </lineSegments>
   )

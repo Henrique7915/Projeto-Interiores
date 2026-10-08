@@ -98,6 +98,7 @@ function toObject(o: SceneObject, elevation: number, levelHeight: number, c: Ctx
     item,
     model: item?.model ?? 'procedural/box',
     position: [o.position[0], elevation + y, o.position[2]],
+    elevation,
     rotationY: (o.rotationDeg ?? 0) * DEG,
     size,
     mirror: !!o.mirror,

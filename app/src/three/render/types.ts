@@ -62,7 +62,10 @@ export interface RObject {
   item: CatalogItem | undefined
   /** nome do desenhista procedural ou caminho do GLB (de `item.model`) */
   model: string
+  /** posição no mundo (já somada à elevação do andar) */
   position: Point3
+  /** elevação do andar/terreno onde o objeto está; scene.position[1] = position[1] - elevation */
+  elevation: number
   rotationY: number
   size: Point3
   mirror: boolean

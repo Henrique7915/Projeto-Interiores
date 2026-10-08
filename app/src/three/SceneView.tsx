@@ -1,54 +1,23 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { CameraControls, Line } from '@react-three/drei'
-import { Bloom, EffectComposer, ToneMapping, Vignette } from '@react-three/postprocessing'
+import { Bloom, EffectComposer, N8AO, ToneMapping, Vignette } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
 import * as THREE from 'three'
-import type { Scene } from '../../../schema/types'
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
+import type { View } from '../../../schema/types'
 import type { ObjectPatch, ScenePick, RenderScene } from './render/types'
+import type { Selection, SceneViewHandle, SceneViewProps, ViewPreset } from './types'
 import { toRenderScene, parseTime } from './adapter/toRender'
-import { Architecture, type Cutaway } from './Architecture'
+import { Architecture } from './Architecture'
 import { Site } from './Site'
+import { Plinth } from './Plinth'
 import { Items } from './interaction/Items'
 import { Lighting, useLampLevel } from './lighting/Lighting'
-import { TIME_PRESETS, type TimePreset } from './lighting/daylight'
+import { TIME_PRESETS } from './lighting/daylight'
 import { wallDir, wallLength, wallNormalRight } from './geometry/walls'
 
-export type ViewPreset = 'iso' | 'top' | 'front'
-export type Quality = 'low' | 'high'
-
-export interface SceneViewHandle {
-  /** PNG (data URL) do quadro atual, para miniaturas e "snapshot" da IA */
-  capture(): string
-  setView(v: ViewPreset): void
-  /** hora decimal de um preset (Manhã, Meio-dia, Tarde, Noite) */
-  timeOfPreset(p: TimePreset): number
-}
-
-export interface SceneViewProps {
-  scene: Scene
-  /** o que está selecionado (destaque no 3D) */
-  selection?: ScenePick | null
-  /** clique em objeto, parede (lado), piso/cômodo, abertura ou zona do terreno; null = clique no vazio */
-  onPick?: (p: ScenePick | null) => void
-  /** fim de um arraste ou giro (R/Q/E): o App transforma em comando */
-  onDragEnd?: (id: string, patch: ObjectPatch) => void
-  /** Delete/Backspace com um objeto selecionado */
-  onDelete?: (id: string) => void
-  /** hora do dia em horas decimais (18.5 = 18:30) ou "HH:MM"; sem ela usa scene.environment.timeOfDay */
-  timeOfDay?: number | string
-  /** o usuário arrastou o sol no 3D */
-  onTimeChange?: (t: number) => void
-  view?: ViewPreset
-  /** paredes que escondem a vista ficam baixas: 'auto' pela câmera */
-  cutaway?: Cutaway
-  quality?: Quality
-  /** passo da grade ao arrastar (m); sem valor usa scene.defaults.snap */
-  snap?: number
-  showSunGizmo?: boolean
-  className?: string
-  style?: React.CSSProperties
-}
+export type { ViewPreset, Quality, Selection, SceneViewHandle, SceneViewProps } from './types'
 
 const FOV = 28
 
@@ -93,7 +62,7 @@ function PickOutline({ rs, pick }: { rs: RenderScene; pick: ScenePick }) {
     return null
   }, [rs, pick])
   if (!pts) return null
-  return <Line points={pts} color="#ffb347" lineWidth={2.5} depthTest={false} renderOrder={20} />
+  return <Line userData={{ noExport: true }} points={pts} color="#ffb347" lineWidth={2.5} depthTest={false} renderOrder={20} />
 }
 
 function Rig({ center, radius, view, handle }: { center: THREE.Vector3; radius: number; view: ViewPreset; handle: React.Ref<SceneViewHandle> | null }) {
@@ -101,7 +70,7 @@ function Rig({ center, radius, view, handle }: { center: THREE.Vector3; radius: 
   const { gl, scene, camera } = useThree()
   const first = useRef(true)
 
-  const apply = (v: ViewPreset, animate: boolean) => {
+  const applyPreset = (v: ViewPreset, animate: boolean) => {
     const az = v === 'front' ? 0 : THREE.MathUtils.degToRad(40)
     const el = v === 'top' ? 89 : v === 'front' ? 12 : 38
     const e = THREE.MathUtils.degToRad(el)
@@ -111,17 +80,44 @@ function Rig({ center, radius, view, handle }: { center: THREE.Vector3; radius: 
   }
 
   useEffect(() => {
-    apply(view, !first.current)
+    applyPreset(view, !first.current)
     first.current = false
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, center, radius])
 
   useImperativeHandle(handle, () => ({
-    capture() {
-      gl.render(scene, camera)
-      return gl.domElement.toDataURL('image/png')
+    // preserveDrawingBuffer: o canvas guarda o último quadro já com pós-processamento
+    capture: () =>
+      new Promise<Blob>((resolve, reject) =>
+        gl.domElement.toBlob((b) => (b ? resolve(b) : reject(new Error('Falha ao capturar a vista 3D'))), 'image/png'),
+      ),
+    exportGLB: async () => {
+      const hidden: THREE.Object3D[] = []
+      scene.traverse((o) => {
+        if (o.userData.noExport || (o as THREE.Light).isLight) { if (o.visible) { o.visible = false; hidden.push(o) } }
+      })
+      try {
+        const buf = (await new GLTFExporter().parseAsync(scene, { binary: true, onlyVisible: true, maxTextureSize: 2048 })) as ArrayBuffer
+        return new Blob([buf], { type: 'model/gltf-binary' })
+      } finally {
+        hidden.forEach((o) => (o.visible = true))
+      }
     },
-    setView: (v) => apply(v, true),
+    setView: (v: View | ViewPreset) => {
+      if (typeof v === 'string') return applyPreset(v, true)
+      if (v.fovDeg && v.fovDeg !== (camera as THREE.PerspectiveCamera).fov) {
+        ;(camera as THREE.PerspectiveCamera).fov = v.fovDeg
+        camera.updateProjectionMatrix()
+      }
+      controls.current.setLookAt(v.position[0], v.position[1], v.position[2], v.target[0], v.target[1], v.target[2], true)
+    },
+    getView: () => {
+      const p = new THREE.Vector3(), t = new THREE.Vector3()
+      controls.current.getPosition(p)
+      controls.current.getTarget(t)
+      const r = (n: number) => Math.round(n * 100) / 100
+      return { position: [r(p.x), r(p.y), r(p.z)], target: [r(t.x), r(t.y), r(t.z)], fovDeg: (camera as THREE.PerspectiveCamera).fov }
+    },
     timeOfPreset: (p) => TIME_PRESETS[p],
   }))
 
@@ -140,15 +136,30 @@ function Rig({ center, radius, view, handle }: { center: THREE.Vector3; radius: 
   )
 }
 
-function Effects({ lamp }: { lamp: number }) {
-  return (
-    <EffectComposer multisampling={4} enableNormalPass={false}>
-      <Bloom intensity={0.15 + lamp * 0.55} luminanceThreshold={0.85} luminanceSmoothing={0.3} mipmapBlur />
+function Effects({ lamp, ao }: { lamp: number; ao: boolean }) {
+  const bloom = <Bloom intensity={0.15 + lamp * 0.55} luminanceThreshold={0.85} luminanceSmoothing={0.3} mipmapBlur />
+  return ao ? (
+    <EffectComposer multisampling={0} enableNormalPass={false}>
+      <N8AO aoRadius={0.55} intensity={2.2} distanceFalloff={0.8} aoSamples={14} denoiseSamples={6} denoiseRadius={10} quality="medium" halfRes />
+      {bloom}
+      <Vignette eskil={false} offset={0.25} darkness={0.55} />
+      <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+    </EffectComposer>
+  ) : (
+    <EffectComposer multisampling={0} enableNormalPass={false}>
+      {bloom}
       <Vignette eskil={false} offset={0.25} darkness={0.55} />
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
     </EffectComposer>
   )
 }
+
+const toPick = (s: Selection): ScenePick | null => {
+  if (!s || s.kind === 'site') return null
+  if (s.kind === 'wall') return { type: 'wall', id: s.id, side: s.side ?? 'left' }
+  return { type: s.kind, id: s.id }
+}
+const toSelection = (p: ScenePick | null): Selection => (!p ? null : p.type === 'wall' ? { kind: 'wall', id: p.id, side: p.side } : { kind: p.type, id: p.id })
 
 /**
  * Motor 3D do Design3D. Lê só o `Scene` do schema e nunca o altera:
@@ -165,9 +176,25 @@ export const SceneView = forwardRef<SceneViewHandle, SceneViewProps>(function Sc
   const hours = typeof timeOfDay === 'string' ? parseTime(timeOfDay, rs.env.timeOfDay) : timeOfDay ?? rs.env.timeOfDay
   const objects = useMemo(() => [...rs.objects, ...(rs.site?.objects ?? [])], [rs])
   const walls = useMemo(() => [...rs.walls, ...(rs.site?.walls ?? [])], [rs])
+  const pick = toPick(selection)
+
+  // eventos para o App: posição volta ao espaço da cena (sem a elevação do andar)
+  const objectsRef = useRef(objects)
+  objectsRef.current = objects
+  const dragEnd = useMemo(
+    () => (id: string, patch: ObjectPatch) => {
+      const o = objectsRef.current.find((x) => x.id === id)
+      if (!o) return
+      const p = patch.position ?? o.position
+      const r = (n: number) => Math.round(n * 1000) / 1000
+      onDragEnd?.({ id, position: [r(p[0]), r(p[1] - o.elevation), r(p[2])], ...(patch.rotationDeg !== undefined ? { rotationDeg: ((patch.rotationDeg % 360) + 360) % 360 } : {}) })
+    },
+    [onDragEnd],
+  )
+  const picked = useMemo(() => (p: ScenePick | null) => onPick?.(toSelection(p)), [onPick])
 
   // atalhos: R/Shift+R gira 90°, Q/E gira 15°, Delete remove
-  const selObj = selection?.type === 'object' ? objects.find((o) => o.id === selection.id) ?? null : null
+  const selObj = pick?.type === 'object' ? objects.find((o) => o.id === pick.id) ?? null : null
   const sel = useRef(selObj)
   sel.current = selObj
   useEffect(() => {
@@ -177,7 +204,7 @@ export const SceneView = forwardRef<SceneViewHandle, SceneViewProps>(function Sc
       const o = sel.current
       if (!o || o.locked || e.ctrlKey || e.metaKey) return
       const cur = (o.rotationY * 180) / Math.PI
-      const rot = (d: number) => onDragEnd?.(o.id, { rotationDeg: Math.round((cur + d) * 100) / 100 })
+      const rot = (d: number) => dragEnd(o.id, { rotationDeg: Math.round((cur + d) * 100) / 100 })
       const k = e.key.toLowerCase()
       if (k === 'r') rot(e.shiftKey ? -90 : 90)
       else if (k === 'q') rot(-15)
@@ -186,25 +213,25 @@ export const SceneView = forwardRef<SceneViewHandle, SceneViewProps>(function Sc
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onDragEnd, onDelete])
+  }, [dragEnd, onDelete])
 
   return (
     <Canvas
       className={className}
-      style={{ touchAction: 'none', ...style }}
+      style={{ touchAction: 'none', width: '100%', height: '100%', ...style }}
       shadows={low ? false : 'soft'}
       dpr={low ? 1 : [1, 2]}
       camera={{ fov: FOV, near: 0.1, far: 500, position: [10, 10, 10] }}
       gl={{ antialias: low, powerPreference: 'high-performance', toneMapping: THREE.ACESFilmicToneMapping, preserveDrawingBuffer: true }}
-      onPointerMissed={() => onPick?.(null)}
+      onPointerMissed={() => picked(null)}
     >
       <Rig center={center} radius={radius} view={view} handle={ref} />
       <Lighting time={hours} center={center} radius={radius} shadows={!low} onTimeChange={onTimeChange} showGizmo={showSunGizmo} northDeg={rs.env.northDeg} sky={rs.env.sky} exposure={rs.env.exposure} />
-      {rs.site && <Site site={rs.site} lowQuality={low} onPick={onPick} />}
-      <Architecture scene={rs} cutaway={cutaway} lowQuality={low} onPick={onPick} />
-      <Items objects={objects} walls={walls} bounds={bounds} selectedId={selObj?.id ?? null} interiorLights={rs.env.interiorLights} onPick={onPick} onDragEnd={onDragEnd} snap={snap} lowQuality={low} />
-      {selection && selection.type !== 'object' && selection.type !== 'opening' && <PickOutline rs={rs} pick={selection} />}
-      {!low && <Effects lamp={rs.env.interiorLights === 'on' ? 1 : rs.env.interiorLights === 'off' ? 0 : lamp} />}
+      {rs.site ? <Site site={rs.site} lowQuality={low} onPick={picked} /> : <Plinth box={box} />}
+      <Architecture scene={rs} cutaway={cutaway} lowQuality={low} onPick={picked} />
+      <Items objects={objects} walls={walls} bounds={bounds} selectedId={selObj?.id ?? null} interiorLights={rs.env.interiorLights} onPick={picked} onDragEnd={dragEnd} snap={snap} lowQuality={low} />
+      {pick && pick.type !== 'object' && pick.type !== 'opening' && <PickOutline rs={rs} pick={pick} />}
+      {!low && <Effects lamp={rs.env.interiorLights === 'on' ? 1 : rs.env.interiorLights === 'off' ? 0 : lamp} ao={quality === 'high'} />}
     </Canvas>
   )
 })

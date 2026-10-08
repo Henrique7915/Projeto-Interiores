@@ -140,10 +140,10 @@ export function Lighting({ time, center, radius, shadows, onTimeChange, showGizm
 
       {showGizmo && (
         <>
-          <Line points={arc} color="#ffe2a8" lineWidth={1.2} dashed dashSize={0.5} gapSize={0.4} transparent opacity={0.45} />
-          <group ref={gizmo} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerOver={() => (document.body.style.cursor = 'grab')} onPointerOut={() => (document.body.style.cursor = '')}>
+          <Line userData={{ noExport: true }} points={arc} color="#ffe2a8" lineWidth={1} dashed dashSize={0.5} gapSize={0.5} transparent opacity={0.28} />
+          <group ref={gizmo} userData={{ noExport: true }} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerOver={() => (document.body.style.cursor = 'grab')} onPointerOut={() => (document.body.style.cursor = '')}>
             <mesh ref={glow}>
-              <sphereGeometry args={[radius * 0.07, 24, 16]} />
+              <sphereGeometry args={[radius * 0.05, 24, 16]} />
               <meshBasicMaterial color="#ffd58a" toneMapped={false} />
             </mesh>
             <mesh>
