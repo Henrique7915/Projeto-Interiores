@@ -259,6 +259,18 @@ describe('paredes compartilhadas entre ambientes vizinhos', () => {
   })
 })
 
+describe('comandos estritos', () => {
+  it('campo desconhecido vira erro em vez de ser ignorado em silêncio', () => {
+    const s = applyOps(newScene(), [{ op: 'addRoom', id: 'a', name: 'A', x: 0, z: 0, width: 4, depth: 4 }, { op: 'addObject', id: 'm', catalogId: 'table/dining-rect', x: 2, z: 2 }]).scene
+    const r = applyOps(s, [
+      { op: 'updateObject', id: 'm', patch: { position: [1, 0, 1] } } as never,
+      { op: 'addRoom', name: 'B', x: 5, z: 0, width: 3, depht: 3 } as never,
+    ])
+    expect(r.errors).toHaveLength(2)
+    expect(r.errors[0].message).toMatch(/position|unrecognized|desconhec/i)
+  })
+})
+
 describe('andares, telhado, escada, cortina, grupos e cotas (v0.2)', () => {
   it('o sobrado de exemplo não gera nenhum aviso do validador nem problema de layout', async () => {
     const s = TEMPLATES.find((t) => t.id === 'sobrado')!.build()
