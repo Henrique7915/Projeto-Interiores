@@ -59,4 +59,25 @@ describe('ops', () => {
     const back = await decodeShare(await encodeShare(s))
     expect(back.levels[0].objects!.length).toBe(s.levels[0].objects!.length)
   })
+  it('endereça paredes por lado do ambiente (offset cresce em X/Z)', () => {
+    const r = applyOps(newScene(), [
+      { op: 'addRoom', id: 'sala', name: 'Sala', x: 0, z: 0, width: 5, depth: 4 },
+      { op: 'addOpening', id: 'j-n', roomId: 'sala', roomSide: 'north', kind: 'window', offset: 1 },
+      { op: 'addOpening', id: 'p-s', roomId: 'sala', roomSide: 'south', kind: 'door', offset: 1 },
+      { op: 'addObjectAtWall', id: 'sofa', catalogId: 'sofa/three-seat', roomId: 'sala', roomSide: 'south', offset: 3 },
+      { op: 'addObjectAtWall', id: 'cama', catalogId: 'bed/queen-modern', roomId: 'sala', roomSide: 'west', offset: 3 },
+    ])
+    expect(r.errors).toEqual([])
+    const lvl = r.scene.levels[0]
+    const wallOf = (id: string) => lvl.walls!.find((w) => w.id === lvl.openings!.find((o) => o.id === id)!.wallId)!
+    expect(wallOf('j-n').start[1]).toBe(0)
+    // porta na parede sul a 1 m do lado OESTE: centro em x = 1 (parede vai de leste para oeste, offset 4)
+    const door = lvl.openings!.find((o) => o.id === 'p-s')!
+    expect(door.offset).toBeCloseTo(4, 3)
+    const sofa = lvl.objects!.find((o) => o.id === 'sofa')!
+    expect(sofa.position[0]).toBeCloseTo(3, 3)
+    const bed = lvl.objects!.find((o) => o.id === 'cama')!
+    expect(bed.position[2]).toBeCloseTo(3, 3)
+    expect(bed.rotationDeg).toBe(90)
+  })
 })

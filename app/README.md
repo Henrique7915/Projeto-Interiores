@@ -21,7 +21,7 @@ npm run build        # tsc + vite build (app/dist)
 | `src/state/` | Store Zustand (cena, desfazer/refazer, seleção), ações de alto nível, atalhos |
 | `src/ui/` | Painéis (moodboard, paleta, luz do dia, inspetor), barra superior, diálogos |
 | `src/plan/` | Planta 2D em SVG: zoom/pan, cotas, ferramentas (ambiente, parede, porta, janela, régua), arrastar e girar móveis, redimensionar ambientes por alças |
-| `src/chat/` | Chat de IA e conexão MCP |
+| `src/chat/` | Painel de IA: chat (chave do usuário), conexão MCP e copiar/colar. `src/lib/bridge.ts` sincroniza com o servidor MCP (`ai/`) |
 | `src/three/` | **Motor 3D (Gráficos)**: contrato em `src/three/README.md`; o app só o usa em `src/ui/ThreeHost.tsx` |
 
 ## Regra de ouro

@@ -4,12 +4,15 @@
   "version": "0.1.0",
   "type": "module",
   "workspaces": [
-    "app"
+    "app",
+    "ai"
   ],
   "scripts": {
     "dev": "npm run dev -w app",
     "build": "npm run build -w app",
-    "test": "npm run test -w app",
-    "typecheck": "npm run typecheck -w app"
+    "test": "npm run test -w app && npm run test -w ai",
+    "typecheck": "npm run typecheck -w app && npm run typecheck -w ai",
+    "mcp": "npm run start -w ai",
+    "mcp:http": "npm run http -w ai"
   }
 }

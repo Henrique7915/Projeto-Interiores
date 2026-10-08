@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { decodeShare } from './core'
+import { autoConnectBridge } from './lib/bridge'
 import { loadProject } from './lib/storage'
 import { lastProjectId } from './lib/storage'
 import { useEditor } from './state/store'
@@ -21,6 +22,7 @@ export function App() {
   useShortcuts()
 
   useEffect(() => {
+    autoConnectBridge()
     ;(async () => {
       const m = /#s=([\w-]+)/.exec(location.hash)
       if (m) {

@@ -1,0 +1,23 @@
+{
+  "name": "@design3d/ai",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Servidor MCP do Design 3D: a IA do usuário lê, cria e edita ambientes.",
+  "bin": { "design3d-mcp": "./src/cli.ts" },
+  "scripts": {
+    "start": "tsx src/cli.ts",
+    "http": "tsx src/cli.ts --http",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/*.test.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
