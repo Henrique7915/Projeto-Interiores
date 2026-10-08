@@ -41,7 +41,7 @@ describe('servidor MCP do Design 3D (stdio)', () => {
       commands: [
         { op: 'addRoom', id: 'sala', name: 'Sala', x: 0, z: 0, width: 4, depth: 5, floorMaterial: 'wood/walnut' },
         { op: 'addOpening', roomId: 'sala', roomSide: 'north', kind: 'window', offset: 2, width: 1.6 },
-        { op: 'addObjectAtWall', id: 'sofa', catalogId: 'sofa/three-seat', roomId: 'sala', roomSide: 'south', offset: 2 },
+        { op: 'addObjectAtWall', id: 'sofa', catalogId: 'sofa/modern-3-seat', roomId: 'sala', roomSide: 'south', offset: 2 },
         { op: 'addObject', catalogId: 'nao/existe', x: 1, z: 1 },
       ],
     })
@@ -49,7 +49,7 @@ describe('servidor MCP do Design 3D (stdio)', () => {
     assert.match(r.text, /comando #3/)
     const s = await call('get_scene')
     assert.match(s.text, /ambiente "Sala" \[sala\]: 4 × 5 m/)
-    assert.match(s.text, /Sofá 3 lugares \[sofa\]/)
+    assert.match(s.text, /Sofá de 3 lugares \[sofa\]/)
   })
 
   it('rejeita resultado inválido sem aplicar nada', async () => {
@@ -61,7 +61,7 @@ describe('servidor MCP do Design 3D (stdio)', () => {
 
   it('valida, procura catálogo e materiais', async () => {
     assert.match((await call('validate_scene')).text, /Válida/)
-    assert.match((await call('search_catalog', { query: 'sofá' })).text, /sofa\/three-seat/)
+    assert.match((await call('search_catalog', { query: 'sofá' })).text, /sofa\/modern-3-seat/)
     assert.match((await call('list_materials', { category: 'wood' })).text, /wood\/walnut/)
   })
 

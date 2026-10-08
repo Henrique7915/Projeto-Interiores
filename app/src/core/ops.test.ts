@@ -64,7 +64,7 @@ describe('ops', () => {
       { op: 'addRoom', id: 'sala', name: 'Sala', x: 0, z: 0, width: 5, depth: 4 },
       { op: 'addOpening', id: 'j-n', roomId: 'sala', roomSide: 'north', kind: 'window', offset: 1 },
       { op: 'addOpening', id: 'p-s', roomId: 'sala', roomSide: 'south', kind: 'door', offset: 1 },
-      { op: 'addObjectAtWall', id: 'sofa', catalogId: 'sofa/three-seat', roomId: 'sala', roomSide: 'south', offset: 3 },
+      { op: 'addObjectAtWall', id: 'sofa', catalogId: 'sofa/modern-3-seat', roomId: 'sala', roomSide: 'south', offset: 3 },
       { op: 'addObjectAtWall', id: 'cama', catalogId: 'bed/queen-modern', roomId: 'sala', roomSide: 'west', offset: 3 },
     ])
     expect(r.errors).toEqual([])

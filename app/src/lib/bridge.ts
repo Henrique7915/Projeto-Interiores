@@ -67,7 +67,8 @@ export function connectBridge(url = useBridge.getState().url) {
       useBridge.setState({ lastAiChange: Date.now() })
     } else if (ev.type === 'snapshot-request' && ev.id) {
       try {
-        const blob = await captureView()
+        const v = ev.view === 'iso' || ev.view === 'top' || ev.view === 'front' ? ev.view : undefined
+        const blob = await captureView(v)
         const buf = new Uint8Array(await blob.arrayBuffer())
         let bin = ''
         for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000))
