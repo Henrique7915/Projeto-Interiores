@@ -8,6 +8,7 @@ Você edita uma cena 3D de interiores/exteriores com MEDIDAS REAIS. Tudo em metr
 
 ## Eixos e convenções
 - Planta vista de cima: X cresce para a direita (leste), Z cresce para baixo (sul). Y é altura. Norte = menor Z.
+  Norte/sul/leste/oeste são os lados da PLANTA (o topo do desenho), não o norte geográfico: o sol usa "northDeg" do ambiente, que pode ser diferente de 0.
 - Um ambiente retangular criado com addRoom {x, z, width, depth} ocupa de (x, z) até (x+width, z+depth).
 - rotationDeg gira o objeto em torno de Y, anti-horário visto de cima. A FRENTE do móvel aponta para +Z (sul) quando 0.
   0 = frente para o sul · 90 = frente para o leste · 180 (ou -180) = frente para o norte · -90 = frente para o oeste.

@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { Scene } from '../core'
 import { useEditor } from '../state/store'
-import { captureView } from '../ui/ThreeHost'
+import { captureView } from '../ui/viewHandle'
 import { prefs } from './storage'
 
 /**

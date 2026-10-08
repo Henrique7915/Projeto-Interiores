@@ -122,7 +122,7 @@ export function createMcpServer(store: SceneStore) {
     },
     async ({ scene }) => {
       const target = scene ?? (await store.getScene()).scene
-      const v = validateScene(target)
+      const v = validateScene(target, { catalog: getCatalog() })
       return text(v.valid ? `Válida.${v.warnings.length ? '\nAvisos:\n' + v.warnings.join('\n') : ''}` : 'Inválida:\n' + v.errors.join('\n'), !v.valid)
     },
   )
