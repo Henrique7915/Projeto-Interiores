@@ -30,6 +30,9 @@ import type { Annotation, Container, ContainerKey, Group, Level, Opening, Room, 
 
 /* ───────────── schemas (UI, chat de IA e servidor MCP usam os mesmos) ───────────── */
 
+/** Objetos estritos: campo desconhecido vira erro (a IA descobre na hora que errou o nome do campo). */
+const obj = <T extends z.ZodRawShape>(shape: T) => z.object(shape).strict()
+
 const pt = z.tuple([z.number(), z.number()]).describe('[x, z] em metros')
 const mat = z.string().describe('id de material, ex.: "wood/walnut" (ver list_materials)')
 const container = z.string().optional().describe('"site" (terreno) ou id de um andar; padrão: primeiro andar (ou terreno, conforme o objeto)')
@@ -40,7 +43,7 @@ const zoneKind = z.enum(['grass', 'paving', 'deck', 'gravel', 'soil', 'water', '
 const roofKind = z.enum(['flat', 'shed', 'gable', 'hip'])
 const treatmentKind = z.enum(['curtain', 'sheer', 'blind', 'roller', 'none'])
 const roomType = z.enum(['living', 'dining', 'kitchen', 'bedroom', 'bathroom', 'office', 'laundry', 'hall', 'garage', 'balcony', 'storage', 'studio', 'other'])
-const dims = z.object({ width: z.number().positive(), height: z.number().positive(), depth: z.number().positive() })
+const dims = obj({ width: z.number().positive(), height: z.number().positive(), depth: z.number().positive() })
 const slots = z.record(z.string(), mat)
 
 /** Parede por id, ou pelo lado de um ambiente retangular (mais fácil para IA acertar a orientação). */
@@ -51,7 +54,7 @@ const wallRef = {
 }
 
 export const OpSchema = z.discriminatedUnion('op', [
-  z.object({
+  obj({
     op: z.literal('addRoom'),
     id: optId,
     name: z.string().default('Ambiente'),
@@ -69,12 +72,12 @@ export const OpSchema = z.discriminatedUnion('op', [
     wallMaterial: mat.optional().describe('acabamento interno das paredes'),
     exteriorMaterial: mat.optional().describe('acabamento externo das paredes'),
   }),
-  z.object({
+  obj({
     op: z.literal('updateRoom'),
     id: z.string(),
-    patch: z.object({ name: z.string().optional(), type: roomType.optional(), floorMaterial: mat.optional(), ceilingHeight: z.number().positive().optional(), ceilingVisible: z.boolean().optional() }),
+    patch: obj({ name: z.string().optional(), type: roomType.optional(), floorMaterial: mat.optional(), ceilingHeight: z.number().positive().optional(), ceilingVisible: z.boolean().optional() }),
   }),
-  z.object({
+  obj({
     op: z.literal('resizeRoom'),
     id: z.string(),
     width: z.number().positive().optional(),
@@ -82,10 +85,10 @@ export const OpSchema = z.discriminatedUnion('op', [
     x: z.number().optional(),
     z: z.number().optional(),
   }),
-  z.object({ op: z.literal('moveRoom'), id: z.string(), dx: z.number(), dz: z.number() }),
-  z.object({ op: z.literal('removeRoom'), id: z.string(), keepWalls: z.boolean().optional() }),
+  obj({ op: z.literal('moveRoom'), id: z.string(), dx: z.number(), dz: z.number() }),
+  obj({ op: z.literal('removeRoom'), id: z.string(), keepWalls: z.boolean().optional() }),
 
-  z.object({
+  obj({
     op: z.literal('addZone'),
     id: optId,
     kind: zoneKind,
@@ -99,13 +102,13 @@ export const OpSchema = z.discriminatedUnion('op', [
     elevation: z.number().optional(),
     poolDepth: z.number().positive().optional().describe('profundidade (m), só para piscina/água'),
   }),
-  z.object({
+  obj({
     op: z.literal('updateZone'),
     id: z.string(),
-    patch: z.object({ name: z.string().optional(), kind: zoneKind.optional(), material: mat.optional(), edgeMaterial: mat.optional(), elevation: z.number().optional(), poolDepth: z.number().positive().optional(), polygon: z.array(pt).min(3).optional() }),
+    patch: obj({ name: z.string().optional(), kind: zoneKind.optional(), material: mat.optional(), edgeMaterial: mat.optional(), elevation: z.number().optional(), poolDepth: z.number().positive().optional(), polygon: z.array(pt).min(3).optional() }),
   }),
-  z.object({ op: z.literal('removeZone'), id: z.string() }),
-  z.object({
+  obj({ op: z.literal('removeZone'), id: z.string() }),
+  obj({
     op: z.literal('setSite'),
     width: z.number().positive().optional(),
     depth: z.number().positive().optional(),
@@ -115,7 +118,7 @@ export const OpSchema = z.discriminatedUnion('op', [
     groundMaterial: mat.optional(),
   }),
 
-  z.object({
+  obj({
     op: z.literal('addWall'),
     id: optId,
     name: z.string().optional(),
@@ -128,14 +131,14 @@ export const OpSchema = z.discriminatedUnion('op', [
     right: mat.optional(),
     container,
   }),
-  z.object({
+  obj({
     op: z.literal('updateWall'),
     id: z.string(),
-    patch: z.object({ name: z.string().optional(), kind: wallKind.optional(), start: pt.optional(), end: pt.optional(), thickness: z.number().positive().optional(), height: z.number().positive().optional(), left: mat.optional(), right: mat.optional() }),
+    patch: obj({ name: z.string().optional(), kind: wallKind.optional(), start: pt.optional(), end: pt.optional(), thickness: z.number().positive().optional(), height: z.number().positive().optional(), left: mat.optional(), right: mat.optional() }),
   }),
-  z.object({ op: z.literal('removeWall'), id: z.string() }),
+  obj({ op: z.literal('removeWall'), id: z.string() }),
 
-  z.object({
+  obj({
     op: z.literal('addOpening'),
     id: optId,
     ...wallRef,
@@ -147,14 +150,14 @@ export const OpSchema = z.discriminatedUnion('op', [
     hinge: z.enum(['start', 'end']).optional(),
     opensTo: z.enum(['left', 'right']).optional(),
   }),
-  z.object({
+  obj({
     op: z.literal('updateOpening'),
     id: z.string(),
-    patch: z.object({ kind: openingKind.optional(), wallId: z.string().optional(), offset: z.number().optional(), width: z.number().positive().optional(), height: z.number().positive().optional(), sill: z.number().min(0).optional(), hinge: z.enum(['start', 'end']).optional(), opensTo: z.enum(['left', 'right']).optional() }),
+    patch: obj({ kind: openingKind.optional(), wallId: z.string().optional(), offset: z.number().optional(), width: z.number().positive().optional(), height: z.number().positive().optional(), sill: z.number().min(0).optional(), hinge: z.enum(['start', 'end']).optional(), opensTo: z.enum(['left', 'right']).optional() }),
   }),
-  z.object({ op: z.literal('removeOpening'), id: z.string() }),
+  obj({ op: z.literal('removeOpening'), id: z.string() }),
 
-  z.object({
+  obj({
     op: z.literal('addObject'),
     id: optId,
     catalogId: z.string().describe('id do catálogo (ver search_catalog)'),
@@ -168,7 +171,7 @@ export const OpSchema = z.discriminatedUnion('op', [
     roomId: z.string().optional(),
     container,
   }),
-  z.object({
+  obj({
     op: z.literal('addObjectAtWall'),
     id: optId,
     catalogId: z.string(),
@@ -181,10 +184,10 @@ export const OpSchema = z.discriminatedUnion('op', [
     dimensions: dims.optional(),
     materials: slots.optional(),
   }),
-  z.object({
+  obj({
     op: z.literal('updateObject'),
     id: z.string(),
-    patch: z.object({
+    patch: obj({
       name: z.string().optional(),
       x: z.number().optional(),
       z: z.number().optional(),
@@ -197,26 +200,26 @@ export const OpSchema = z.discriminatedUnion('op', [
       mirror: z.boolean().optional(),
     }),
   }),
-  z.object({ op: z.literal('duplicateObject'), id: z.string(), newId: optId, dx: z.number().default(0.5), dz: z.number().default(0.5) }),
-  z.object({ op: z.literal('removeObject'), id: z.string() }),
+  obj({ op: z.literal('duplicateObject'), id: z.string(), newId: optId, dx: z.number().default(0.5), dz: z.number().default(0.5) }),
+  obj({ op: z.literal('removeObject'), id: z.string() }),
 
-  z.object({
+  obj({
     op: z.literal('setMaterial'),
     target: z.discriminatedUnion('type', [
-      z.object({ type: z.literal('room'), id: z.string() }).describe('piso do ambiente'),
-      z.object({ type: z.literal('roomWalls'), id: z.string(), side: z.enum(['inside', 'outside', 'both']).default('inside') }).describe('todas as paredes do ambiente'),
-      z.object({ type: z.literal('wall'), id: z.string(), side: z.enum(['left', 'right', 'top', 'both']).default('both') }),
-      z.object({ type: z.literal('object'), id: z.string(), slot: z.string().optional().describe('slot de material; padrão: o primeiro') }),
-      z.object({ type: z.literal('opening'), id: z.string(), slot: z.string().default('frame') }),
-      z.object({ type: z.literal('zone'), id: z.string() }),
-      z.object({ type: z.literal('roof'), id: z.string() }).describe('telhado (telhas)'),
-      z.object({ type: z.literal('site') }).describe('solo do terreno'),
+      obj({ type: z.literal('room'), id: z.string() }).describe('piso do ambiente'),
+      obj({ type: z.literal('roomWalls'), id: z.string(), side: z.enum(['inside', 'outside', 'both']).default('inside') }).describe('todas as paredes do ambiente'),
+      obj({ type: z.literal('wall'), id: z.string(), side: z.enum(['left', 'right', 'top', 'both']).default('both') }),
+      obj({ type: z.literal('object'), id: z.string(), slot: z.string().optional().describe('slot de material; padrão: o primeiro') }),
+      obj({ type: z.literal('opening'), id: z.string(), slot: z.string().default('frame') }),
+      obj({ type: z.literal('zone'), id: z.string() }),
+      obj({ type: z.literal('roof'), id: z.string() }).describe('telhado (telhas)'),
+      obj({ type: z.literal('site') }).describe('solo do terreno'),
     ]),
     material: mat,
   }),
-  z.object({
+  obj({
     op: z.literal('setEnvironment'),
-    patch: z.object({
+    patch: obj({
       timeOfDay: z.string().regex(/^\d{1,2}:\d{2}$/).optional().describe('HH:MM'),
       northDeg: z.number().optional(),
       sky: z.enum(['clear', 'partly-cloudy', 'overcast']).optional(),
@@ -226,20 +229,20 @@ export const OpSchema = z.discriminatedUnion('op', [
     }),
   }),
   /* ───── andares, telhado, escada, cortina, grupos e cotas (schema v0.2) ───── */
-  z.object({
+  obj({
     op: z.literal('addLevel'),
     id: optId,
     name: z.string().optional().describe('ex.: "1º andar"'),
     height: z.number().positive().optional().describe('pé-direito (m); padrão = o do andar de baixo'),
     slabThickness: z.number().positive().optional().describe('espessura da laje (m), padrão 0.12'),
   }),
-  z.object({
+  obj({
     op: z.literal('updateLevel'),
     id: z.string(),
-    patch: z.object({ name: z.string().optional(), height: z.number().positive().optional(), slabThickness: z.number().positive().optional(), hidden: z.boolean().optional() }),
+    patch: obj({ name: z.string().optional(), height: z.number().positive().optional(), slabThickness: z.number().positive().optional(), hidden: z.boolean().optional() }),
   }),
-  z.object({ op: z.literal('removeLevel'), id: z.string() }).describe('remove o andar com tudo que há nele'),
-  z.object({
+  obj({ op: z.literal('removeLevel'), id: z.string() }).describe('remove o andar com tudo que há nele'),
+  obj({
     op: z.literal('addRoof'),
     id: optId,
     name: z.string().optional(),
@@ -259,10 +262,10 @@ export const OpSchema = z.discriminatedUnion('op', [
     material: mat.optional(),
     ceilingMaterial: mat.optional(),
   }),
-  z.object({
+  obj({
     op: z.literal('updateRoof'),
     id: z.string(),
-    patch: z.object({
+    patch: obj({
       name: z.string().optional(),
       kind: roofKind.optional(),
       polygon: z.array(pt).min(3).optional(),
@@ -275,8 +278,8 @@ export const OpSchema = z.discriminatedUnion('op', [
       ceilingMaterial: mat.optional(),
     }),
   }),
-  z.object({ op: z.literal('removeRoof'), id: z.string() }),
-  z.object({
+  obj({ op: z.literal('removeRoof'), id: z.string() }),
+  obj({
     op: z.literal('addSlabOpening'),
     id: optId,
     name: z.string().optional(),
@@ -288,13 +291,13 @@ export const OpSchema = z.discriminatedUnion('op', [
     polygon: z.array(pt).min(3).optional(),
     railing: z.boolean().default(true).describe('guarda-corpo em volta do vão'),
   }).describe('vão no piso para a escada; ponha a escada (stairs/*) no andar de baixo, sob o vão'),
-  z.object({
+  obj({
     op: z.literal('updateSlabOpening'),
     id: z.string(),
-    patch: z.object({ name: z.string().optional(), polygon: z.array(pt).min(3).optional(), railing: z.boolean().optional() }),
+    patch: obj({ name: z.string().optional(), polygon: z.array(pt).min(3).optional(), railing: z.boolean().optional() }),
   }),
-  z.object({ op: z.literal('removeSlabOpening'), id: z.string() }),
-  z.object({
+  obj({ op: z.literal('removeSlabOpening'), id: z.string() }),
+  obj({
     op: z.literal('setTreatment'),
     id: z.string().describe('id da abertura (janela ou porta)'),
     kind: treatmentKind.describe('curtain = cortina · sheer = voal · blind = persiana · roller = rolô · none = tirar'),
@@ -302,14 +305,14 @@ export const OpSchema = z.discriminatedUnion('op', [
     side: z.enum(['left', 'right']).optional().describe('lado da parede; padrão: o de dentro'),
     open: z.number().min(0).max(1).optional().describe('0 = fechada, 1 = aberta'),
   }),
-  z.object({
+  obj({
     op: z.literal('groupObjects'),
     id: optId,
     name: z.string().optional(),
     objectIds: z.array(z.string()).min(2).describe('móveis que passam a se mover juntos (do mesmo andar ou do terreno)'),
   }),
-  z.object({ op: z.literal('ungroup'), id: z.string() }),
-  z.object({
+  obj({ op: z.literal('ungroup'), id: z.string() }),
+  obj({
     op: z.literal('addDimension'),
     id: optId,
     start: pt,
@@ -318,21 +321,21 @@ export const OpSchema = z.discriminatedUnion('op', [
     text: z.string().optional().describe('texto no lugar da medida automática'),
     container,
   }).describe('cota desenhada na planta'),
-  z.object({
+  obj({
     op: z.literal('addLabel'),
     id: optId,
     start: pt.describe('onde fica o texto'),
     text: z.string(),
     container,
   }).describe('texto solto na planta'),
-  z.object({
+  obj({
     op: z.literal('updateAnnotation'),
     id: z.string(),
-    patch: z.object({ start: pt.optional(), end: pt.optional(), offset: z.number().optional(), text: z.string().optional() }),
+    patch: obj({ start: pt.optional(), end: pt.optional(), offset: z.number().optional(), text: z.string().optional() }),
   }),
-  z.object({ op: z.literal('removeAnnotation'), id: z.string() }),
-  z.object({ op: z.literal('setMeta'), patch: z.object({ name: z.string().optional(), description: z.string().optional() }) }),
-  z.object({ op: z.literal('clear') }),
+  obj({ op: z.literal('removeAnnotation'), id: z.string() }),
+  obj({ op: z.literal('setMeta'), patch: obj({ name: z.string().optional(), description: z.string().optional() }) }),
+  obj({ op: z.literal('clear') }),
 ])
 
 export type Op = z.infer<typeof OpSchema>

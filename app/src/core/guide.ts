@@ -32,7 +32,7 @@ mesa de jantar 6 lugares 1,8 × 0,9 com 0,9 livre em volta; bancada 0,6 de profu
 Sempre use ids de catálogo reais (search_catalog). Se faltar um item, use o mais parecido e ajuste "dimensions".
 
 ## Andares, telhado, escada, cortina, grupos e cotas
-Andares: addLevel {name?, height?} empilha um andar novo em cima do último (a elevação é calculada); crie os ambientes dele com addRoom {container: id do andar}. Use "container" também em addWall e addObject para escolher o andar; sem ele vale o térreo (ou o andar do ambiente em que o móvel cai). updateLevel {id, patch:{name?, height?, hidden?}} · removeLevel {id}.
+Andares: addLevel {name?, height?} empilha um andar novo em cima do último (a elevação é calculada); crie os ambientes dele com addRoom {container: id do andar}. ATENÇÃO: addRoom, addWall e addObject SEM container caem no PRIMEIRO andar (térreo), mesmo depois de um addLevel; passe sempre "container" com o id do andar de cima. updateLevel {id, patch:{name?, height?, hidden?}} · removeLevel {id}.
 Telhado: addRoof {kind: gable (duas águas) | hip (quatro) | shed (uma) | flat, roomId (cobre o ambiente) ou x,z,width,depth, pitchDeg?, overhang?, material?}; fica no andar do ambiente (ou no mais alto). updateRoof {id, patch} · removeRoof {id}.
 Escada: ponha o objeto stairs/straight ou stairs/l-shaped no andar de BAIXO (addObject) e fure o piso do andar de CIMA com addSlabOpening {levelId, x, z, width, depth, railing?} sobre a escada. updateSlabOpening · removeSlabOpening.
 Cortina: setTreatment {id: id da janela, kind: curtain | sheer | blind | roller | none, material?, open?: 0..1}.
