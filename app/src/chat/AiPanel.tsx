@@ -66,7 +66,9 @@ function ChatTab() {
   const history = useRef<Awaited<ReturnType<typeof runChatTurn>>>([])
   const abort = useRef<AbortController | null>(null)
   const end = useRef<HTMLDivElement>(null)
-  useEffect(() => end.current?.scrollIntoView({ behavior: 'smooth' }), [lines, busy])
+  useEffect(() => {
+    end.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [lines, busy])
 
   const send = async (t = text) => {
     if (!t.trim() || busy) return
