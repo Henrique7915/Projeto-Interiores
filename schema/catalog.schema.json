@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://design3d.local/schema/catalog/0.1.0",
+  "$id": "https://design3d.local/schema/v0.1/catalog.schema.json",
   "title": "Design3D Catalog",
   "description": "Contrato do catálogo de móveis/objetos (assets/catalog.json, conteúdo mantido pela frente de Gráficos) e da biblioteca de materiais (assets/materials.json). Uma cena referencia itens por catalogId e materiais por MaterialId.",
   "type": "object",

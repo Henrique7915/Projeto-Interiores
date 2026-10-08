@@ -7,7 +7,7 @@ Este é o contrato entre as três frentes e qualquer IA que edite ambientes. Uma
 | `scene.schema.json` | JSON Schema (draft 2020-12) da cena |
 | `catalog.schema.json` | Contrato do catálogo de móveis, materiais e presets de clima (`assets/catalog.json`) |
 | `types.ts` | Tipos TypeScript equivalentes, para o app importar |
-| `validar.mjs` | Validador: schema + regras de consistência. `node validar.mjs cena.json` ou `import { validateScene }` |
+| `validar.mjs` | Validador: schema + regras de consistência. `node validar.mjs cena.json`, ou `import { validateScene, validateCatalog }`. Com `assets/catalog.json` presente, valida o catálogo e avisa sobre itens e materiais que não existem nele |
 | `exemplos/` | `studio-aconchegante.json` (interno, inspirado no exemplo) e `quintal-com-piscina.json` (externo) |
 
 Para validar: `cd schema && npm install && npm run validar`.

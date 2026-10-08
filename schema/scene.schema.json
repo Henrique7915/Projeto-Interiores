@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://design3d.local/schema/scene/0.1.0",
+  "$id": "https://design3d.local/schema/v0.1/scene.schema.json",
   "title": "Design3D Scene",
   "description": "Formato da cena do Design3D (v0.1.0). Unidades em metros, ângulos em graus, Y para cima. Veja schema/README.md para as convenções.",
   "type": "object",
