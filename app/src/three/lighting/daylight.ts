@@ -78,16 +78,16 @@ interface Key {
 
 // h em horas; entre as chaves interpolamos linearmente (0 e 24 repetem a noite)
 const KEYS: Key[] = [
-  { h: 0, sun: '#7f9bff', sunI: 0.5, sky: '#1b2447', ground: '#0b0e1a', hemiI: 0.45, bg: '#080b16', lamp: 1, exposure: 1.1, env: 0.15 },
-  { h: 5, sun: '#8aa0ff', sunI: 0.45, sky: '#26305e', ground: '#0d101f', hemiI: 0.45, bg: '#0e1328', lamp: 1, exposure: 1.1, env: 0.15 },
-  { h: 6.3, sun: '#ff9a5a', sunI: 1.4, sky: '#f0a678', ground: '#3a2d33', hemiI: 0.7, bg: '#ae7f78', lamp: 0.7, exposure: 1.0, env: 0.35 },
-  { h: 7.6, sun: '#ffd0a0', sunI: 2.8, sky: '#a8c4ee', ground: '#6a5c52', hemiI: 0.95, bg: '#8ca5c8', lamp: 0.0, exposure: 1.0, env: 0.7 },
+  { h: 0, sun: '#7f9bff', sunI: 0.6, sky: '#26305e', ground: '#101428', hemiI: 1.0, bg: '#080b16', lamp: 1, exposure: 1.1, env: 0.15 },
+  { h: 5, sun: '#8aa0ff', sunI: 0.55, sky: '#2c376a', ground: '#101428', hemiI: 1.0, bg: '#0e1328', lamp: 1, exposure: 1.1, env: 0.15 },
+  { h: 6.3, sun: '#ff9a5a', sunI: 1.4, sky: '#f0a678', ground: '#3a2d33', hemiI: 1.0, bg: '#ae7f78', lamp: 0.7, exposure: 1.0, env: 0.35 },
+  { h: 7.6, sun: '#ffd0a0', sunI: 2.8, sky: '#a8c4ee', ground: '#6a5c52', hemiI: 1.15, bg: '#8ca5c8', lamp: 0.0, exposure: 1.0, env: 0.7 },
   { h: 12.8, sun: '#fff6ea', sunI: 4.2, sky: '#bcd8ff', ground: '#8a8478', hemiI: 1.15, bg: '#9dbce0', lamp: 0.0, exposure: 0.95, env: 1.0 },
   { h: 17, sun: '#ffd9a8', sunI: 3.4, sky: '#b4cbe8', ground: '#7a6c5d', hemiI: 1.0, bg: '#a0b2c6', lamp: 0.0, exposure: 1.0, env: 0.85 },
-  { h: 18.5, sun: '#ff9d4a', sunI: 2.4, sky: '#e7a56f', ground: '#4d3a35', hemiI: 0.8, bg: '#8b5f58', lamp: 0.75, exposure: 1.05, env: 0.55 },
-  { h: 19.6, sun: '#ff7a4a', sunI: 0.8, sky: '#5b4f86', ground: '#241c30', hemiI: 0.6, bg: '#2f2c52', lamp: 1.0, exposure: 1.1, env: 0.3 },
-  { h: 21, sun: '#8aa0ff', sunI: 0.5, sky: '#26305e', ground: '#0d101f', hemiI: 0.45, bg: '#0f1430', lamp: 1.0, exposure: 1.1, env: 0.15 },
-  { h: 24, sun: '#7f9bff', sunI: 0.5, sky: '#1b2447', ground: '#0b0e1a', hemiI: 0.45, bg: '#080b16', lamp: 1, exposure: 1.1, env: 0.15 },
+  { h: 18.5, sun: '#ff9d4a', sunI: 3.0, sky: '#f0b27e', ground: '#6a4d42', hemiI: 1.2, bg: '#5c4550', lamp: 0.75, exposure: 1.08, env: 0.75 },
+  { h: 19.6, sun: '#ff7a4a', sunI: 0.8, sky: '#6a5f9a', ground: '#2c2238', hemiI: 0.95, bg: '#2f2c52', lamp: 1.0, exposure: 1.1, env: 0.3 },
+  { h: 21, sun: '#8aa0ff', sunI: 0.6, sky: '#34417a', ground: '#141830', hemiI: 1.0, bg: '#0f1430', lamp: 1.0, exposure: 1.1, env: 0.15 },
+  { h: 24, sun: '#7f9bff', sunI: 0.6, sky: '#26305e', ground: '#101428', hemiI: 1.0, bg: '#080b16', lamp: 1, exposure: 1.1, env: 0.15 },
 ]
 
 export interface Atmosphere {

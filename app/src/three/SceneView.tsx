@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { CameraControls, Line } from '@react-three/drei'
-import { Bloom, EffectComposer, ToneMapping, Vignette } from '@react-three/postprocessing'
+import { Bloom, EffectComposer, N8AO, ToneMapping, Vignette } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
 import * as THREE from 'three'
 import type { Scene } from '../../../schema/types'
@@ -9,6 +9,7 @@ import type { ObjectPatch, ScenePick, RenderScene } from './render/types'
 import { toRenderScene, parseTime } from './adapter/toRender'
 import { Architecture, type Cutaway } from './Architecture'
 import { Site } from './Site'
+import { Plinth } from './Plinth'
 import { Items } from './interaction/Items'
 import { Lighting, useLampLevel } from './lighting/Lighting'
 import { TIME_PRESETS, type TimePreset } from './lighting/daylight'
@@ -142,7 +143,8 @@ function Rig({ center, radius, view, handle }: { center: THREE.Vector3; radius: 
 
 function Effects({ lamp }: { lamp: number }) {
   return (
-    <EffectComposer multisampling={4} enableNormalPass={false}>
+    <EffectComposer multisampling={0} enableNormalPass={false}>
+      <N8AO aoRadius={0.55} intensity={2.2} distanceFalloff={0.8} aoSamples={14} denoiseSamples={6} denoiseRadius={10} quality="medium" halfRes />
       <Bloom intensity={0.15 + lamp * 0.55} luminanceThreshold={0.85} luminanceSmoothing={0.3} mipmapBlur />
       <Vignette eskil={false} offset={0.25} darkness={0.55} />
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
@@ -200,7 +202,7 @@ export const SceneView = forwardRef<SceneViewHandle, SceneViewProps>(function Sc
     >
       <Rig center={center} radius={radius} view={view} handle={ref} />
       <Lighting time={hours} center={center} radius={radius} shadows={!low} onTimeChange={onTimeChange} showGizmo={showSunGizmo} northDeg={rs.env.northDeg} sky={rs.env.sky} exposure={rs.env.exposure} />
-      {rs.site && <Site site={rs.site} lowQuality={low} onPick={onPick} />}
+      {rs.site ? <Site site={rs.site} lowQuality={low} onPick={onPick} /> : <Plinth box={box} />}
       <Architecture scene={rs} cutaway={cutaway} lowQuality={low} onPick={onPick} />
       <Items objects={objects} walls={walls} bounds={bounds} selectedId={selObj?.id ?? null} interiorLights={rs.env.interiorLights} onPick={onPick} onDragEnd={onDragEnd} snap={snap} lowQuality={low} />
       {selection && selection.type !== 'object' && selection.type !== 'opening' && <PickOutline rs={rs} pick={selection} />}
