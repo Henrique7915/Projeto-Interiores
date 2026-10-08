@@ -76,6 +76,7 @@ const ItemNode = memo(function ItemNode({ obj, selected, glow, lowQuality, regis
       rotation={[0, obj.rotationY, 0]}
       scale={obj.mirror ? [-1, 1, 1] : 1}
       onPointerDown={(e) => onDown(obj, e)}
+      onClick={(e) => e.stopPropagation()}
       onPointerOver={() => (document.body.style.cursor = obj.locked ? 'pointer' : 'grab')}
       onPointerOut={() => (document.body.style.cursor = '')}
     >
