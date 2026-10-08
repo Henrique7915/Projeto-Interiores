@@ -344,6 +344,7 @@ function moveWallContents(c: Container, from: Wall, to: Wall) {
  */
 function attachRoomWalls(c: Container, room: { id: string; polygon: V2[] }, st: WallStyle, taken: Set<string>) {
   const walls = list(c, 'walls')
+  const rooms = (c as { rooms?: Room[] }).rooms ?? []
   const pts = room.polygon
   pts.forEach((p, i) => {
     const q = pts[(i + 1) % pts.length]
@@ -356,18 +357,21 @@ function attachRoomWalls(c: Container, room: { id: string; polygon: V2[] }, st: 
     const covered: [number, number][] = []
     const shared: { s0: number; s1: number; wall: Wall }[] = []
 
-    // 1) paredes de ambientes vizinhos, em sentido oposto: divide no trecho comum e compartilha
+    // 1) paredes de ambientes vizinhos, do outro lado da aresta: divide no trecho comum e compartilha
     for (const w of [...walls]) {
       const ids = wallRoomIds(w)
       if (!ids.length || ids.includes(room.id)) continue
-      const [dx, dz] = wallDir(w)
-      if (dx * ux + dz * uz > -0.5) continue
       const ov = overlapOnWall(w, p, q)
       if (!ov) continue
+      // o vizinho tem que estar mesmo do lado de fora desta aresta (a parede pode correr em qualquer sentido)
+      const m = pointOnWall(w, (ov.lo + ov.hi) / 2)
+      const behind: V2 = [m[0] + uz * 0.05, m[1] - ux * 0.05]
+      if (!rooms.some((r) => ids.includes(r.id) && pointInPolygon(behind, r.polygon))) continue
       const segs = cutWall(c, w, [ov.lo, ov.hi], taken)
       const mid = segs.reduce((best, s) => (Math.min(s.t1, ov.hi) - Math.max(s.t0, ov.lo) > Math.min(best.t1, ov.hi) - Math.max(best.t0, ov.lo) ? s : best))
       setWallRooms(mid.wall, [...ids, room.id])
-      mid.wall.finish = { ...mid.wall.finish, left: st.inside }
+      const sameDir = wallDir(mid.wall)[0] * ux + wallDir(mid.wall)[1] * uz > 0
+      mid.wall.finish = { ...mid.wall.finish, [sameDir ? 'right' : 'left']: st.inside }
       const a = s_(mid.wall.start)
       const b = s_(mid.wall.end)
       shared.push({ s0: Math.min(a, b), s1: Math.max(a, b), wall: mid.wall })
@@ -416,6 +420,13 @@ function attachRoomWalls(c: Container, room: { id: string; polygon: V2[] }, st: 
   })
 }
 
+/** O lado direito da parede (de start para end) aponta para dentro do polígono? */
+function rightFacesInside(w: Wall, poly: V2[]): boolean {
+  const n = wallNormalRight(w)
+  const m = pointOnWall(w, wallLength(w) / 2)
+  return pointInPolygon([m[0] + n[0] * 0.05, m[1] + n[1] * 0.05], poly)
+}
+
 /** Altura, espessura e acabamentos das paredes que o ambiente já tem (ou o padrão da cena). */
 function roomStyle(d: Scene, c: Container, room: Room): WallStyle {
   const df = d.defaults
@@ -423,9 +434,7 @@ function roomStyle(d: Scene, c: Container, room: Room): WallStyle {
   const mine = wallsOfRoom(c, room.id)
   const w = mine.find((x) => wallRoomIds(x).length === 1) ?? mine[0]
   if (!w) return st
-  const n = wallNormalRight(w)
-  const m = pointOnWall(w, wallLength(w) / 2)
-  const rightIsInside = pointInPolygon([m[0] + n[0] * 0.05, m[1] + n[1] * 0.05], room.polygon)
+  const rightIsInside = rightFacesInside(w, room.polygon)
   const [ins, out] = rightIsInside ? (['right', 'left'] as const) : (['left', 'right'] as const)
   return { height: w.height ?? st.height, thickness: w.thickness ?? st.thickness, inside: w.finish?.[ins] ?? st.inside, outside: w.finish?.[out] ?? st.outside }
 }
@@ -445,9 +454,7 @@ function reshapeRoom(d: Scene, c: Container, room: Room, newPoly: V2[], taken: S
   for (const w of had) {
     const ids = wallRoomIds(w)
     if (ids.length < 2) continue
-    const n = wallNormalRight(w)
-    const m = pointOnWall(w, wallLength(w) / 2)
-    const facing = pointInPolygon([m[0] + n[0] * 0.05, m[1] + n[1] * 0.05], oldPoly) ? 'right' : 'left'
+    const facing = rightFacesInside(w, oldPoly) ? 'right' : 'left'
     setWallRooms(w, ids.filter((x) => x !== room.id))
     w.finish = { ...w.finish, [facing]: st.outside }
   }
@@ -621,10 +628,16 @@ function apply(d: Scene, op: Op, created: string[]) {
       const r = findRoom(d, op.id)
       if (!r) throw new Error(`Ambiente não encontrado: "${op.id}"`)
       const c = r.container as Level
-      c.rooms = (c.rooms ?? []).filter((x) => x.id !== op.id)
       const ownWalls = wallsOfRoom(c, op.id)
       const soleIds = new Set(ownWalls.filter((w) => wallRoomIds(w).length === 1).map((w) => w.id))
-      for (const w of ownWalls) if (wallRoomIds(w).length > 1) setWallRooms(w, wallRoomIds(w).filter((x) => x !== op.id))
+      const outside = roomStyle(d, c, r.entity).outside
+      for (const w of ownWalls) {
+        const ids = wallRoomIds(w)
+        if (ids.length < 2) continue
+        setWallRooms(w, ids.filter((x) => x !== op.id))
+        w.finish = { ...w.finish, [rightFacesInside(w, r.entity.polygon) ? 'right' : 'left']: outside }
+      }
+      c.rooms = (c.rooms ?? []).filter((x) => x.id !== op.id)
       if (!op.keepWalls) {
         const ids = soleIds
         c.walls = (c.walls ?? []).filter((w) => !ids.has(w.id))

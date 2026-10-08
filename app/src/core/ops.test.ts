@@ -205,6 +205,45 @@ describe('paredes compartilhadas entre ambientes vizinhos', () => {
     expect(wallsOfRoom(s.levels[0], 'sala')).toHaveLength(4)
     expect(s.levels[0].walls!.every((w) => wallRoomIds(w).length === 1)).toBe(true)
   })
+  it('encolher um ambiente ao longo de uma parede compartilhada divide a parede do vizinho (sem duplicar)', async () => {
+    let s = applyOps(newScene(), [
+      { op: 'addRoom', id: 'a', name: 'A', x: 0, z: 0, width: 4, depth: 4 },
+      { op: 'addRoom', id: 'b', name: 'B', x: 4, z: 0, width: 4, depth: 4 },
+      { op: 'addRoom', id: 'c', name: 'C', x: 0, z: 4, width: 8, depth: 3 },
+    ]).scene
+    expect(dup(s)).toEqual([])
+    s = applyOps(s, [{ op: 'resizeRoom', id: 'b', width: 3 }]).scene
+    expect(dup(s)).toEqual([])
+    expect(await overlapWarnings(s)).toEqual([])
+    const south = wallsOfRoom(s.levels[0], 'c').filter((w) => w.start[1] === 4 && w.end[1] === 4)
+    expect(south.map((w) => wallRoomIds(w).length).sort()).toEqual([1, 2, 2])
+    s = applyOps(s, [{ op: 'resizeRoom', id: 'b', width: 4 }]).scene
+    expect(dup(s)).toEqual([])
+    expect(await overlapWarnings(s)).toEqual([])
+  })
+  it('deslizar um ambiente ao longo do vizinho mantém uma parede só em cada trecho', async () => {
+    let s = applyOps(newScene(), [
+      { op: 'addRoom', id: 'a', name: 'A', x: 0, z: 0, width: 4, depth: 6 },
+      { op: 'addRoom', id: 'b', name: 'B', x: 4, z: 0, width: 3, depth: 3 },
+    ]).scene
+    for (const dz of [1, 1, 1, 1.5, -2, -3]) {
+      s = applyOps(s, [{ op: 'moveRoom', id: 'b', dx: 0, dz }]).scene
+      expect(dup(s)).toEqual([])
+      expect(await overlapWarnings(s)).toEqual([])
+      expect(wallsOfRoom(s.levels[0], 'b').length).toBeGreaterThanOrEqual(4)
+    }
+    expect(validateSchema(s).errors).toEqual([])
+  })
+  it('depois de remover um ambiente, o lado que virou fachada volta para o acabamento exterior', () => {
+    let s = applyOps(newScene(), [
+      { op: 'addRoom', id: 'sala', name: 'Sala', x: 0, z: 0, width: 4, depth: 5, wallMaterial: 'paint/white-matte', exteriorMaterial: 'paint/exterior-white' },
+      { op: 'addRoom', id: 'quarto', name: 'Quarto', x: 4, z: 0, width: 3, depth: 5, wallMaterial: 'paint/sage' },
+    ]).scene
+    s = applyOps(s, [{ op: 'removeRoom', id: 'quarto' }]).scene
+    const sala = wallsOfRoom(s.levels[0], 'sala')
+    const outs = sala.map((w) => (w.finish?.left === 'paint/white-matte' ? w.finish?.right : w.finish?.left))
+    expect(outs.every((m) => m === 'paint/exterior-white')).toBe(true)
+  })
   it('três ambientes em fila: duas paredes compartilhadas', () => {
     const s = applyOps(base(), [
       { op: 'addRoom', id: 'b', name: 'B', x: 4, z: 0, width: 3, depth: 5 },
