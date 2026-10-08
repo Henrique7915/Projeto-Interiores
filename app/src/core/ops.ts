@@ -1,10 +1,11 @@
 import { produce } from 'immer'
 import { z } from 'zod'
 import { getCatalogItem, hasMaterial } from './catalog'
-import { bbox, dist, ensureClockwise, pointOnWall, rectPoints, round, wallAngleDeg, wallDir, wallLength, wallNormalRight } from './geometry'
+import { bbox, dist, ensureClockwise, pointInPolygon, pointOnWall, rectPoints, round, wallAngleDeg, wallDir, wallLength, wallNormalRight } from './geometry'
 import {
   ROOM_KEY,
   allIds,
+  edgeOfWall,
   findObject,
   findOpening,
   findRoom,
@@ -15,8 +16,9 @@ import {
   hoursToTime,
   objectDims,
   roomAt,
+  setWallRooms,
   slotNames,
-  wallRoomId,
+  wallRoomIds,
   wallsOfRoom,
 } from './model'
 import type { Container, ContainerKey, Level, Opening, Room, Scene, SceneObject, Wall } from './schema'
@@ -262,41 +264,225 @@ function rectOrPoly(op: { x?: number; z?: number; width?: number; depth?: number
   return rectPoints(op.x ?? 0, op.z ?? 0, op.width, op.depth)
 }
 
-function makeWalls(d: Scene, c: Container, roomId: string, pts: [number, number][], o: { height: number; thickness: number; inside: string; outside: string }, taken: Set<string>) {
+type V2 = [number, number]
+interface WallStyle {
+  height: number
+  thickness: number
+  inside: string
+  outside: string
+}
+
+/** Tolerância (m) para duas paredes serem consideradas na mesma linha, e menor trecho (m) que vale a pena existir. */
+const TOL = 5e-3
+const MIN_SEG = 0.02
+
+const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x)) as T
+const alongWall = (w: { start: V2; end: V2 }, p: V2) => {
+  const [dx, dz] = wallDir(w)
+  return (p[0] - w.start[0]) * dx + (p[1] - w.start[1]) * dz
+}
+const offWall = (w: { start: V2; end: V2 }, p: V2) => {
+  const [dx, dz] = wallDir(w)
+  return Math.abs(-(p[0] - w.start[0]) * dz + (p[1] - w.start[1]) * dx)
+}
+
+/** Trecho (em metros desde o início de w) em que o segmento a→b coincide com a parede w, ou null. */
+function overlapOnWall(w: Wall, a: V2, b: V2): { lo: number; hi: number } | null {
+  if (offWall(w, a) > TOL || offWall(w, b) > TOL) return null
+  const lo = Math.max(0, Math.min(alongWall(w, a), alongWall(w, b)))
+  const hi = Math.min(wallLength(w), Math.max(alongWall(w, a), alongWall(w, b)))
+  return hi - lo >= MIN_SEG ? { lo, hi } : null
+}
+
+/**
+ * Corta a parede nos pontos `cuts` (metros desde o início). O primeiro pedaço mantém o id; os outros ganham ids novos.
+ * Aberturas e objetos presos à parede vão para o pedaço onde estão.
+ */
+function cutWall(c: Container, w: Wall, cuts: number[], taken: Set<string>): { wall: Wall; t0: number; t1: number }[] {
+  const L = wallLength(w)
+  const ts = [...new Set(cuts.map((t) => round(t, 4)))].filter((t) => t > MIN_SEG && t < L - MIN_SEG).sort((a, b) => a - b)
+  if (!ts.length) return [{ wall: w, t0: 0, t1: L }]
+  const orig = { start: w.start, end: w.end }
+  const pts = [0, ...ts, L]
+  const at = (t: number): V2 => (t <= 0 ? orig.start : t >= L ? orig.end : ([round(pointOnWall(orig, t)[0], 4), round(pointOnWall(orig, t)[1], 4)] as V2))
+  const segs: { wall: Wall; t0: number; t1: number }[] = []
+  for (let i = 0; i < pts.length - 1; i++) {
+    const seg = i === 0 ? w : { ...clone(w), id: freshId(taken, w.id) }
+    segs.push({ wall: seg, t0: pts[i], t1: pts[i + 1] })
+  }
+  const all = list(c, 'walls')
+  all.splice(all.findIndex((x) => x.id === w.id) + 1, 0, ...segs.slice(1).map((s) => s.wall))
+  const pick = (t: number) => segs.find((s) => t <= s.t1) ?? segs[segs.length - 1]
+  for (const o of c.openings ?? []) if (o.wallId === w.id) {
+    const s = pick(o.offset)
+    o.wallId = s.wall.id
+    o.offset = round(o.offset - s.t0)
+  }
+  for (const ob of c.objects ?? []) if (ob.wallId === w.id) ob.wallId = pick(alongWall(orig, [ob.position[0], ob.position[2]])).wall.id
+  for (const s of segs) {
+    s.wall.start = at(s.t0)
+    s.wall.end = at(s.t1)
+  }
+  for (const s of segs) clampOpenings(c, s.wall)
+  return segs
+}
+
+/** Passa aberturas e objetos de uma parede que vai sumir para outra que cobre o mesmo trecho. */
+function moveWallContents(c: Container, from: Wall, to: Wall) {
+  const L = wallLength(to)
+  for (const o of c.openings ?? []) if (o.wallId === from.id) {
+    const center = pointOnWall(from, o.offset)
+    o.wallId = to.id
+    o.offset = round(clamp(alongWall(to, center), o.width / 2, L - o.width / 2))
+  }
+  for (const ob of c.objects ?? []) if (ob.wallId === from.id) ob.wallId = to.id
+}
+
+/**
+ * Cria as paredes do ambiente. Onde a aresta coincide com a parede de outro ambiente (colada, lado a lado),
+ * a parede é dividida na medida do trecho comum e compartilhada: uma só parede, ligada aos dois ambientes.
+ */
+function attachRoomWalls(c: Container, room: { id: string; polygon: V2[] }, st: WallStyle, taken: Set<string>) {
   const walls = list(c, 'walls')
+  const rooms = (c as { rooms?: Room[] }).rooms ?? []
+  const pts = room.polygon
   pts.forEach((p, i) => {
     const q = pts[(i + 1) % pts.length]
-    if (dist(p, q) < 0.01) return
-    walls.push({
-      id: freshId(taken, `parede-${roomId}`),
-      start: p,
-      end: q,
-      thickness: o.thickness,
-      height: o.height,
-      finish: { left: o.outside, right: o.inside },
-      extensions: { [ROOM_KEY]: roomId },
-    })
+    const E = dist(p, q)
+    if (E < 0.01) return
+    const ux = (q[0] - p[0]) / E
+    const uz = (q[1] - p[1]) / E
+    const s_ = (pt: V2) => (pt[0] - p[0]) * ux + (pt[1] - p[1]) * uz
+    const pointAt = (s: number): V2 => (s <= TOL ? p : s >= E - TOL ? q : [round(p[0] + ux * s, 4), round(p[1] + uz * s, 4)])
+    const covered: [number, number][] = []
+    const shared: { s0: number; s1: number; wall: Wall }[] = []
+
+    // 1) paredes de ambientes vizinhos, do outro lado da aresta: divide no trecho comum e compartilha
+    for (const w of [...walls]) {
+      const ids = wallRoomIds(w)
+      if (!ids.length || ids.includes(room.id)) continue
+      const ov = overlapOnWall(w, p, q)
+      if (!ov) continue
+      // o vizinho tem que estar mesmo do lado de fora desta aresta (a parede pode correr em qualquer sentido)
+      const m = pointOnWall(w, (ov.lo + ov.hi) / 2)
+      const behind: V2 = [m[0] + uz * 0.05, m[1] - ux * 0.05]
+      if (!rooms.some((r) => ids.includes(r.id) && pointInPolygon(behind, r.polygon))) continue
+      const segs = cutWall(c, w, [ov.lo, ov.hi], taken)
+      const mid = segs.reduce((best, s) => (Math.min(s.t1, ov.hi) - Math.max(s.t0, ov.lo) > Math.min(best.t1, ov.hi) - Math.max(best.t0, ov.lo) ? s : best))
+      setWallRooms(mid.wall, [...ids, room.id])
+      const sameDir = wallDir(mid.wall)[0] * ux + wallDir(mid.wall)[1] * uz > 0
+      mid.wall.finish = { ...mid.wall.finish, [sameDir ? 'right' : 'left']: st.inside }
+      const a = s_(mid.wall.start)
+      const b = s_(mid.wall.end)
+      shared.push({ s0: Math.min(a, b), s1: Math.max(a, b), wall: mid.wall })
+      covered.push([Math.min(a, b), Math.max(a, b)])
+    }
+
+    // 2) paredes que já eram só deste ambiente: o que caiu sobre trecho compartilhado é redundante
+    for (const w of [...walls]) {
+      const ids = wallRoomIds(w)
+      if (ids.length !== 1 || ids[0] !== room.id) continue
+      if (!overlapOnWall(w, p, q)) continue
+      const cuts = shared.flatMap((sh) => [alongWall(w, pointAt(sh.s0)), alongWall(w, pointAt(sh.s1))])
+      for (const seg of cutWall(c, w, cuts, taken)) {
+        const a = s_(seg.wall.start)
+        const b = s_(seg.wall.end)
+        const mid = (a + b) / 2
+        const sh = shared.find((x) => mid > x.s0 - TOL && mid < x.s1 + TOL)
+        if (sh) {
+          moveWallContents(c, seg.wall, sh.wall)
+          c.walls = (c.walls ?? []).filter((x) => x.id !== seg.wall.id)
+        } else covered.push([Math.min(a, b), Math.max(a, b)])
+      }
+    }
+
+    // 3) o que sobrou da aresta ganha parede nova
+    covered.sort((a, b) => a[0] - b[0])
+    let cursor = 0
+    const gaps: [number, number][] = []
+    for (const [a, b] of covered) {
+      if (a - cursor >= MIN_SEG) gaps.push([cursor, a])
+      cursor = Math.max(cursor, b)
+    }
+    if (E - cursor >= MIN_SEG) gaps.push([cursor, E])
+    for (const [a, b] of gaps) {
+      const wl = list(c, 'walls')
+      wl.push({
+        id: freshId(taken, `parede-${room.id}`),
+        start: pointAt(a),
+        end: pointAt(b),
+        thickness: st.thickness,
+        height: st.height,
+        finish: { left: st.outside, right: st.inside },
+        extensions: { [ROOM_KEY]: room.id },
+      })
+    }
   })
 }
 
-function rebuildRoomWalls(c: Container, room: Room, taken: Set<string>) {
-  const old = wallsOfRoom(c, room.id)
-  if (!old.length) return
-  const pts = room.polygon
-  const goneWalls = old.slice(pts.length)
-  old.slice(0, pts.length).forEach((w, i) => {
-    w.start = pts[i]
-    w.end = pts[(i + 1) % pts.length]
-  })
-  for (let i = old.length; i < pts.length; i++) {
-    const proto = old[0]
-    list(c, 'walls').push({ ...structuredClone(proto), id: freshId(taken, `parede-${room.id}`), start: pts[i], end: pts[(i + 1) % pts.length] })
+/** O lado direito da parede (de start para end) aponta para dentro do polígono? */
+function rightFacesInside(w: Wall, poly: V2[]): boolean {
+  const n = wallNormalRight(w)
+  const m = pointOnWall(w, wallLength(w) / 2)
+  return pointInPolygon([m[0] + n[0] * 0.05, m[1] + n[1] * 0.05], poly)
+}
+
+/** Altura, espessura e acabamentos das paredes que o ambiente já tem (ou o padrão da cena). */
+function roomStyle(d: Scene, c: Container, room: Room): WallStyle {
+  const df = d.defaults
+  const st: WallStyle = { height: df?.wallHeight ?? (c as Level).height ?? D.wallHeight, thickness: df?.wallThickness ?? D.wallThickness, inside: df?.wallMaterial ?? D.wallIn, outside: D.wallOut }
+  const mine = wallsOfRoom(c, room.id)
+  const w = mine.find((x) => wallRoomIds(x).length === 1) ?? mine[0]
+  if (!w) return st
+  const rightIsInside = rightFacesInside(w, room.polygon)
+  const [ins, out] = rightIsInside ? (['right', 'left'] as const) : (['left', 'right'] as const)
+  return { height: w.height ?? st.height, thickness: w.thickness ?? st.thickness, inside: w.finish?.[ins] ?? st.inside, outside: w.finish?.[out] ?? st.outside }
+}
+
+/**
+ * Muda o polígono do ambiente (resize/move) levando as paredes junto:
+ * as só dele acompanham (aberturas ficam), as compartilhadas ficam com o vizinho, e a nova posição se cola de novo onde encostar.
+ */
+function reshapeRoom(d: Scene, c: Container, room: Room, newPoly: V2[], taken: Set<string>) {
+  const had = wallsOfRoom(c, room.id)
+  const oldPoly = room.polygon
+  if (!had.length) {
+    room.polygon = newPoly
+    return
   }
-  if (goneWalls.length) {
-    const ids = new Set(goneWalls.map((w) => w.id))
-    c.walls = (c.walls ?? []).filter((w) => !ids.has(w.id))
-    c.openings = (c.openings ?? []).filter((o) => !ids.has(o.wallId))
+  const st = roomStyle(d, c, room)
+  for (const w of had) {
+    const ids = wallRoomIds(w)
+    if (ids.length < 2) continue
+    const facing = rightFacesInside(w, oldPoly) ? 'right' : 'left'
+    setWallRooms(w, ids.filter((x) => x !== room.id))
+    w.finish = { ...w.finish, [facing]: st.outside }
   }
+  const gone = new Set<string>()
+  for (const w of wallsOfRoom(c, room.id)) {
+    const { index } = edgeOfWall(oldPoly, w)
+    if (index < 0) {
+      gone.add(w.id)
+      continue
+    }
+    const a = oldPoly[index]
+    const b = oldPoly[(index + 1) % oldPoly.length]
+    const na = newPoly[index]
+    const nb = newPoly[(index + 1) % newPoly.length]
+    const E = dist(a, b) || 1
+    const pos = (pt: V2): V2 => {
+      const u = ((pt[0] - a[0]) * (b[0] - a[0]) + (pt[1] - a[1]) * (b[1] - a[1])) / (E * E)
+      return [round(na[0] + (nb[0] - na[0]) * u, 4), round(na[1] + (nb[1] - na[1]) * u, 4)]
+    }
+    w.start = pos(w.start)
+    w.end = pos(w.end)
+  }
+  if (gone.size) {
+    c.walls = (c.walls ?? []).filter((w) => !gone.has(w.id))
+    c.openings = (c.openings ?? []).filter((o) => !gone.has(o.wallId))
+  }
+  room.polygon = newPoly
+  attachRoomWalls(c, room, st, taken)
   for (const w of wallsOfRoom(c, room.id)) clampOpenings(c, w)
 }
 
@@ -344,24 +530,35 @@ const zoneDefaultMaterial: Record<string, string> = {
   other: 'stone/slate',
 }
 
-/** Resolve a parede de um comando: por wallId, ou por roomId + roomSide (retângulos). `flip` = offset deve ser invertido. */
-function resolveWallRef(d: Scene, ref: { wallId?: string; roomId?: string; roomSide?: 'north' | 'east' | 'south' | 'west' }) {
+/**
+ * Resolve a parede de um comando: por wallId, ou por roomId + roomSide (retângulos).
+ * `flip`: a parede corre contra o sentido do lado (oeste→leste / norte→sul). `shift`: onde a parede começa, medido do início do lado.
+ * Um lado pode ter várias paredes (parte dele é compartilhada com um vizinho); vale a que contém o `offset` pedido (ou o meio do lado).
+ */
+function resolveWallRef(d: Scene, ref: { wallId?: string; roomId?: string; roomSide?: 'north' | 'east' | 'south' | 'west'; offset?: number }) {
   if (ref.wallId) {
     const w = findWall(d, ref.wallId)
     if (!w) throw new Error(`Parede não encontrada: "${ref.wallId}"`)
-    return { w, flip: false }
+    return { w, flip: false, shift: 0 }
   }
   if (!ref.roomId || !ref.roomSide) throw new Error('Informe wallId, ou roomId + roomSide (north/east/south/west).')
   const r = findRoom(d, ref.roomId)
   if (!r) throw new Error(`Ambiente não encontrado: "${ref.roomId}"`)
   const b = bbox(r.entity.polygon)
-  const eps = 1e-3
   const horizontal = ref.roomSide === 'north' || ref.roomSide === 'south'
   const target = ref.roomSide === 'north' ? b.minZ : ref.roomSide === 'south' ? b.maxZ : ref.roomSide === 'west' ? b.minX : b.maxX
-  const hit = wallsOfRoom(r.container, ref.roomId).find((w) => (horizontal ? Math.abs(w.start[1] - target) < eps && Math.abs(w.end[1] - target) < eps : Math.abs(w.start[0] - target) < eps && Math.abs(w.end[0] - target) < eps))
-  if (!hit) throw new Error(`O ambiente "${ref.roomId}" não tem parede no lado ${ref.roomSide} (só funciona em ambientes retangulares com paredes).`)
-  const flip = horizontal ? hit.start[0] > hit.end[0] : hit.start[1] > hit.end[1]
-  return { w: { entity: hit, container: r.container, key: r.key }, flip }
+  const ax = horizontal ? 0 : 1
+  const cross = horizontal ? 1 : 0
+  const sideStart = horizontal ? b.minX : b.minZ
+  const pieces = wallsOfRoom(r.container, ref.roomId)
+    .filter((w) => Math.abs(w.start[cross] - target) < TOL && Math.abs(w.end[cross] - target) < TOL)
+    .map((w) => ({ w, lo: Math.min(w.start[ax], w.end[ax]) - sideStart, hi: Math.max(w.start[ax], w.end[ax]) - sideStart }))
+  if (!pieces.length) throw new Error(`O ambiente "${ref.roomId}" não tem parede no lado ${ref.roomSide} (só funciona em ambientes retangulares com paredes).`)
+  const pos = ref.offset ?? (horizontal ? b.width : b.depth) / 2
+  const gap = (p: { lo: number; hi: number }) => Math.max(p.lo - pos, pos - p.hi, 0)
+  const hit = pieces.reduce((best, p) => (gap(p) < gap(best) ? p : best))
+  const flip = hit.w.start[ax] > hit.w.end[ax]
+  return { w: { entity: hit.w, container: r.container, key: r.key }, flip, shift: hit.lo }
 }
 
 function apply(d: Scene, op: Op, created: string[]) {
@@ -398,7 +595,7 @@ function apply(d: Scene, op: Op, created: string[]) {
       const defaults = d.defaults
       ;(lvl.rooms ??= []).push({ id, name: op.name, type: op.type, polygon: pts, floor: { material: op.floorMaterial ?? defaults?.floorMaterial ?? D.floor } })
       if (op.walls)
-        makeWalls(d, lvl, id, pts, { height: op.wallHeight ?? defaults?.wallHeight ?? lvl.height ?? D.wallHeight, thickness: op.wallThickness ?? defaults?.wallThickness ?? D.wallThickness, inside: op.wallMaterial ?? defaults?.wallMaterial ?? D.wallIn, outside: op.exteriorMaterial ?? D.wallOut }, taken)
+        attachRoomWalls(lvl, { id, polygon: pts }, { height: op.wallHeight ?? defaults?.wallHeight ?? lvl.height ?? D.wallHeight, thickness: op.wallThickness ?? defaults?.wallThickness ?? D.wallThickness, inside: op.wallMaterial ?? defaults?.wallMaterial ?? D.wallIn, outside: op.exteriorMaterial ?? D.wallOut }, taken)
       break
     }
     case 'updateRoom': {
@@ -416,19 +613,14 @@ function apply(d: Scene, op: Op, created: string[]) {
       const r = findRoom(d, op.id)
       if (!r) throw new Error(`Ambiente não encontrado: "${op.id}"`)
       const b = bbox(r.entity.polygon)
-      r.entity.polygon = rectPoints(op.x ?? b.minX, op.z ?? b.minZ, op.width ?? b.width, op.depth ?? b.depth)
-      rebuildRoomWalls(r.container, r.entity, taken)
+      reshapeRoom(d, r.container, r.entity, rectPoints(op.x ?? b.minX, op.z ?? b.minZ, op.width ?? b.width, op.depth ?? b.depth), taken)
       break
     }
     case 'moveRoom': {
       const r = findRoom(d, op.id)
       if (!r) throw new Error(`Ambiente não encontrado: "${op.id}"`)
       const mv = (p: [number, number]): [number, number] => [round(p[0] + op.dx), round(p[1] + op.dz)]
-      r.entity.polygon = r.entity.polygon.map(mv)
-      for (const w of wallsOfRoom(r.container, op.id)) {
-        w.start = mv(w.start)
-        w.end = mv(w.end)
-      }
+      reshapeRoom(d, r.container, r.entity, r.entity.polygon.map(mv), taken)
       for (const o of r.container.objects ?? []) if (o.roomId === op.id) o.position = [round(o.position[0] + op.dx), o.position[1], round(o.position[2] + op.dz)]
       break
     }
@@ -436,9 +628,18 @@ function apply(d: Scene, op: Op, created: string[]) {
       const r = findRoom(d, op.id)
       if (!r) throw new Error(`Ambiente não encontrado: "${op.id}"`)
       const c = r.container as Level
+      const ownWalls = wallsOfRoom(c, op.id)
+      const soleIds = new Set(ownWalls.filter((w) => wallRoomIds(w).length === 1).map((w) => w.id))
+      const outside = roomStyle(d, c, r.entity).outside
+      for (const w of ownWalls) {
+        const ids = wallRoomIds(w)
+        if (ids.length < 2) continue
+        setWallRooms(w, ids.filter((x) => x !== op.id))
+        w.finish = { ...w.finish, [rightFacesInside(w, r.entity.polygon) ? 'right' : 'left']: outside }
+      }
       c.rooms = (c.rooms ?? []).filter((x) => x.id !== op.id)
       if (!op.keepWalls) {
-        const ids = new Set(wallsOfRoom(c, op.id).map((w) => w.id))
+        const ids = soleIds
         c.walls = (c.walls ?? []).filter((w) => !ids.has(w.id))
         c.openings = (c.openings ?? []).filter((o) => !ids.has(o.wallId))
         for (const ob of c.objects ?? []) if (ob.wallId && ids.has(ob.wallId)) delete ob.wallId
@@ -526,12 +727,12 @@ function apply(d: Scene, op: Op, created: string[]) {
       break
     }
     case 'addOpening': {
-      const { w, flip } = resolveWallRef(d, op)
+      const { w, flip, shift } = resolveWallRef(d, op)
       const df = openingDefaults(op.kind)
       const id = newOf(op.id, op.kind)
       const width = op.width ?? df.width
       const len = wallLength(w.entity)
-      const rawOffset = op.offset === undefined ? len / 2 : flip ? len - op.offset : op.offset
+      const rawOffset = op.offset === undefined ? len / 2 : flip ? len - (op.offset - shift) : op.offset - shift
       if (width > len) throw new Error(`Abertura (${width} m) maior que a parede (${round(len, 2)} m)`)
       const wallH = w.entity.height ?? (w.container as Level).height ?? D.wallHeight
       const sill = op.sill ?? df.sill
@@ -583,9 +784,9 @@ function apply(d: Scene, op: Op, created: string[]) {
     case 'addObjectAtWall': {
       const cat = getCatalogItem(op.catalogId)
       if (!cat) throw new Error(`Item de catálogo desconhecido: "${op.catalogId}".`)
-      const { w, flip } = resolveWallRef(d, op)
+      const { w, flip, shift } = resolveWallRef(d, op)
       const dm = op.dimensions ?? cat.dimensions
-      const offset = op.offset === undefined ? wallLength(w.entity) / 2 : flip ? wallLength(w.entity) - op.offset : op.offset
+      const offset = op.offset === undefined ? wallLength(w.entity) / 2 : flip ? wallLength(w.entity) - (op.offset - shift) : op.offset - shift
       const nR = wallNormalRight(w.entity)
       const n: [number, number] = op.side === 'right' ? nR : [-nR[0], -nR[1]]
       const base = pointOnWall(w.entity, offset)

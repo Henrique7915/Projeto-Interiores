@@ -1,6 +1,6 @@
 import { getCatalogItem, nameOf, resolveMaterial } from './catalog'
 import { bbox, overlapDepth, pointInPolygon, polygonArea, polygonPerimeter, round, wallLength } from './geometry'
-import { allContainers, objectCorners, objectDims, objectMaterials, wallRoomId } from './model'
+import { allContainers, objectCorners, objectDims, objectMaterials, wallRoomIds } from './model'
 import type { Scene, SceneObject } from './schema'
 
 export interface Issue {
@@ -59,7 +59,7 @@ export function describeScene(scene: Scene): string {
     }
     for (const w of c.walls ?? []) {
       const ops = (c.openings ?? []).filter((o) => o.wallId === w.id)
-      L.push(`• parede ${w.kind ?? 'solid'} [${w.id}]${wallRoomId(w) ? ` (do ambiente ${wallRoomId(w)})` : ''}: (${round(w.start[0], 2)}, ${round(w.start[1], 2)}) → (${round(w.end[0], 2)}, ${round(w.end[1], 2)}), ${round(wallLength(w), 2)} m, esp ${w.thickness ?? 0.15}, h ${w.height ?? '—'}, esquerda ${w.finish?.left ?? '—'}, direita ${w.finish?.right ?? '—'}` + (ops.length ? `; aberturas: ${ops.map((o) => `${o.kind} [${o.id}] centro a ${round(o.offset, 2)} m, ${o.width}×${o.height}${o.sill ? `, peitoril ${o.sill}` : ''}`).join('; ')}` : ''))
+      L.push(`• parede ${w.kind ?? 'solid'} [${w.id}]${wallRoomIds(w).length ? ` (${wallRoomIds(w).length > 1 ? 'compartilhada pelos ambientes' : 'do ambiente'} ${wallRoomIds(w).join(' e ')})` : ''}: (${round(w.start[0], 2)}, ${round(w.start[1], 2)}) → (${round(w.end[0], 2)}, ${round(w.end[1], 2)}), ${round(wallLength(w), 2)} m, esp ${w.thickness ?? 0.15}, h ${w.height ?? '—'}, esquerda ${w.finish?.left ?? '—'}, direita ${w.finish?.right ?? '—'}` + (ops.length ? `; aberturas: ${ops.map((o) => `${o.kind} [${o.id}] centro a ${round(o.offset, 2)} m, ${o.width}×${o.height}${o.sill ? `, peitoril ${o.sill}` : ''}`).join('; ')}` : ''))
     }
     for (const o of c.objects ?? []) {
       const d = objectDims(o)

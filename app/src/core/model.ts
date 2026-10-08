@@ -1,8 +1,11 @@
 import { getCatalogItem } from './catalog'
-import { footprintCorners, pointInPolygon } from './geometry'
+import { dist, footprintCorners, pointInPolygon } from './geometry'
 import type { Container, ContainerKey, Opening, Room, Scene, SceneObject, Wall, GroundZone } from './schema'
 
+/** Ambiente dono da parede (o primeiro, se a parede é compartilhada). */
 export const ROOM_KEY = 'app.roomId'
+/** Todos os ambientes que encostam na parede; só existe quando a parede é compartilhada por 2 ou mais. */
+export const ROOMS_KEY = 'app.roomIds'
 
 export interface Located<T> {
   entity: T
@@ -31,8 +34,48 @@ export const findObject = (s: Scene, id: string) => locate<SceneObject>(s, id, (
 export const findRoom = (s: Scene, id: string) => locate<Room>(s, id, (c) => (c as { rooms?: Room[] }).rooms)
 export const findZone = (s: Scene, id: string) => locate<GroundZone>(s, id, (c) => (c as { zones?: GroundZone[] }).zones)
 
-export const wallRoomId = (w: Wall): string | undefined => (w.extensions?.[ROOM_KEY] as string | undefined)
-export const wallsOfRoom = (c: Container, roomId: string) => (c.walls ?? []).filter((w) => wallRoomId(w) === roomId)
+export const wallRoomIds = (w: Wall): string[] => {
+  const list = w.extensions?.[ROOMS_KEY]
+  if (Array.isArray(list)) return list.filter((x): x is string => typeof x === 'string')
+  const one = w.extensions?.[ROOM_KEY]
+  return typeof one === 'string' ? [one] : []
+}
+export const wallRoomId = (w: Wall): string | undefined => wallRoomIds(w)[0]
+export function setWallRooms(w: Wall, ids: string[]) {
+  const ext: Record<string, unknown> = { ...w.extensions }
+  delete ext[ROOM_KEY]
+  delete ext[ROOMS_KEY]
+  if (ids.length) ext[ROOM_KEY] = ids[0]
+  if (ids.length > 1) ext[ROOMS_KEY] = [...ids]
+  if (Object.keys(ext).length) w.extensions = ext as Wall['extensions']
+  else delete w.extensions
+}
+
+/** Índice da aresta do polígono sobre a qual a parede está (e a posição do meio da parede ao longo dela), ou -1. */
+export function edgeOfWall(poly: [number, number][], w: Wall): { index: number; at: number } {
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i]
+    const b = poly[(i + 1) % poly.length]
+    const e = dist(a, b)
+    if (e < 1e-6) continue
+    const ux = (b[0] - a[0]) / e
+    const uz = (b[1] - a[1]) / e
+    const off = (p: [number, number]) => Math.abs((p[0] - a[0]) * -uz + (p[1] - a[1]) * ux)
+    if (off(w.start) < 5e-3 && off(w.end) < 5e-3) return { index: i, at: ((w.start[0] + w.end[0]) / 2 - a[0]) * ux + ((w.start[1] + w.end[1]) / 2 - a[1]) * uz }
+  }
+  return { index: -1, at: 0 }
+}
+
+/** Paredes que encostam no ambiente (inclusive as compartilhadas), na ordem das arestas do polígono (norte→leste→sul→oeste num retângulo). */
+export function wallsOfRoom(c: Container, roomId: string): Wall[] {
+  const mine = (c.walls ?? []).filter((w) => wallRoomIds(w).includes(roomId))
+  const room = (c as { rooms?: Room[] }).rooms?.find((r) => r.id === roomId)
+  if (!room || mine.length < 2) return mine
+  return mine
+    .map((w) => ({ w, k: edgeOfWall(room.polygon, w) }))
+    .sort((p, q) => (p.k.index < 0 ? 1e9 : p.k.index) - (q.k.index < 0 ? 1e9 : q.k.index) || p.k.at - q.k.at)
+    .map((x) => x.w)
+}
 
 export function allIds(scene: Scene): Set<string> {
   const ids = new Set<string>([scene.id])
