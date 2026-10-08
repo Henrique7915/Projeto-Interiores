@@ -63,7 +63,8 @@
         "sala",
         "estar"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/sofa-modern-l.png"
     },
     {
       "id": "sofa/modern-3-seat",
@@ -125,7 +126,8 @@
         "sala",
         "estar"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/sofa-modern-3-seat.png"
     },
     {
       "id": "chair/armchair-lounge",
@@ -179,7 +181,8 @@
         "sala",
         "leitura"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/chair-armchair-lounge.png"
     },
     {
       "id": "table/dining-rect",
@@ -230,7 +233,8 @@
       "tags": [
         "jantar"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/table-dining-rect.png"
     },
     {
       "id": "table/coffee-round",
@@ -274,7 +278,8 @@
       "tags": [
         "sala"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/table-coffee-round.png"
     },
     {
       "id": "chair/dining-wood",
@@ -314,7 +319,8 @@
       "tags": [
         "jantar"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/chair-dining-wood.png"
     },
     {
       "id": "chair/office",
@@ -353,7 +359,8 @@
       "tags": [
         "escritório"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/chair-office.png"
     },
     {
       "id": "desk/simple",
@@ -403,7 +410,8 @@
       "tags": [
         "escritório"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/desk-simple.png"
     },
     {
       "id": "bed/queen-modern",
@@ -459,7 +467,8 @@
       "tags": [
         "quarto"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/bed-queen-modern.png"
     },
     {
       "id": "storage/nightstand",
@@ -487,7 +496,8 @@
       "tags": [
         "quarto"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/storage-nightstand.png"
     },
     {
       "id": "storage/wardrobe-2-door",
@@ -534,7 +544,8 @@
       "tags": [
         "quarto"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/storage-wardrobe-2-door.png"
     },
     {
       "id": "storage/tv-unit",
@@ -568,7 +579,8 @@
       "tags": [
         "sala"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/storage-tv-unit.png"
     },
     {
       "id": "shelf/bookcase-tall",
@@ -607,7 +619,8 @@
         "sala",
         "livros"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/shelf-bookcase-tall.png"
     },
     {
       "id": "shelf/wall-floating",
@@ -642,7 +655,8 @@
       "tags": [
         "decoração"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/shelf-wall-floating.png"
     },
     {
       "id": "lighting/table-lamp",
@@ -681,7 +695,8 @@
           ]
         }
       },
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/lighting-table-lamp.png"
     },
     {
       "id": "lighting/floor-arc",
@@ -718,7 +733,8 @@
           ]
         }
       },
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/lighting-floor-arc.png"
     },
     {
       "id": "lighting/floor-lamp",
@@ -755,7 +771,8 @@
           ]
         }
       },
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/lighting-floor-lamp.png"
     },
     {
       "id": "lighting/pendant-dome",
@@ -788,7 +805,8 @@
           ]
         }
       },
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/lighting-pendant-dome.png"
     },
     {
       "id": "lighting/desk-lamp",
@@ -819,7 +837,8 @@
           ]
         }
       },
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/lighting-desk-lamp.png"
     },
     {
       "id": "rug/rectangular",
@@ -858,7 +877,8 @@
         "sala",
         "quarto"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/rug-rectangular.png"
     },
     {
       "id": "rug/round",
@@ -893,7 +913,8 @@
           ]
         }
       },
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/rug-round.png"
     },
     {
       "id": "plant/monstera-large",
@@ -925,7 +946,8 @@
           ]
         }
       },
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/plant-monstera-large.png"
     },
     {
       "id": "plant/tree-medium",
@@ -957,7 +979,8 @@
       "tags": [
         "exterior"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/plant-tree-medium.png"
     },
     {
       "id": "plant/palm",
@@ -981,7 +1004,8 @@
       "tags": [
         "exterior"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/plant-palm.png"
     },
     {
       "id": "outdoor/sun-lounger",
@@ -1018,7 +1042,8 @@
         "exterior",
         "piscina"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/outdoor-sun-lounger.png"
     },
     {
       "id": "outdoor/umbrella",
@@ -1055,7 +1080,8 @@
         "exterior",
         "piscina"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/outdoor-umbrella.png"
     },
     {
       "id": "other/box",
@@ -1090,7 +1116,8 @@
           "default": "wood/natural-oak"
         }
       },
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/other-box.png"
     }
   ],
   "materials": {
