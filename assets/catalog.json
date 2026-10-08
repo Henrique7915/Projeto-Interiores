@@ -2381,6 +2381,98 @@
       "thumbnail": "thumbnails/outdoor-car.png"
     },
     {
+      "id": "stairs/straight",
+      "name": {
+        "pt-BR": "Escada reta",
+        "en": "Straight stairs"
+      },
+      "category": "stairs",
+      "model": "procedural/stairs-straight",
+      "dimensions": {
+        "width": 0.9,
+        "height": 2.9,
+        "depth": 3.6
+      },
+      "resizable": {
+        "width": [
+          0.7,
+          1.6
+        ],
+        "height": [
+          1.2,
+          4.5
+        ],
+        "depth": [
+          1.8,
+          6
+        ]
+      },
+      "materialSlots": {
+        "steps": {
+          "label": "Degraus",
+          "default": "wood/natural-oak",
+          "allowed": [
+            "wood",
+            "stone",
+            "concrete",
+            "ceramic",
+            "paint"
+          ]
+        }
+      },
+      "tags": [
+        "escada",
+        "interior"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "stairs/l-shaped",
+      "name": {
+        "pt-BR": "Escada em L",
+        "en": "L-shaped stairs"
+      },
+      "category": "stairs",
+      "model": "procedural/stairs-l",
+      "dimensions": {
+        "width": 1.8,
+        "height": 2.9,
+        "depth": 2.7
+      },
+      "resizable": {
+        "width": [
+          1.4,
+          3
+        ],
+        "height": [
+          1.2,
+          4.5
+        ],
+        "depth": [
+          1.4,
+          4
+        ]
+      },
+      "materialSlots": {
+        "steps": {
+          "label": "Degraus",
+          "default": "wood/natural-oak",
+          "allowed": [
+            "wood",
+            "stone",
+            "concrete",
+            "ceramic",
+            "paint"
+          ]
+        }
+      },
+      "tags": [
+        "escada",
+        "interior"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
       "id": "other/box",
       "name": {
         "pt-BR": "Caixa",
@@ -2668,6 +2760,19 @@
         "tileSize": [
           0.3,
           0.3
+        ]
+      }
+    },
+    "ceramic/roof-tile": {
+      "name": "Telha cerâmica",
+      "category": "ceramic",
+      "color": "#a8492d",
+      "roughness": 0.75,
+      "texture": {
+        "set": "roof-tile",
+        "tileSize": [
+          0.4,
+          0.4
         ]
       }
     },

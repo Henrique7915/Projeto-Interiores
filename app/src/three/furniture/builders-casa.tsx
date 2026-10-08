@@ -324,6 +324,55 @@ function Car({ s: [w, h, d], m }: BuildProps) {
   )
 }
 
+// ---- Escadas ----
+
+/** Degraus maciços (cada degrau é um bloco do piso até a sua altura). O topo chega exatamente em `h`. */
+function stepCount(h: number) {
+  return Math.max(3, Math.round(h / 0.18))
+}
+
+/** Escada reta: embaixo em +Z (frente), sobe em direção a -Z; a altura total é `h`. */
+function StairsStraight({ s: [w, h, d], m }: BuildProps) {
+  const steps = m('steps')
+  const n = stepCount(h)
+  const rise = h / n
+  const run = d / n
+  return (
+    <group>
+      {Array.from({ length: n }, (_, i) => (
+        <Box key={i} size={[w, (i + 1) * rise, run]} pos={[0, ((i + 1) * rise) / 2, d / 2 - run * (i + 0.5)]} mat={steps} r={0.008} />
+      ))}
+    </group>
+  )
+}
+
+/**
+ * Escada em L com patamar: o primeiro lance sobe pela coluna da esquerda (-X) de +Z para -Z, o patamar fica no
+ * canto do fundo e o segundo lance segue para +X. O topo fica na extremidade +X do fundo.
+ */
+function StairsL({ s: [w, h, d], m }: BuildProps) {
+  const steps = m('steps')
+  const n = stepCount(h)
+  const rise = h / n
+  const fw = Math.min(w, d) / 2 // largura de cada lance
+  const n1 = Math.max(1, Math.floor((n - 1) / 2)) // degraus do primeiro lance (antes do patamar)
+  const n2 = Math.max(1, n - 1 - n1) // degraus do segundo lance
+  const run1 = (d - fw) / n1
+  const run2 = (w - fw) / n2
+  const x0 = -w / 2, z0 = -d / 2
+  return (
+    <group>
+      {Array.from({ length: n1 }, (_, i) => (
+        <Box key={`a${i}`} size={[fw, (i + 1) * rise, run1]} pos={[x0 + fw / 2, ((i + 1) * rise) / 2, d / 2 - run1 * (i + 0.5)]} mat={steps} r={0.008} />
+      ))}
+      <Box size={[fw, (n1 + 1) * rise, fw]} pos={[x0 + fw / 2, ((n1 + 1) * rise) / 2, z0 + fw / 2]} mat={steps} r={0.008} />
+      {Array.from({ length: n2 }, (_, i) => (
+        <Box key={`b${i}`} size={[run2, (n1 + 2 + i) * rise, fw]} pos={[x0 + fw + run2 * (i + 0.5), ((n1 + 2 + i) * rise) / 2, z0 + fw / 2]} mat={steps} r={0.008} />
+      ))}
+    </group>
+  )
+}
+
 export const CASA_BUILDERS: Record<string, (p: BuildProps) => ReactElement> = {
   'kitchen-counter': KitchenCounter,
   'kitchen-island': KitchenIsland,
@@ -343,4 +392,6 @@ export const CASA_BUILDERS: Record<string, (p: BuildProps) => ReactElement> = {
   bbq: Bbq,
   mailbox: Mailbox,
   car: Car,
+  'stairs-straight': StairsStraight,
+  'stairs-l': StairsL,
 }

@@ -19,6 +19,7 @@ export const TEXTURE_SETS: Record<string, TextureSetDef> = {
   marble: { kind: 'marble', color2: '#8d8f93' },
   'stone-rough': { kind: 'concrete' },
   terrazzo: { kind: 'speckle', color2: '#8c5a47' },
+  'roof-tile': { kind: 'tile', color2: '#7c3520' },
   granite: { kind: 'speckle', color2: '#4b4e55' },
   asphalt: { kind: 'gravel', color2: '#6a6a6c' },
   'concrete-fine': { kind: 'concrete' },
