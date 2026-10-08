@@ -156,7 +156,9 @@ export function NumInput({ value, onCommit, label, suffix, step = 1, min, max }:
 
 export function TextInput({ value, onCommit, label, placeholder }: { value: string; onCommit: (v: string) => void; label?: string; placeholder?: string }) {
   const [text, setText] = useState(value)
-  useEffect(() => setText(value), [value])
+  useEffect(() => {
+    setText(value)
+  }, [value])
   return (
     <label className="field wide">
       {label && <span>{label}</span>}
