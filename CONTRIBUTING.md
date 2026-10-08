@@ -18,7 +18,7 @@ Mexer na pasta de outra frente: só com combinado prévio com a dona (pelo coord
 2. Uma branch por etapa, a partir da `main` atualizada: `graficos/paredes-e-pisos`, `app/store-da-cena`, `arquitetura/schema-v0-2`.
 3. PRs pequenos, um por etapa do `progresso.json`. Título e descrição em português, dizendo o que dá para ver de diferente (Antes / Depois).
 4. Antes de pedir merge: `git fetch origin main && git rebase origin/main`, e o CI precisa estar verde.
-5. Merge por **squash**, apagando a branch depois.
+5. **A própria frente faz o merge** do seu PR, por **squash**, quando o CI está verde e, se o PR muda contrato (item 6), a Arquitetura aprovou. Depois apaga a branch. (Decisão do Henrique em 2026-10-08; ele acompanha pelo painel e pode reverter qualquer PR.)
 6. PR que muda contrato entre frentes (`schema/`, props do `<SceneView>`, lista de comandos) precisa de revisão da Arquitetura.
 
 ## CI
