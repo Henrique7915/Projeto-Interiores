@@ -2,7 +2,7 @@
 // Gera as miniaturas do catálogo (assets/thumbnails/*.png) renderizando cada item com o motor 3D.
 // Pré-requisitos: o app rodando em modo dev (npm run dev) com <PreviewPage/> montada em `?preview=<catalogId>`,
 // e `playwright-core` + um Chromium (ex.: PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers).
-// Uso: node assets/scripts/thumbnails.mjs [--url http://localhost:5173] [--chrome /caminho/chrome] [--only sofa/modern-l]
+// Uso: node assets/scripts/thumbnails.mjs [--url http://localhost:5173] [--chrome /caminho/chrome] [--only sofa/modern-l,rug/round]
 import { mkdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
@@ -23,7 +23,7 @@ const browser = await chromium.launch({
 const page = await browser.newPage({ viewport: { width: 600, height: 600 }, deviceScaleFactor: 1 })
 const base = args.url ?? 'http://localhost:5173'
 for (const it of catalog.items) {
-  if (args.only && args.only !== it.id) continue
+  if (args.only && !args.only.split(',').includes(it.id)) continue
   const lit = it.category === 'lighting' ? '&lit=1' : ''
   await page.goto(`${base}/?preview=${encodeURIComponent(it.id)}&size=512${lit}`)
   await page.waitForSelector('#preview-frame canvas')

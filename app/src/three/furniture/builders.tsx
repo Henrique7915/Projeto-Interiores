@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import * as THREE from 'three'
 import type { Vec3 } from './parts'
 import { Box, Cyl, MATS, Sph, simpleMat } from './parts'
+import { CASA_BUILDERS } from './builders-casa'
 
 /** Dados que cada desenhista recebe. Medidas em metros; origem no centro da base; frente em +Z. */
 export interface BuildProps {
@@ -549,4 +550,5 @@ export const BUILDERS: Record<string, (p: BuildProps) => ReactElement> = {
   lounger: Lounger,
   umbrella: Umbrella,
   box: BoxGeneric,
+  ...CASA_BUILDERS,
 }
