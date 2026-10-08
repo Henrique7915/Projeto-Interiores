@@ -2,6 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { analyzeScene, applyOps, decodeShare, describeScene, encodeShare, newScene, parseScene, polygonArea, TEMPLATES, validateSchema, wallsOfRoom } from './index'
 import { wallRoomIds } from './model'
 
+/** Avisos de paredes sobrepostas do validador oficial da Arquitetura (schema/validar.mjs). */
+async function overlapWarnings(scene: unknown): Promise<string[]> {
+  // @ts-expect-error módulo .mjs da Arquitetura, sem tipos no app
+  const { validateScene } = await import('../../../schema/validar.mjs')
+  return (validateScene(scene).warnings as string[]).filter((w) => w.includes('se sobrepõem'))
+}
+
 describe('ops', () => {
   it('cria ambiente com 4 paredes (interior à direita) e área correta', () => {
     const r = applyOps(newScene(), [{ op: 'addRoom', id: 'sala', name: 'Sala', x: 0, z: 0, width: 5, depth: 4, wallMaterial: 'paint/sage' }])
@@ -102,7 +109,7 @@ describe('paredes compartilhadas entre ambientes vizinhos', () => {
   }
   const base = () => applyOps(newScene(), [{ op: 'addRoom', id: 'sala', name: 'Sala', x: 0, z: 0, width: 4, depth: 5 }]).scene
 
-  it('quarto colado na sala reaproveita a parede (sem parede duplicada)', () => {
+  it('quarto colado na sala reaproveita a parede (sem parede duplicada)', async () => {
     const s = applyOps(base(), [{ op: 'addRoom', id: 'quarto', name: 'Quarto', x: 4, z: 0, width: 3, depth: 5, wallMaterial: 'paint/sage' }]).scene
     expect(s.levels[0].walls).toHaveLength(7)
     expect(dup(s)).toEqual([])
@@ -112,6 +119,7 @@ describe('paredes compartilhadas entre ambientes vizinhos', () => {
     expect(wallsOfRoom(s.levels[0], 'sala')).toHaveLength(4)
     expect(wallsOfRoom(s.levels[0], 'quarto')).toHaveLength(4)
     expect(validateSchema(s).errors).toEqual([])
+    expect(await overlapWarnings(s)).toEqual([])
   })
   it('acabamento de cada lado da parede compartilhada é o do ambiente daquele lado', () => {
     let s = applyOps(newScene(), [{ op: 'addRoom', id: 'sala', name: 'Sala', x: 0, z: 0, width: 4, depth: 5, wallMaterial: 'paint/white-matte' }]).scene
@@ -130,7 +138,7 @@ describe('paredes compartilhadas entre ambientes vizinhos', () => {
     expect(ops[0].wallId).toBe(ops[1].wallId)
     expect(ops[0].offset).toBeCloseTo(2.5, 3)
   })
-  it('parede parcialmente compartilhada é dividida no trecho comum e a porta acha o pedaço certo', () => {
+  it('parede parcialmente compartilhada é dividida no trecho comum e a porta acha o pedaço certo', async () => {
     // sala 0..5 em z; quarto encosta só em z 0..3 -> leste da sala = [0..3 compartilhado] + [3..5 só da sala]
     let s = applyOps(base(), [{ op: 'addRoom', id: 'quarto', name: 'Quarto', x: 4, z: 0, width: 3, depth: 3 }]).scene
     expect(dup(s)).toEqual([])
@@ -144,6 +152,7 @@ describe('paredes compartilhadas entre ambientes vizinhos', () => {
     const [p1, p2] = s.levels[0].openings!
     expect(wallRoomIds(s.levels[0].walls!.find((w) => w.id === p1.wallId)!)).toHaveLength(2)
     expect(wallRoomIds(s.levels[0].walls!.find((w) => w.id === p2.wallId)!)).toEqual(['sala'])
+    expect(await overlapWarnings(s)).toEqual([])
     expect(validateSchema(s).errors).toEqual([])
   })
   it('aberturas já existentes ficam com o pedaço certo ao dividir', () => {
@@ -155,12 +164,13 @@ describe('paredes compartilhadas entre ambientes vizinhos', () => {
     expect(w.start[1]).toBeCloseTo(3)
     expect(j.offset).toBeCloseTo(1, 3)
   })
-  it('mover o ambiente para colar em outro compartilha; afastar de volta separa', () => {
+  it('mover o ambiente para colar em outro compartilha; afastar de volta separa', async () => {
     let s = applyOps(base(), [{ op: 'addRoom', id: 'quarto', name: 'Quarto', x: 10, z: 0, width: 3, depth: 5 }]).scene
     expect(s.levels[0].walls).toHaveLength(8)
     s = applyOps(s, [{ op: 'moveRoom', id: 'quarto', dx: -6, dz: 0 }]).scene
     expect(s.levels[0].walls).toHaveLength(7)
     expect(dup(s)).toEqual([])
+    expect(await overlapWarnings(s)).toEqual([])
     s = applyOps(s, [{ op: 'moveRoom', id: 'quarto', dx: 6, dz: 0 }]).scene
     expect(s.levels[0].walls).toHaveLength(8)
     expect(wallsOfRoom(s.levels[0], 'sala')).toHaveLength(4)
