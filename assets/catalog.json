@@ -2424,7 +2424,8 @@
         "escada",
         "interior"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/stairs-straight.png"
     },
     {
       "id": "stairs/l-shaped",
@@ -2470,7 +2471,8 @@
         "escada",
         "interior"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/stairs-l-shaped.png"
     },
     {
       "id": "other/box",
