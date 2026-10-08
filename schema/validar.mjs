@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Valida cenas do Design3D: JSON Schema + regras de consistência que o schema não expressa.
 // Uso: node validar.mjs <cena.json> [...]      (sai com código 1 se houver erro)
-// Também exporta validateScene(scene) para o app e o servidor MCP reutilizarem.
-import { readFileSync } from "node:fs";
+// Se ../assets/catalog.json existir, ele é validado e as cenas são conferidas contra ele.
+// Também exporta validateScene(scene, { catalog }) e validateCatalog(catalog) para o app e o servidor MCP.
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
@@ -14,9 +15,33 @@ const catalogSchema = JSON.parse(readFileSync(join(here, "catalog.schema.json"),
 
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 addFormats(ajv);
-ajv.addSchema(sceneSchema, "scene.schema.json");
-ajv.addSchema(catalogSchema, "catalog.schema.json");
-const validateSchema = ajv.getSchema("scene.schema.json");
+ajv.addSchema(sceneSchema);
+ajv.addSchema(catalogSchema);
+const validateSchema = ajv.getSchema(sceneSchema.$id);
+const validateCatalogSchema = ajv.getSchema(catalogSchema.$id);
+
+const schemaErrors = (fn) =>
+  fn.errors.map((e) => {
+    const extra = e.params?.additionalProperty ?? e.params?.allowedValues?.join(", ");
+    return `schema ${e.instancePath || "/"}: ${e.message}${extra ? ` (${extra})` : ""}`;
+  });
+
+/** Valida um catálogo (assets/catalog.json): schema + ids únicos + materiais de slots existentes. */
+export function validateCatalog(catalog) {
+  if (!validateCatalogSchema(catalog)) return { valid: false, errors: schemaErrors(validateCatalogSchema), warnings: [] };
+  const errors = [];
+  const seen = new Set();
+  const mats = catalog.materials ?? {};
+  for (const [i, item] of catalog.items.entries()) {
+    if (seen.has(item.id)) errors.push(`/items/${i}: id '${item.id}' repetido`);
+    seen.add(item.id);
+    for (const [slot, def] of Object.entries(item.materialSlots ?? {}))
+      if (!mats[def.default]) errors.push(`/items/${i}: slot '${slot}' de '${item.id}' usa material inexistente '${def.default}'`);
+  }
+  for (const [id, m] of Object.entries(mats))
+    if (m.base && !mats[m.base]) errors.push(`/materials/${id}: base inexistente '${m.base}'`);
+  return { valid: errors.length === 0, errors, warnings: [] };
+}
 
 const EPS = 1e-6;
 const dist = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
@@ -40,16 +65,17 @@ function selfIntersects(poly) {
   return false;
 }
 
-/** @returns {{ valid: boolean, errors: string[], warnings: string[] }} */
-export function validateScene(scene) {
+/**
+ * @param {object} scene
+ * @param {{ catalog?: object }} [opts] com catálogo, avisa sobre catalogId e materiais desconhecidos
+ * @returns {{ valid: boolean, errors: string[], warnings: string[] }}
+ */
+export function validateScene(scene, opts = {}) {
   const errors = [];
   const warnings = [];
 
   if (!validateSchema(scene)) {
-    for (const e of validateSchema.errors) {
-      const extra = e.params?.additionalProperty ?? e.params?.allowedValues?.join(", ");
-      errors.push(`schema ${e.instancePath || "/"}: ${e.message}${extra ? ` (${extra})` : ""}`);
-    }
+    errors.push(...schemaErrors(validateSchema));
     return { valid: false, errors, warnings };
   }
 
@@ -131,7 +157,33 @@ export function validateScene(scene) {
     });
   }
 
+  if (opts.catalog) checkAgainstCatalog(scene, opts.catalog, warnings);
   return { valid: errors.length === 0, errors, warnings };
+}
+
+// Itens e materiais desconhecidos viram aviso: o motor desenha um substituto, mas provavelmente é erro de digitação.
+function checkAgainstCatalog(scene, catalog, warnings) {
+  const items = new Set(catalog.items.map((i) => i.id));
+  const mats = new Set([...Object.keys(catalog.materials ?? {}), ...Object.keys(scene.materials ?? {})]);
+  const mat = (ref, where) => {
+    if (ref && !mats.has(ref)) warnings.push(`${where}: material '${ref}' não existe no catálogo nem na cena`);
+  };
+  const slots = (m, where) => Object.values(m ?? {}).forEach((r) => mat(r, where));
+  const d = scene.defaults ?? {};
+  [d.wallMaterial, d.floorMaterial, d.ceilingMaterial].forEach((r) => mat(r, "/defaults"));
+  Object.entries(scene.materials ?? {}).forEach(([id, m]) => mat(m.base, `/materials/${id}`));
+  const containers = [...scene.levels.map((l, i) => [l, `/levels/${i}`]), ...(scene.site ? [[scene.site, "/site"]] : [])];
+  for (const [c, path] of containers) {
+    (c.walls ?? []).forEach((w) => ["left", "right", "top"].forEach((k) => mat(w.finish?.[k], `${path} parede '${w.id}'`)));
+    (c.openings ?? []).forEach((o) => slots(o.materials, `${path} abertura '${o.id}'`));
+    (c.rooms ?? []).forEach((r) => (mat(r.floor?.material, `${path} cômodo '${r.id}'`), mat(r.ceiling?.material, `${path} cômodo '${r.id}'`)));
+    (c.zones ?? []).forEach((z) => (mat(z.material, `${path} zona '${z.id}'`), mat(z.edgeMaterial, `${path} zona '${z.id}'`)));
+    mat(c.groundMaterial, path);
+    (c.objects ?? []).forEach((o) => {
+      if (!items.has(o.catalogId)) warnings.push(`${path} objeto '${o.id}': item '${o.catalogId}' não existe no catálogo`);
+      slots(o.materials, `${path} objeto '${o.id}'`);
+    });
+  }
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
@@ -141,6 +193,16 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     process.exit(2);
   }
   let ok = true;
+  const catalogPath = process.env.DESIGN3D_CATALOG ?? join(here, "..", "assets", "catalog.json");
+  let catalog;
+  if (existsSync(catalogPath)) {
+    catalog = JSON.parse(readFileSync(catalogPath, "utf8"));
+    const r = validateCatalog(catalog);
+    console.log(`${r.valid ? "✓" : "✗"} ${catalogPath} (catálogo)`);
+    for (const e of r.errors) console.log(`   erro: ${e}`);
+    ok &&= r.valid;
+    if (!r.valid) catalog = undefined;
+  }
   for (const f of files) {
     let scene;
     try {
@@ -150,7 +212,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
       ok = false;
       continue;
     }
-    const r = validateScene(scene);
+    const r = validateScene(scene, { catalog });
     console.log(`${r.valid ? "✓" : "✗"} ${f}`);
     for (const e of r.errors) console.log(`   erro: ${e}`);
     for (const w of r.warnings) console.log(`   aviso: ${w}`);
