@@ -2,42 +2,89 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://design3d.local/schema/v0.1/scene.schema.json",
   "title": "Design3D Scene",
-  "description": "Formato da cena do Design3D (v0.1.0). Unidades em metros, ângulos em graus, Y para cima. Veja schema/README.md para as convenções.",
+  "description": "Formato da cena do Design3D (v0.1 e v0.2). Unidades em metros, ângulos em graus, Y para cima. Veja schema/README.md para as convenções.",
   "type": "object",
-  "required": ["format", "version", "id", "name", "units", "levels"],
+  "required": [
+    "format",
+    "version",
+    "id",
+    "name",
+    "units",
+    "levels"
+  ],
   "additionalProperties": false,
   "properties": {
-    "$schema": { "type": "string" },
-    "format": { "const": "design3d.scene" },
-    "version": { "type": "string", "pattern": "^0\\.1\\.\\d+$", "description": "Versão do formato (semver). Este schema aceita 0.1.x." },
-    "id": { "$ref": "#/$defs/Id" },
-    "name": { "type": "string", "minLength": 1, "maxLength": 200 },
-    "units": { "const": "m", "description": "Sempre metros. A interface pode exibir cm ou pés." },
-    "createdAt": { "type": "string", "format": "date-time" },
-    "updatedAt": { "type": "string", "format": "date-time" },
-    "meta": { "$ref": "#/$defs/Meta" },
-    "defaults": { "$ref": "#/$defs/Defaults" },
-    "environment": { "$ref": "#/$defs/Environment" },
+    "$schema": {
+      "type": "string"
+    },
+    "format": {
+      "const": "design3d.scene"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^0\\.[12]\\.\\d+$",
+      "description": "Versão do formato (semver). Aceita 0.1.x e 0.2.x; a 0.2 só acrescenta campos opcionais."
+    },
+    "id": {
+      "$ref": "#/$defs/Id"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "units": {
+      "const": "m",
+      "description": "Sempre metros. A interface pode exibir cm ou pés."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "meta": {
+      "$ref": "#/$defs/Meta"
+    },
+    "defaults": {
+      "$ref": "#/$defs/Defaults"
+    },
+    "environment": {
+      "$ref": "#/$defs/Environment"
+    },
     "materials": {
       "type": "object",
       "description": "Materiais próprios da cena. Uma referência de material procura aqui primeiro e depois na biblioteca (assets/materials).",
-      "propertyNames": { "$ref": "#/$defs/MaterialId" },
-      "additionalProperties": { "$ref": "#/$defs/Material" }
+      "propertyNames": {
+        "$ref": "#/$defs/MaterialId"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/Material"
+      }
     },
     "levels": {
       "type": "array",
       "description": "Andares. Pode ser vazio numa cena só externa.",
-      "items": { "$ref": "#/$defs/Level" }
+      "items": {
+        "$ref": "#/$defs/Level"
+      }
     },
-    "site": { "$ref": "#/$defs/Site" },
+    "site": {
+      "$ref": "#/$defs/Site"
+    },
     "views": {
       "type": "array",
       "description": "Câmeras salvas.",
-      "items": { "$ref": "#/$defs/View" }
+      "items": {
+        "$ref": "#/$defs/View"
+      }
     },
-    "extensions": { "$ref": "#/$defs/Extensions" }
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    }
   },
-
   "$defs": {
     "Id": {
       "type": "string",
@@ -49,335 +96,1162 @@
       "pattern": "^[a-z0-9][a-z0-9_-]*(/[a-z0-9][a-z0-9_-]*)*$",
       "description": "Id de material: 'categoria/nome' para a biblioteca (ex.: 'wood/smoked-oak') ou um id próprio da cena."
     },
-    "MaterialRef": { "$ref": "#/$defs/MaterialId" },
-    "Length": { "type": "number", "minimum": 0, "maximum": 10000, "description": "Comprimento em metros." },
-    "PositiveLength": { "type": "number", "exclusiveMinimum": 0, "maximum": 10000 },
-    "Coord": { "type": "number", "minimum": -100000, "maximum": 100000 },
+    "MaterialRef": {
+      "$ref": "#/$defs/MaterialId"
+    },
+    "Length": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10000,
+      "description": "Comprimento em metros."
+    },
+    "PositiveLength": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 10000
+    },
+    "Coord": {
+      "type": "number",
+      "minimum": -100000,
+      "maximum": 100000
+    },
     "Point2": {
       "type": "array",
       "description": "Ponto na planta [x, z] em metros.",
-      "prefixItems": [{ "$ref": "#/$defs/Coord" }, { "$ref": "#/$defs/Coord" }],
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/Coord"
+        },
+        {
+          "$ref": "#/$defs/Coord"
+        }
+      ],
       "items": false,
       "minItems": 2
     },
     "Point3": {
       "type": "array",
       "description": "Ponto [x, y, z] em metros; y é a altura.",
-      "prefixItems": [{ "$ref": "#/$defs/Coord" }, { "$ref": "#/$defs/Coord" }, { "$ref": "#/$defs/Coord" }],
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/Coord"
+        },
+        {
+          "$ref": "#/$defs/Coord"
+        },
+        {
+          "$ref": "#/$defs/Coord"
+        }
+      ],
       "items": false,
       "minItems": 3
     },
     "Polygon": {
       "type": "array",
       "description": "Polígono simples na planta, sem repetir o primeiro ponto no fim.",
-      "items": { "$ref": "#/$defs/Point2" },
+      "items": {
+        "$ref": "#/$defs/Point2"
+      },
       "minItems": 3
     },
-    "Angle": { "type": "number", "minimum": -360, "maximum": 360, "description": "Graus. Rotação em Y é anti-horária vista de cima (convenção do Three.js)." },
-    "Color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "Angle": {
+      "type": "number",
+      "minimum": -360,
+      "maximum": 360,
+      "description": "Graus. Rotação em Y é anti-horária vista de cima (convenção do Three.js)."
+    },
+    "Color": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$"
+    },
     "Extensions": {
       "type": "object",
       "description": "Dados livres de extensões/plugins. Chaves com prefixo do dono (ex.: 'ai.notes').",
       "additionalProperties": true
     },
-
     "Meta": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "description": { "type": "string", "maxLength": 5000 },
-        "author": { "type": "string", "maxLength": 200 },
-        "tags": { "type": "array", "items": { "type": "string", "maxLength": 50 }, "maxItems": 50 },
-        "thumbnail": { "type": "string", "description": "URL ou data URI de miniatura." },
-        "locale": { "type": "string", "examples": ["pt-BR"] }
+        "description": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "author": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "maxItems": 50
+        },
+        "thumbnail": {
+          "type": "string",
+          "description": "URL ou data URI de miniatura."
+        },
+        "locale": {
+          "type": "string",
+          "examples": [
+            "pt-BR"
+          ]
+        }
       }
     },
-
     "Defaults": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "wallHeight": { "$ref": "#/$defs/PositiveLength", "default": 2.7 },
-        "wallThickness": { "$ref": "#/$defs/PositiveLength", "default": 0.15 },
-        "wallMaterial": { "$ref": "#/$defs/MaterialRef" },
-        "floorMaterial": { "$ref": "#/$defs/MaterialRef" },
-        "ceilingMaterial": { "$ref": "#/$defs/MaterialRef" },
-        "snap": { "$ref": "#/$defs/PositiveLength", "default": 0.05, "description": "Grade de encaixe do editor." }
+        "wallHeight": {
+          "$ref": "#/$defs/PositiveLength",
+          "default": 2.7
+        },
+        "wallThickness": {
+          "$ref": "#/$defs/PositiveLength",
+          "default": 0.15
+        },
+        "wallMaterial": {
+          "$ref": "#/$defs/MaterialRef"
+        },
+        "floorMaterial": {
+          "$ref": "#/$defs/MaterialRef"
+        },
+        "ceilingMaterial": {
+          "$ref": "#/$defs/MaterialRef"
+        },
+        "snap": {
+          "$ref": "#/$defs/PositiveLength",
+          "default": 0.05,
+          "description": "Grade de encaixe do editor."
+        }
       }
     },
-
     "Environment": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "timeOfDay": { "type": "string", "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$", "description": "Hora local HH:MM usada para posicionar o sol." },
-        "date": { "type": "string", "format": "date" },
+        "timeOfDay": {
+          "type": "string",
+          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+          "description": "Hora local HH:MM usada para posicionar o sol."
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
         "location": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["lat", "lon"],
+          "required": [
+            "lat",
+            "lon"
+          ],
           "properties": {
-            "lat": { "type": "number", "minimum": -90, "maximum": 90 },
-            "lon": { "type": "number", "minimum": -180, "maximum": 180 },
-            "label": { "type": "string" }
+            "lat": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "lon": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            },
+            "label": {
+              "type": "string"
+            }
           }
         },
-        "northDeg": { "$ref": "#/$defs/Angle", "description": "Ângulo do norte em relação ao eixo -Z da cena. 0 = norte para -Z." },
-        "sky": { "enum": ["clear", "partly-cloudy", "overcast"], "default": "clear" },
-        "mood": { "type": "string", "description": "Preset de clima/iluminação (ex.: 'cozy', 'bright', 'moody'). Definidos pela frente de Gráficos." },
-        "interiorLights": { "enum": ["auto", "on", "off"], "default": "auto" },
-        "exposure": { "type": "number", "minimum": 0.1, "maximum": 10 }
+        "northDeg": {
+          "$ref": "#/$defs/Angle",
+          "description": "Ângulo do norte em relação ao eixo -Z da cena. 0 = norte para -Z."
+        },
+        "sky": {
+          "enum": [
+            "clear",
+            "partly-cloudy",
+            "overcast"
+          ],
+          "default": "clear"
+        },
+        "mood": {
+          "type": "string",
+          "description": "Preset de clima/iluminação (ex.: 'cozy', 'bright', 'moody'). Definidos pela frente de Gráficos."
+        },
+        "interiorLights": {
+          "enum": [
+            "auto",
+            "on",
+            "off"
+          ],
+          "default": "auto"
+        },
+        "exposure": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 10
+        }
       }
     },
-
     "Texture": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["set"],
+      "required": [
+        "set"
+      ],
       "properties": {
-        "set": { "type": "string", "description": "Id do conjunto de texturas PBR em assets/textures." },
+        "set": {
+          "type": "string",
+          "description": "Id do conjunto de texturas PBR em assets/textures."
+        },
         "tileSize": {
           "type": "array",
           "description": "Tamanho real de uma repetição da textura [u, v] em metros.",
-          "prefixItems": [{ "$ref": "#/$defs/PositiveLength" }, { "$ref": "#/$defs/PositiveLength" }],
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            {
+              "$ref": "#/$defs/PositiveLength"
+            }
+          ],
           "items": false,
           "minItems": 2
         },
-        "rotationDeg": { "$ref": "#/$defs/Angle" }
+        "rotationDeg": {
+          "$ref": "#/$defs/Angle"
+        }
       }
     },
-
     "Material": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "category", "color"],
+      "required": [
+        "name",
+        "category",
+        "color"
+      ],
       "properties": {
-        "name": { "type": "string", "minLength": 1 },
-        "category": {
-          "enum": ["wood", "stone", "ceramic", "fabric", "leather", "paint", "wallpaper", "metal", "glass", "plastic", "concrete", "plant", "ground", "water", "light", "other"]
+        "name": {
+          "type": "string",
+          "minLength": 1
         },
-        "color": { "$ref": "#/$defs/Color" },
-        "roughness": { "type": "number", "minimum": 0, "maximum": 1 },
-        "metalness": { "type": "number", "minimum": 0, "maximum": 1 },
-        "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
-        "emissive": { "$ref": "#/$defs/Color" },
-        "emissiveIntensity": { "type": "number", "minimum": 0 },
-        "texture": { "$ref": "#/$defs/Texture" },
-        "base": { "$ref": "#/$defs/MaterialRef", "description": "Material da biblioteca usado como base; os campos daqui sobrescrevem." }
+        "category": {
+          "enum": [
+            "wood",
+            "stone",
+            "ceramic",
+            "fabric",
+            "leather",
+            "paint",
+            "wallpaper",
+            "metal",
+            "glass",
+            "plastic",
+            "concrete",
+            "plant",
+            "ground",
+            "water",
+            "light",
+            "other"
+          ]
+        },
+        "color": {
+          "$ref": "#/$defs/Color"
+        },
+        "roughness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "metalness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "emissive": {
+          "$ref": "#/$defs/Color"
+        },
+        "emissiveIntensity": {
+          "type": "number",
+          "minimum": 0
+        },
+        "texture": {
+          "$ref": "#/$defs/Texture"
+        },
+        "base": {
+          "$ref": "#/$defs/MaterialRef",
+          "description": "Material da biblioteca usado como base; os campos daqui sobrescrevem."
+        }
       }
     },
-
     "Level": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "name", "elevation", "height"],
+      "required": [
+        "id",
+        "name",
+        "elevation",
+        "height"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/Id" },
-        "name": { "type": "string" },
-        "elevation": { "$ref": "#/$defs/Coord", "description": "Altura do piso deste andar acima do terreno (y)." },
-        "height": { "$ref": "#/$defs/PositiveLength", "description": "Pé-direito padrão do andar." },
-        "slabThickness": { "$ref": "#/$defs/Length", "default": 0.12 },
-        "walls": { "type": "array", "items": { "$ref": "#/$defs/Wall" } },
-        "openings": { "type": "array", "items": { "$ref": "#/$defs/Opening" } },
-        "rooms": { "type": "array", "items": { "$ref": "#/$defs/Room" } },
-        "objects": { "type": "array", "items": { "$ref": "#/$defs/SceneObject" } },
-        "hidden": { "type": "boolean" },
-        "extensions": { "$ref": "#/$defs/Extensions" }
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "elevation": {
+          "$ref": "#/$defs/Coord",
+          "description": "Altura do piso deste andar acima do terreno (y)."
+        },
+        "height": {
+          "$ref": "#/$defs/PositiveLength",
+          "description": "Pé-direito padrão do andar."
+        },
+        "slabThickness": {
+          "$ref": "#/$defs/Length",
+          "default": 0.12
+        },
+        "walls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Wall"
+          }
+        },
+        "openings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Opening"
+          }
+        },
+        "rooms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Room"
+          }
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SceneObject"
+          }
+        },
+        "hidden": {
+          "type": "boolean"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "roofs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Roof"
+          },
+          "description": "v0.2: telhados apoiados neste andar."
+        },
+        "slabOpenings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SlabOpening"
+          },
+          "description": "v0.2: vãos no piso deste andar (escada, mezanino, poço)."
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Group"
+          },
+          "description": "v0.2: grupos de objetos que se movem juntos."
+        },
+        "annotations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Annotation"
+          },
+          "description": "v0.2: cotas e textos desenhados na planta."
+        }
       }
     },
-
     "WallFinish": {
       "type": "object",
       "additionalProperties": false,
       "description": "Acabamentos. 'left' e 'right' são os lados à esquerda e à direita de quem anda de start para end, visto de cima.",
       "properties": {
-        "left": { "$ref": "#/$defs/MaterialRef" },
-        "right": { "$ref": "#/$defs/MaterialRef" },
-        "top": { "$ref": "#/$defs/MaterialRef" },
+        "left": {
+          "$ref": "#/$defs/MaterialRef"
+        },
+        "right": {
+          "$ref": "#/$defs/MaterialRef"
+        },
+        "top": {
+          "$ref": "#/$defs/MaterialRef"
+        },
         "baseboard": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "height": { "$ref": "#/$defs/PositiveLength" },
-            "material": { "$ref": "#/$defs/MaterialRef" },
-            "sides": { "enum": ["left", "right", "both"] }
+            "height": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "material": {
+              "$ref": "#/$defs/MaterialRef"
+            },
+            "sides": {
+              "enum": [
+                "left",
+                "right",
+                "both"
+              ]
+            }
           }
         }
       }
     },
-
     "Wall": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "start", "end"],
+      "required": [
+        "id",
+        "start",
+        "end"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/Id" },
-        "name": { "type": "string" },
-        "kind": { "enum": ["solid", "half", "glass", "railing", "fence"], "default": "solid" },
-        "start": { "$ref": "#/$defs/Point2" },
-        "end": { "$ref": "#/$defs/Point2" },
-        "thickness": { "$ref": "#/$defs/PositiveLength", "description": "Centrada na linha start-end. Padrão: defaults.wallThickness." },
-        "height": { "$ref": "#/$defs/PositiveLength", "description": "Altura no início. Padrão: altura do andar." },
-        "heightEnd": { "$ref": "#/$defs/PositiveLength", "description": "Altura no fim, para paredes inclinadas. Padrão: igual a height." },
-        "finish": { "$ref": "#/$defs/WallFinish" },
-        "extensions": { "$ref": "#/$defs/Extensions" }
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "solid",
+            "half",
+            "glass",
+            "railing",
+            "fence"
+          ],
+          "default": "solid"
+        },
+        "start": {
+          "$ref": "#/$defs/Point2"
+        },
+        "end": {
+          "$ref": "#/$defs/Point2"
+        },
+        "thickness": {
+          "$ref": "#/$defs/PositiveLength",
+          "description": "Centrada na linha start-end. Padrão: defaults.wallThickness."
+        },
+        "height": {
+          "$ref": "#/$defs/PositiveLength",
+          "description": "Altura no início. Padrão: altura do andar."
+        },
+        "heightEnd": {
+          "$ref": "#/$defs/PositiveLength",
+          "description": "Altura no fim, para paredes inclinadas. Padrão: igual a height."
+        },
+        "finish": {
+          "$ref": "#/$defs/WallFinish"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        }
       }
     },
-
     "Opening": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "wallId", "kind", "offset", "width", "height"],
+      "required": [
+        "id",
+        "wallId",
+        "kind",
+        "offset",
+        "width",
+        "height"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/Id" },
-        "wallId": { "$ref": "#/$defs/Id" },
-        "kind": { "enum": ["door", "double-door", "sliding-door", "garage-door", "window", "sliding-window", "fixed-window", "passage"] },
-        "offset": { "$ref": "#/$defs/Length", "description": "Distância ao longo da parede, do start até o CENTRO da abertura." },
-        "width": { "$ref": "#/$defs/PositiveLength" },
-        "height": { "$ref": "#/$defs/PositiveLength" },
-        "sill": { "$ref": "#/$defs/Length", "default": 0, "description": "Altura do peitoril (0 para portas)." },
-        "hinge": { "enum": ["start", "end"], "description": "Lado da dobradiça, para portas de abrir." },
-        "opensTo": { "enum": ["left", "right"], "description": "Lado da parede para onde a folha abre." },
-        "catalogId": { "type": "string", "description": "Modelo de esquadria do catálogo (opcional)." },
-        "materials": { "$ref": "#/$defs/MaterialSlots" },
-        "extensions": { "$ref": "#/$defs/Extensions" }
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "wallId": {
+          "$ref": "#/$defs/Id"
+        },
+        "kind": {
+          "enum": [
+            "door",
+            "double-door",
+            "sliding-door",
+            "garage-door",
+            "window",
+            "sliding-window",
+            "fixed-window",
+            "passage"
+          ]
+        },
+        "offset": {
+          "$ref": "#/$defs/Length",
+          "description": "Distância ao longo da parede, do start até o CENTRO da abertura."
+        },
+        "width": {
+          "$ref": "#/$defs/PositiveLength"
+        },
+        "height": {
+          "$ref": "#/$defs/PositiveLength"
+        },
+        "sill": {
+          "$ref": "#/$defs/Length",
+          "default": 0,
+          "description": "Altura do peitoril (0 para portas)."
+        },
+        "hinge": {
+          "enum": [
+            "start",
+            "end"
+          ],
+          "description": "Lado da dobradiça, para portas de abrir."
+        },
+        "opensTo": {
+          "enum": [
+            "left",
+            "right"
+          ],
+          "description": "Lado da parede para onde a folha abre."
+        },
+        "catalogId": {
+          "type": "string",
+          "description": "Modelo de esquadria do catálogo (opcional)."
+        },
+        "materials": {
+          "$ref": "#/$defs/MaterialSlots"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "treatment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "description": "v0.2: cortina ou persiana na abertura.",
+          "properties": {
+            "kind": {
+              "enum": [
+                "curtain",
+                "sheer",
+                "blind",
+                "roller",
+                "none"
+              ]
+            },
+            "material": {
+              "$ref": "#/$defs/MaterialRef"
+            },
+            "side": {
+              "enum": [
+                "left",
+                "right"
+              ],
+              "description": "Lado da parede onde fica. Padrão: o lado do cômodo."
+            },
+            "open": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "0 = fechada, 1 = aberta."
+            }
+          }
+        }
       }
     },
-
     "Room": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "name", "polygon"],
+      "required": [
+        "id",
+        "name",
+        "polygon"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/Id" },
-        "name": { "type": "string" },
-        "type": {
-          "enum": ["living", "dining", "kitchen", "bedroom", "bathroom", "office", "laundry", "hall", "garage", "balcony", "storage", "studio", "other"]
+        "id": {
+          "$ref": "#/$defs/Id"
         },
-        "polygon": { "$ref": "#/$defs/Polygon" },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "living",
+            "dining",
+            "kitchen",
+            "bedroom",
+            "bathroom",
+            "office",
+            "laundry",
+            "hall",
+            "garage",
+            "balcony",
+            "storage",
+            "studio",
+            "other"
+          ]
+        },
+        "polygon": {
+          "$ref": "#/$defs/Polygon"
+        },
         "floor": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "material": { "$ref": "#/$defs/MaterialRef" },
-            "elevation": { "$ref": "#/$defs/Coord", "description": "Desnível em relação ao piso do andar (ex.: -0.02 no box)." }
+            "material": {
+              "$ref": "#/$defs/MaterialRef"
+            },
+            "elevation": {
+              "$ref": "#/$defs/Coord",
+              "description": "Desnível em relação ao piso do andar (ex.: -0.02 no box)."
+            }
           }
         },
         "ceiling": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "height": { "$ref": "#/$defs/PositiveLength", "description": "Altura do forro. Padrão: altura do andar." },
-            "material": { "$ref": "#/$defs/MaterialRef" },
-            "visible": { "type": "boolean", "default": true }
+            "height": {
+              "$ref": "#/$defs/PositiveLength",
+              "description": "Altura do forro. Padrão: altura do andar."
+            },
+            "material": {
+              "$ref": "#/$defs/MaterialRef"
+            },
+            "visible": {
+              "type": "boolean",
+              "default": true
+            },
+            "dropHeight": {
+              "$ref": "#/$defs/Length",
+              "description": "v0.2: altura do rebaixo (sanca/forro) abaixo de ceiling.height."
+            }
           }
         },
-        "extensions": { "$ref": "#/$defs/Extensions" }
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        }
       }
     },
-
     "MaterialSlots": {
       "type": "object",
       "description": "Material por slot do modelo (ex.: { 'upholstery': 'fabric/navy-velvet', 'legs': 'wood/walnut' }). Os slots vêm do catálogo.",
-      "propertyNames": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
-      "additionalProperties": { "$ref": "#/$defs/MaterialRef" }
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_-]*$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/MaterialRef"
+      }
     },
-
     "Light": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type"],
+      "required": [
+        "type"
+      ],
       "properties": {
-        "type": { "enum": ["point", "spot", "area"] },
-        "intensity": { "type": "number", "minimum": 0, "description": "Lúmens aproximados." },
-        "temperatureK": { "type": "number", "minimum": 1000, "maximum": 12000, "default": 2700 },
-        "color": { "$ref": "#/$defs/Color" },
-        "on": { "type": "boolean", "default": true },
-        "castShadow": { "type": "boolean" }
+        "type": {
+          "enum": [
+            "point",
+            "spot",
+            "area"
+          ]
+        },
+        "intensity": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Lúmens aproximados."
+        },
+        "temperatureK": {
+          "type": "number",
+          "minimum": 1000,
+          "maximum": 12000,
+          "default": 2700
+        },
+        "color": {
+          "$ref": "#/$defs/Color"
+        },
+        "on": {
+          "type": "boolean",
+          "default": true
+        },
+        "castShadow": {
+          "type": "boolean"
+        }
       }
     },
-
     "Dimensions": {
       "type": "object",
       "additionalProperties": false,
       "description": "Medidas reais do objeto (caixa envolvente) em metros: largura (x local), altura (y), profundidade (z local).",
-      "required": ["width", "height", "depth"],
+      "required": [
+        "width",
+        "height",
+        "depth"
+      ],
       "properties": {
-        "width": { "$ref": "#/$defs/PositiveLength" },
-        "height": { "$ref": "#/$defs/PositiveLength" },
-        "depth": { "$ref": "#/$defs/PositiveLength" }
+        "width": {
+          "$ref": "#/$defs/PositiveLength"
+        },
+        "height": {
+          "$ref": "#/$defs/PositiveLength"
+        },
+        "depth": {
+          "$ref": "#/$defs/PositiveLength"
+        }
       }
     },
-
     "SceneObject": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "catalogId", "position"],
+      "required": [
+        "id",
+        "catalogId",
+        "position"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/Id" },
-        "name": { "type": "string" },
-        "catalogId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*(/[a-z0-9][a-z0-9_-]*)*$", "description": "Item do catálogo (assets/catalog.json), ex.: 'sofa/modern-3-seat'." },
-        "position": { "$ref": "#/$defs/Point3", "description": "Centro da base do objeto, relativo ao piso do andar (ou ao terreno, em site.objects)." },
-        "rotationDeg": { "$ref": "#/$defs/Angle", "default": 0, "description": "Rotação em Y. Modelos têm a frente voltada para +Z quando rotationDeg = 0." },
-        "dimensions": { "$ref": "#/$defs/Dimensions", "description": "Se omitido, usa as medidas padrão do catálogo." },
-        "mirror": { "type": "boolean", "description": "Espelha no eixo X local (ex.: sofá em L para o outro lado)." },
-        "materials": { "$ref": "#/$defs/MaterialSlots" },
-        "mount": { "enum": ["floor", "wall", "ceiling", "surface"], "description": "Como o objeto se apoia. Padrão: o do catálogo." },
-        "wallId": { "$ref": "#/$defs/Id", "description": "Parede onde está fixado, quando mount = wall." },
-        "parentId": { "$ref": "#/$defs/Id", "description": "Objeto sobre o qual está apoiado (ex.: abajur no criado-mudo)." },
-        "roomId": { "$ref": "#/$defs/Id", "description": "Cômodo ao qual pertence (informativo; pode ser recalculado)." },
-        "light": { "$ref": "#/$defs/Light" },
-        "locked": { "type": "boolean" },
-        "hidden": { "type": "boolean" },
-        "tags": { "type": "array", "items": { "type": "string" } },
-        "extensions": { "$ref": "#/$defs/Extensions" }
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "catalogId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*(/[a-z0-9][a-z0-9_-]*)*$",
+          "description": "Item do catálogo (assets/catalog.json), ex.: 'sofa/modern-3-seat'."
+        },
+        "position": {
+          "$ref": "#/$defs/Point3",
+          "description": "Centro da base do objeto, relativo ao piso do andar (ou ao terreno, em site.objects)."
+        },
+        "rotationDeg": {
+          "$ref": "#/$defs/Angle",
+          "default": 0,
+          "description": "Rotação em Y. Modelos têm a frente voltada para +Z quando rotationDeg = 0."
+        },
+        "dimensions": {
+          "$ref": "#/$defs/Dimensions",
+          "description": "Se omitido, usa as medidas padrão do catálogo."
+        },
+        "mirror": {
+          "type": "boolean",
+          "description": "Espelha no eixo X local (ex.: sofá em L para o outro lado)."
+        },
+        "materials": {
+          "$ref": "#/$defs/MaterialSlots"
+        },
+        "mount": {
+          "enum": [
+            "floor",
+            "wall",
+            "ceiling",
+            "surface"
+          ],
+          "description": "Como o objeto se apoia. Padrão: o do catálogo."
+        },
+        "wallId": {
+          "$ref": "#/$defs/Id",
+          "description": "Parede onde está fixado, quando mount = wall."
+        },
+        "parentId": {
+          "$ref": "#/$defs/Id",
+          "description": "Objeto sobre o qual está apoiado (ex.: abajur no criado-mudo)."
+        },
+        "roomId": {
+          "$ref": "#/$defs/Id",
+          "description": "Cômodo ao qual pertence (informativo; pode ser recalculado)."
+        },
+        "light": {
+          "$ref": "#/$defs/Light"
+        },
+        "locked": {
+          "type": "boolean"
+        },
+        "hidden": {
+          "type": "boolean"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        }
       }
     },
-
     "GroundZone": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "kind", "polygon"],
+      "required": [
+        "id",
+        "kind",
+        "polygon"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/Id" },
-        "name": { "type": "string" },
-        "kind": { "enum": ["grass", "paving", "deck", "gravel", "soil", "water", "pool", "garden-bed", "sand", "other"] },
-        "polygon": { "$ref": "#/$defs/Polygon" },
-        "material": { "$ref": "#/$defs/MaterialRef" },
-        "elevation": { "$ref": "#/$defs/Coord", "default": 0, "description": "Altura da superfície em relação ao terreno." },
-        "depth": { "$ref": "#/$defs/Length", "description": "Profundidade, para piscinas e espelhos d'água." },
-        "edgeMaterial": { "$ref": "#/$defs/MaterialRef", "description": "Borda/bordadura." },
-        "extensions": { "$ref": "#/$defs/Extensions" }
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "grass",
+            "paving",
+            "deck",
+            "gravel",
+            "soil",
+            "water",
+            "pool",
+            "garden-bed",
+            "sand",
+            "other"
+          ]
+        },
+        "polygon": {
+          "$ref": "#/$defs/Polygon"
+        },
+        "material": {
+          "$ref": "#/$defs/MaterialRef"
+        },
+        "elevation": {
+          "$ref": "#/$defs/Coord",
+          "default": 0,
+          "description": "Altura da superfície em relação ao terreno."
+        },
+        "depth": {
+          "$ref": "#/$defs/Length",
+          "description": "Profundidade, para piscinas e espelhos d'água."
+        },
+        "edgeMaterial": {
+          "$ref": "#/$defs/MaterialRef",
+          "description": "Borda/bordadura."
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        }
       }
     },
-
     "Site": {
       "type": "object",
       "additionalProperties": false,
       "description": "Ambiente externo: terreno, zonas de piso, muros e objetos externos. Mesmo sistema de coordenadas dos andares.",
       "properties": {
-        "boundary": { "$ref": "#/$defs/Polygon", "description": "Limite do terreno." },
-        "groundMaterial": { "$ref": "#/$defs/MaterialRef" },
-        "zones": { "type": "array", "items": { "$ref": "#/$defs/GroundZone" } },
-        "walls": { "type": "array", "items": { "$ref": "#/$defs/Wall" }, "description": "Muros, cercas e guarda-corpos externos." },
-        "openings": { "type": "array", "items": { "$ref": "#/$defs/Opening" }, "description": "Portões em muros externos." },
-        "objects": { "type": "array", "items": { "$ref": "#/$defs/SceneObject" } },
-        "extensions": { "$ref": "#/$defs/Extensions" }
+        "boundary": {
+          "$ref": "#/$defs/Polygon",
+          "description": "Limite do terreno."
+        },
+        "groundMaterial": {
+          "$ref": "#/$defs/MaterialRef"
+        },
+        "zones": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GroundZone"
+          }
+        },
+        "walls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Wall"
+          },
+          "description": "Muros, cercas e guarda-corpos externos."
+        },
+        "openings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Opening"
+          },
+          "description": "Portões em muros externos."
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SceneObject"
+          }
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "terrain": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "points"
+          ],
+          "description": "v0.2: relevo do terreno por pontos cotados [x, z, altura]; o motor interpola. Sem isto o terreno é plano (y = 0).",
+          "properties": {
+            "points": {
+              "type": "array",
+              "minItems": 3,
+              "items": {
+                "$ref": "#/$defs/Point3"
+              }
+            },
+            "smoothing": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Group"
+          }
+        },
+        "annotations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Annotation"
+          }
+        }
       }
     },
-
     "View": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "name", "position", "target"],
+      "required": [
+        "id",
+        "name",
+        "position",
+        "target"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/Id" },
-        "name": { "type": "string" },
-        "mode": { "enum": ["orbit", "top", "walk"], "default": "orbit" },
-        "position": { "$ref": "#/$defs/Point3" },
-        "target": { "$ref": "#/$defs/Point3" },
-        "fovDeg": { "type": "number", "minimum": 10, "maximum": 120 }
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "orbit",
+            "top",
+            "walk"
+          ],
+          "default": "orbit"
+        },
+        "position": {
+          "$ref": "#/$defs/Point3"
+        },
+        "target": {
+          "$ref": "#/$defs/Point3"
+        },
+        "fovDeg": {
+          "type": "number",
+          "minimum": 10,
+          "maximum": 120
+        }
       }
+    },
+    "Roof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "polygon"
+      ],
+      "description": "Telhado sobre um polígono da planta. A altura da base é relativa ao piso do andar.",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "flat",
+            "shed",
+            "gable",
+            "hip"
+          ],
+          "description": "plano (laje), uma água, duas águas, quatro águas."
+        },
+        "polygon": {
+          "$ref": "#/$defs/Polygon"
+        },
+        "baseHeight": {
+          "$ref": "#/$defs/Length",
+          "description": "Altura do beiral acima do piso do andar. Padrão: altura do andar."
+        },
+        "pitchDeg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 75,
+          "description": "Inclinação das águas. Ignorado em 'flat'."
+        },
+        "ridgeDeg": {
+          "$ref": "#/$defs/Angle",
+          "description": "Direção da cumeeira (gable/hip) ou da descida (shed), em graus na planta: 0 = ao longo de +X, 90 = ao longo de -Z."
+        },
+        "overhang": {
+          "$ref": "#/$defs/Length",
+          "default": 0.4,
+          "description": "Beiral além do polígono."
+        },
+        "thickness": {
+          "$ref": "#/$defs/PositiveLength",
+          "default": 0.15
+        },
+        "material": {
+          "$ref": "#/$defs/MaterialRef"
+        },
+        "ceilingMaterial": {
+          "$ref": "#/$defs/MaterialRef",
+          "description": "Forro visto por baixo."
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        }
+      }
+    },
+    "SlabOpening": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "polygon"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "polygon": {
+          "$ref": "#/$defs/Polygon"
+        },
+        "railing": {
+          "type": "boolean",
+          "description": "Desenhar guarda-corpo em volta."
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        }
+      }
+    },
+    "Group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "objectIds"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "objectIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "locked": {
+          "type": "boolean"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        }
+      }
+    },
+    "Annotation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "kind": {
+          "enum": [
+            "dimension",
+            "label"
+          ],
+          "description": "dimension: cota entre start e end; label: texto em start."
+        },
+        "start": {
+          "$ref": "#/$defs/Point2"
+        },
+        "end": {
+          "$ref": "#/$defs/Point2"
+        },
+        "offset": {
+          "type": "number",
+          "description": "Distância da linha de cota ao segmento medido (positivo = lado esquerdo)."
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Texto; numa cota, substitui a medida calculada."
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "dimension"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "start",
+              "end"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "label"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "start",
+              "text"
+            ]
+          }
+        }
+      ]
     }
   }
 }
