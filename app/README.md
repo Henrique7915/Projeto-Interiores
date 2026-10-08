@@ -11,7 +11,7 @@ npm test             # testes do núcleo (comandos da cena)
 npm run build        # tsc + vite build (app/dist)
 ```
 
-`assets/` (na raiz do repositório) (catálogo, GLBs, texturas) é servido em `/assets/` no dev e copiado no build. O app carrega `assets/catalog.json` e `assets/materials.json` se existirem; senão usa o catálogo embutido (`src/core/fallbackCatalog.ts`).
+`assets/` (na raiz do repositório) é servido em `/assets/` no dev e copiado no build. O catálogo de móveis e materiais é `assets/catalog.json`, importado direto pelo app e pelo motor 3D (fonte única).
 
 ## Estrutura
 
@@ -20,9 +20,9 @@ npm run build        # tsc + vite build (app/dist)
 | `src/core/` | Núcleo sem React: comandos (`ops.ts`), catálogo, geometria, análise, links, templates. **Usado também pelo servidor MCP** (`ai/`). |
 | `src/state/` | Store Zustand (cena, desfazer/refazer, seleção), ações de alto nível, atalhos |
 | `src/ui/` | Painéis (moodboard, paleta, luz do dia, inspetor), barra superior, diálogos |
-| `src/plan/` | Planta 2D com medidas |
+| `src/plan/` | Planta 2D em SVG: zoom/pan, cotas, ferramentas (ambiente, parede, porta, janela, régua), arrastar e girar móveis, redimensionar ambientes por alças |
 | `src/chat/` | Chat de IA e conexão MCP |
-| `src/three/` | **Motor 3D (Gráficos)** — contrato em `src/three/CONTRATO.md` |
+| `src/three/` | **Motor 3D (Gráficos)**: contrato em `src/three/README.md`; o app só o usa em `src/ui/ThreeHost.tsx` |
 
 ## Regra de ouro
 
