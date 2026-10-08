@@ -6,6 +6,10 @@ const slot = (label, def, allowed) => ({ label, default: def, ...(allowed ? { al
 const LICENSE = 'Próprio (gerado por código neste repositório)'
 const SOFT = ['fabric', 'leather']
 const HARD = ['wood', 'metal', 'stone', 'paint', 'plastic']
+const CERAMIC = ['ceramic', 'paint', 'stone']
+const SURFACE = ['stone', 'wood', 'ceramic', 'concrete', 'paint', 'metal']
+const METAL = ['metal']
+const GLASS = ['glass']
 
 export const items = [
   // Sofás e poltronas
@@ -64,6 +68,66 @@ export const items = [
     materialSlots: { fabric: slot('Estofado', 'fabric/linen', SOFT), frame: slot('Estrutura', 'wood/natural-oak', ['wood', 'metal']) }, tags: ['exterior', 'piscina'] },
   { id: 'outdoor/umbrella', name: L('Guarda-sol', 'Parasol'), category: 'outdoor', model: 'procedural/umbrella', dimensions: { width: 2.6, height: 2.5, depth: 2.6 },
     materialSlots: { canopy: slot('Tecido', 'fabric/linen', SOFT), pole: slot('Haste', 'wood/natural-oak', ['wood', 'metal']) }, tags: ['exterior', 'piscina'] },
+  // Cozinha
+  { id: 'kitchen/counter', name: L('Balcão de cozinha', 'Kitchen counter'), category: 'kitchen', model: 'procedural/kitchen-counter', dimensions: { width: 1.2, height: 0.9, depth: 0.6 }, resizable: { width: [0.4, 3.6], depth: [0.5, 0.75] },
+    materialSlots: { body: slot('Armário', 'paint/white-matte', ['wood', 'paint']), top: slot('Bancada', 'stone/granite-grey', SURFACE), handles: slot('Puxadores', 'metal/brushed-steel', METAL) }, tags: ['cozinha'] },
+  { id: 'kitchen/island', name: L('Ilha de cozinha', 'Kitchen island'), category: 'kitchen', model: 'procedural/kitchen-island', dimensions: { width: 2, height: 0.92, depth: 0.9 }, resizable: { width: [1, 4], depth: [0.7, 1.2] },
+    materialSlots: { body: slot('Armário', 'paint/ink-blue', ['wood', 'paint']), top: slot('Bancada', 'stone/marble-carrara', SURFACE), handles: slot('Puxadores', 'metal/brass', METAL) }, tags: ['cozinha'] },
+  { id: 'appliance/fridge', name: L('Geladeira', 'Refrigerator'), category: 'appliance', model: 'procedural/fridge', dimensions: { width: 0.7, height: 1.8, depth: 0.72 }, resizable: { width: [0.55, 0.95], height: [1.4, 2.1] },
+    materialSlots: { body: slot('Corpo', 'metal/brushed-steel', ['metal', 'paint', 'plastic']), handle: slot('Puxador', 'metal/black-matte', METAL) }, tags: ['cozinha'] },
+  { id: 'appliance/stove', name: L('Fogão', 'Stove'), category: 'appliance', model: 'procedural/stove', dimensions: { width: 0.6, height: 0.9, depth: 0.62 }, resizable: { width: [0.5, 0.9] },
+    materialSlots: { body: slot('Corpo', 'metal/brushed-steel', ['metal', 'paint', 'plastic']), top: slot('Mesa', 'metal/black-matte', ['metal', 'glass']) }, tags: ['cozinha'] },
+  // Banheiro
+  { id: 'bathroom/toilet', name: L('Vaso sanitário', 'Toilet'), category: 'bathroom', model: 'procedural/toilet', dimensions: { width: 0.4, height: 0.78, depth: 0.7 },
+    materialSlots: { ceramic: slot('Louça', 'ceramic/porcelain-white', ['ceramic', 'paint']), seat: slot('Assento', 'plastic/white', ['plastic', 'wood']) }, tags: ['banheiro'] },
+  { id: 'bathroom/vanity', name: L('Gabinete com pia', 'Vanity with sink'), category: 'bathroom', model: 'procedural/vanity', dimensions: { width: 0.8, height: 0.85, depth: 0.5 }, resizable: { width: [0.5, 1.8] },
+    materialSlots: { body: slot('Gabinete', 'wood/ash', ['wood', 'paint']), top: slot('Tampo', 'stone/marble-carrara', SURFACE), basin: slot('Cuba', 'ceramic/porcelain-white', CERAMIC), tap: slot('Torneira', 'metal/chrome', METAL) }, tags: ['banheiro'] },
+  { id: 'bathroom/shower-box', name: L('Box de banho', 'Shower enclosure'), category: 'bathroom', model: 'procedural/shower-box', dimensions: { width: 0.9, height: 2, depth: 0.9 }, resizable: { width: [0.7, 1.5], depth: [0.7, 1.5] },
+    materialSlots: { tray: slot('Base', 'ceramic/porcelain-white', CERAMIC), frame: slot('Perfil', 'metal/black-matte', METAL), glass: slot('Vidro', 'glass/clear', GLASS) }, tags: ['banheiro'] },
+  { id: 'bathroom/bathtub', name: L('Banheira', 'Bathtub'), category: 'bathroom', model: 'procedural/bathtub', dimensions: { width: 1.7, height: 0.55, depth: 0.75 }, resizable: { width: [1.3, 2], depth: [0.65, 0.9] },
+    materialSlots: { shell: slot('Louça', 'ceramic/porcelain-white', CERAMIC), tap: slot('Torneira', 'metal/chrome', METAL) }, tags: ['banheiro'] },
+  // Camas, sofás e mesas (variações)
+  { id: 'bed/single', name: L('Cama de solteiro', 'Single bed'), category: 'bed', model: 'procedural/bed-queen', dimensions: { width: 0.9, height: 0.95, depth: 1.95 }, resizable: { width: [0.8, 1.1] },
+    materialSlots: { bedding: slot('Roupa de cama', 'fabric/sage-linen', SOFT), accent: slot('Manta', 'fabric/oat-knit', SOFT), frame: slot('Estrutura e cabeceira', 'wood/light-ash', ['wood', 'fabric', 'leather', 'paint']) }, tags: ['quarto'] },
+  { id: 'bed/king', name: L('Cama king', 'King bed'), category: 'bed', model: 'procedural/bed-queen', dimensions: { width: 1.93, height: 1.05, depth: 2.12 }, resizable: { width: [1.8, 2.2] },
+    materialSlots: { bedding: slot('Roupa de cama', 'fabric/linen', SOFT), accent: slot('Manta', 'fabric/charcoal-felt', SOFT), frame: slot('Estrutura e cabeceira', 'wood/walnut', ['wood', 'fabric', 'leather', 'paint']) }, tags: ['quarto'] },
+  { id: 'sofa/two-seat', name: L('Sofá de 2 lugares', '2-seat sofa'), category: 'sofa', model: 'procedural/sofa-3', dimensions: { width: 1.6, height: 0.82, depth: 0.9 }, resizable: { width: [1.3, 2] },
+    materialSlots: { upholstery: slot('Estofado', 'fabric/sage-linen', SOFT), cushions: slot('Almofadas', 'fabric/ochre-velvet', SOFT), legs: slot('Pés', 'wood/walnut', HARD) }, tags: ['sala'] },
+  { id: 'sofa/three-seat', name: L('Sofá de 3 lugares reto', '3-seat sofa'), category: 'sofa', model: 'procedural/sofa-3', dimensions: { width: 2.3, height: 0.85, depth: 0.95 }, resizable: { width: [1.9, 3] },
+    materialSlots: { upholstery: slot('Estofado', 'fabric/linen', SOFT), cushions: slot('Almofadas', 'fabric/rust-wool', SOFT), legs: slot('Pés', 'wood/natural-oak', HARD) }, tags: ['sala'] },
+  { id: 'sofa/armchair', name: L('Poltrona', 'Armchair'), category: 'sofa', model: 'procedural/armchair', dimensions: { width: 0.8, height: 0.82, depth: 0.82 }, resizable: { width: [0.65, 1.1], depth: [0.65, 1.1] },
+    materialSlots: { upholstery: slot('Estofado', 'fabric/boucle', SOFT), frame: slot('Estrutura', 'wood/natural-oak', HARD) }, tags: ['sala'] },
+  { id: 'table/side', name: L('Mesa lateral', 'Side table'), category: 'table', model: 'procedural/table-coffee-round', dimensions: { width: 0.45, height: 0.5, depth: 0.45 }, resizable: { width: [0.3, 0.7], height: [0.35, 0.65] },
+    materialSlots: { top: slot('Tampo', 'wood/walnut', ['wood', 'stone', 'ceramic', 'paint', 'metal']) }, tags: ['sala'] },
+  { id: 'table/coffee-rect', name: L('Mesa de centro retangular', 'Rectangular coffee table'), category: 'table', model: 'procedural/table-dining', dimensions: { width: 1.1, height: 0.4, depth: 0.6 }, resizable: { width: [0.7, 1.6], depth: [0.4, 0.9], height: [0.3, 0.5] },
+    materialSlots: { top: slot('Tampo', 'wood/walnut', ['wood', 'stone', 'ceramic', 'paint']), legs: slot('Pés', 'metal/black-matte', HARD) }, tags: ['sala'] },
+  { id: 'table/dining-round', name: L('Mesa de jantar redonda', 'Round dining table'), category: 'table', model: 'procedural/table-dining-round', dimensions: { width: 1.2, height: 0.75, depth: 1.2 }, resizable: { width: [0.8, 1.8], depth: [0.8, 1.8] },
+    materialSlots: { top: slot('Tampo', 'wood/natural-oak', ['wood', 'stone', 'ceramic', 'paint']), legs: slot('Base', 'metal/black-matte', HARD) }, tags: ['jantar'] },
+  { id: 'chair/bar-stool', name: L('Banqueta alta', 'Bar stool'), category: 'chair', model: 'procedural/bar-stool', dimensions: { width: 0.4, height: 0.75, depth: 0.4 }, resizable: { height: [0.6, 0.85] },
+    materialSlots: { seat: slot('Assento', 'leather/tan', SOFT.concat(['wood'])), frame: slot('Estrutura', 'metal/black-matte', ['metal', 'wood']) }, tags: ['cozinha'] },
+  { id: 'storage/sideboard', name: L('Aparador', 'Sideboard'), category: 'storage', model: 'procedural/tv-unit', dimensions: { width: 1.6, height: 0.8, depth: 0.45 }, resizable: { width: [1, 2.4], height: [0.6, 1] },
+    materialSlots: { body: slot('Corpo', 'wood/walnut', ['wood', 'paint']) }, tags: ['sala', 'jantar'] },
+  // Decoração e têxtil
+  { id: 'decor/mirror', name: L('Espelho', 'Mirror'), category: 'decor', model: 'procedural/mirror', dimensions: { width: 0.6, height: 1.6, depth: 0.04 }, mount: 'wall', resizable: { width: [0.3, 1.6], height: [0.4, 2] },
+    materialSlots: { frame: slot('Moldura', 'metal/black-matte', ['metal', 'wood', 'paint']) }, tags: ['decoração'] },
+  { id: 'decor/art-frame', name: L('Quadro', 'Framed art'), category: 'decor', model: 'procedural/art-frame', dimensions: { width: 0.8, height: 0.6, depth: 0.04 }, mount: 'wall', resizable: { width: [0.3, 2], height: [0.3, 1.6] },
+    materialSlots: { frame: slot('Moldura', 'wood/ebony', ['wood', 'metal', 'paint']), art: slot('Cor principal', 'paint/ink-blue', ['paint']), accent: slot('Cor de destaque', 'paint/mustard', ['paint']) }, tags: ['decoração'] },
+  { id: 'textile/curtain', name: L('Cortina', 'Curtain'), category: 'textile', model: 'procedural/curtain', dimensions: { width: 1.6, height: 2.5, depth: 0.12 }, mount: 'wall', resizable: { width: [0.6, 4], height: [1.2, 3.2] },
+    materialSlots: { fabric: slot('Tecido', 'fabric/linen', SOFT), rod: slot('Varão', 'metal/brass', METAL) }, tags: ['janela'] },
+  // Plantas
+  { id: 'plant/shrub', name: L('Arbusto', 'Shrub'), category: 'plant', model: 'procedural/shrub', dimensions: { width: 0.9, height: 0.8, depth: 0.9 }, resizable: { width: [0.4, 2.5], height: [0.3, 2], depth: [0.4, 2.5] },
+    materialSlots: { foliage: slot('Folhagem', 'plant/leaf', ['plant']) }, tags: ['exterior', 'jardim'] },
+  { id: 'plant/small-pot', name: L('Vaso pequeno com planta', 'Small potted plant'), category: 'plant', model: 'procedural/plant-pot', dimensions: { width: 0.3, height: 0.45, depth: 0.3 }, mount: 'surface', resizable: { height: [0.25, 0.8] },
+    materialSlots: { pot: slot('Vaso', 'ceramic/terracotta', ['ceramic', 'stone', 'paint']), foliage: slot('Folhagem', 'plant/leaf-light', ['plant']) } },
+  // Exterior
+  { id: 'outdoor/table', name: L('Mesa de jardim', 'Garden table'), category: 'outdoor', model: 'procedural/table-dining', dimensions: { width: 1.5, height: 0.75, depth: 0.9 }, resizable: { width: [0.8, 3], depth: [0.6, 1.4] },
+    materialSlots: { top: slot('Tampo', 'wood/deck-cumaru', ['wood', 'stone', 'ceramic', 'metal']), legs: slot('Pés', 'metal/black-matte', HARD) }, tags: ['exterior'] },
+  { id: 'outdoor/bbq', name: L('Churrasqueira', 'Barbecue grill'), category: 'outdoor', model: 'procedural/bbq', dimensions: { width: 1.4, height: 1.1, depth: 0.6 }, resizable: { width: [0.9, 2] },
+    materialSlots: { body: slot('Corpo', 'metal/black-matte', ['metal', 'paint']), side: slot('Bancada lateral', 'wood/deck-cumaru', ['wood', 'stone', 'metal']) }, tags: ['exterior'] },
+  { id: 'outdoor/mailbox', name: L('Caixa de correio', 'Mailbox'), category: 'outdoor', model: 'procedural/mailbox', dimensions: { width: 0.25, height: 1.2, depth: 0.4 },
+    materialSlots: { post: slot('Poste', 'wood/deck-cumaru', ['wood', 'metal', 'paint']), box: slot('Caixa', 'metal/black-matte', ['metal', 'paint']) }, tags: ['exterior'] },
+  { id: 'outdoor/car', name: L('Carro', 'Car'), category: 'outdoor', model: 'procedural/car', dimensions: { width: 1.8, height: 1.5, depth: 4.4 },
+    materialSlots: { body: slot('Pintura', 'paint/ink-blue', ['paint', 'metal']) }, tags: ['exterior', 'garagem'] },
   // Genérico
   { id: 'other/box', name: L('Caixa', 'Box'), category: 'other', model: 'procedural/box', dimensions: { width: 0.5, height: 0.5, depth: 0.5 }, resizable: { width: [0.05, 10], height: [0.05, 10], depth: [0.05, 10] },
     materialSlots: { body: slot('Material', 'wood/natural-oak') } },
