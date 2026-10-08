@@ -1,24 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { SceneView, type SceneViewHandle, type ViewPreset } from '../three'
+import { SceneView } from '../three'
+import { getViewHandle, setViewHandle } from './viewHandle'
 import { useEditor } from '../state/store'
-
-let handle: SceneViewHandle | null = null
-
-/** PNG da vista 3D atual (usado por Exportar e pelo chat/MCP). `view` muda o ângulo antes de capturar. */
-export async function captureView(view?: ViewPreset): Promise<Blob> {
-  if (!handle) throw new Error('A vista 3D não está aberta.')
-  if (view) {
-    handle.setView(view)
-    await new Promise((r) => setTimeout(r, 700))
-  }
-  return handle.capture()
-}
-
-/** GLB da cena inteira (Exportar). */
-export async function exportGLB(): Promise<Blob> {
-  if (!handle) throw new Error('A vista 3D não está aberta.')
-  return handle.exportGLB()
-}
 
 const isMobile = () => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches
 
@@ -62,7 +45,7 @@ export function ThreeHost() {
     <>
     <SceneView
       ref={(h) => {
-        handle = h
+        setViewHandle(h)
       }}
       scene={scene}
       selection={selection}
@@ -100,7 +83,7 @@ function ViewControls() {
     <div className="view-controls plan-ui">
       <div className="seg">
         {VIEWS.map((v) => (
-          <button key={v.id} className={view === v.id ? 'on' : ''} onClick={() => (setView(v.id), handle?.setView(v.id))}>
+          <button key={v.id} className={view === v.id ? 'on' : ''} onClick={() => (setView(v.id), getViewHandle()?.setView(v.id))}>
             {v.label}
           </button>
         ))}

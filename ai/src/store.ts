@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { applyOps, newScene, setCatalog, type Catalog, type OpInput, type Scene } from '../../app/src/core/index.ts'
+import { applyOps, getCatalog, newScene, setCatalog, type Catalog, type OpInput, type Scene } from '../../app/src/core/index.ts'
 import { validateScene } from '../../schema/validar.mjs'
 
 export interface ApplyReport {
@@ -111,7 +111,7 @@ export class LocalStore implements SceneStore {
 
   async applyOps(ops: unknown[], source = 'ai'): Promise<ApplyReport> {
     const r = applyOps(this.scene, ops as OpInput[])
-    const v = validateScene(r.scene) as { valid: boolean; errors: string[]; warnings: string[] }
+    const v = validateScene(r.scene, { catalog: getCatalog() })
     // Se o resultado ficou inválido, não aceita: devolve os erros para a IA corrigir.
     if (!v.valid) return { ok: false, created: [], errors: r.errors, validation: { errors: v.errors, warnings: v.warnings }, scene: this.scene, rev: this.rev }
     if (r.scene !== this.scene) {
@@ -123,7 +123,7 @@ export class LocalStore implements SceneStore {
   }
 
   async replaceScene(scene: unknown, source = 'ai') {
-    const v = validateScene(scene) as { valid: boolean; errors: string[] }
+    const v = validateScene(scene, { catalog: getCatalog() })
     if (!v.valid) throw new Error('Cena inválida:\n' + v.errors.slice(0, 12).join('\n'))
     this.scene = scene as Scene
     this.rev++

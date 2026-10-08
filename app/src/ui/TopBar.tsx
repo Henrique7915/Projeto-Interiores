@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { copyShareLink, exportJson } from '../state/actions'
 import { useEditor, type ViewMode } from '../state/store'
 import { download, Icon, IconButton, toast } from './common'
-import { captureView, exportGLB } from './ThreeHost'
+import { captureView, exportGLB } from './viewHandle'
 import { HelpDialog, ProjectsDialog } from './Dialogs'
 
 export function TopBar({ onAi }: { onAi: () => void }) {
@@ -30,7 +30,7 @@ export function TopBar({ onAi }: { onAi: () => void }) {
       </div>
       <div className="seg" role="tablist" aria-label="Vista">
         {modes.map((m) => (
-          <button key={m.id} className={viewMode === m.id ? 'on' : ''} onClick={() => setViewMode(m.id)}>
+          <button key={m.id} className={(viewMode === m.id ? 'on' : '') + (m.id === 'split' ? ' m-hide' : '')} onClick={() => setViewMode(m.id)}>
             <Icon name={m.icon} size={16} /> <span>{m.label}</span>
           </button>
         ))}
@@ -38,7 +38,7 @@ export function TopBar({ onAi }: { onAi: () => void }) {
       <div className="actions">
         <IconButton icon="undo" label="Desfazer (Ctrl+Z)" onClick={undo} disabled={!past.length} />
         <IconButton icon="redo" label="Refazer (Ctrl+Shift+Z)" onClick={redo} disabled={!future.length} />
-        <select className="unit" value={unit} onChange={(e) => setUnit(e.target.value as 'm')} aria-label="Unidade">
+        <select className="unit m-hide" value={unit} onChange={(e) => setUnit(e.target.value as 'm')} aria-label="Unidade">
           <option value="m">m</option>
           <option value="cm">cm</option>
           <option value="ft">pés</option>
@@ -79,7 +79,9 @@ export function TopBar({ onAi }: { onAi: () => void }) {
         <button className="btn ai" onClick={onAi}>
           <Icon name="sparkle" size={16} /> IA
         </button>
-        <IconButton icon="help" label="Ajuda" onClick={() => setDlg('help')} />
+        <span className="m-hide">
+          <IconButton icon="help" label="Ajuda" onClick={() => setDlg('help')} />
+        </span>
       </div>
       {dlg === 'projects' && <ProjectsDialog onClose={() => setDlg(null)} />}
       {dlg === 'help' && <HelpDialog onClose={() => setDlg(null)} />}
