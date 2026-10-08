@@ -21,3 +21,22 @@ jobs:
           cache-dependency-path: schema/package-lock.json
       - run: npm ci
       - run: npm run validar
+
+  catalogo:
+    name: Catálogo de móveis e materiais
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: schema/package-lock.json
+      - run: npm ci
+        working-directory: schema
+      - name: Validar assets/catalog.json
+        run: node assets/validar.mjs
+      - name: catalog.json está em dia com assets/catalog/*.mjs
+        run: |
+          node assets/catalog/build.mjs
+          git diff --exit-code assets/catalog.json

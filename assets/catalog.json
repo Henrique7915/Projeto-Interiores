@@ -1,0 +1,1755 @@
+{
+  "$schema": "../schema/catalog.schema.json",
+  "format": "design3d.catalog",
+  "version": "0.1.0",
+  "items": [
+    {
+      "id": "sofa/modern-l",
+      "name": {
+        "pt-BR": "Sofá em L moderno",
+        "en": "Modern L sofa"
+      },
+      "category": "sofa",
+      "model": "procedural/sofa-l",
+      "dimensions": {
+        "width": 2.6,
+        "height": 0.85,
+        "depth": 1.6
+      },
+      "resizable": {
+        "width": [
+          1.8,
+          3.6
+        ],
+        "depth": [
+          1.2,
+          2
+        ],
+        "height": [
+          0.7,
+          1
+        ]
+      },
+      "materialSlots": {
+        "upholstery": {
+          "label": "Estofado",
+          "default": "fabric/navy-velvet",
+          "allowed": [
+            "fabric",
+            "leather"
+          ]
+        },
+        "cushions": {
+          "label": "Almofadas",
+          "default": "fabric/rust-wool",
+          "allowed": [
+            "fabric",
+            "leather"
+          ]
+        },
+        "legs": {
+          "label": "Pés",
+          "default": "wood/walnut",
+          "allowed": [
+            "wood",
+            "metal",
+            "stone",
+            "paint",
+            "plastic"
+          ]
+        }
+      },
+      "tags": [
+        "sala",
+        "estar"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "sofa/modern-3-seat",
+      "name": {
+        "pt-BR": "Sofá de 3 lugares",
+        "en": "Modern 3-seat sofa"
+      },
+      "category": "sofa",
+      "model": "procedural/sofa-3",
+      "dimensions": {
+        "width": 2.2,
+        "height": 0.85,
+        "depth": 0.95
+      },
+      "resizable": {
+        "width": [
+          1.6,
+          3
+        ],
+        "depth": [
+          0.8,
+          1.1
+        ],
+        "height": [
+          0.7,
+          1
+        ]
+      },
+      "materialSlots": {
+        "upholstery": {
+          "label": "Estofado",
+          "default": "fabric/grey-wool",
+          "allowed": [
+            "fabric",
+            "leather"
+          ]
+        },
+        "cushions": {
+          "label": "Almofadas",
+          "default": "fabric/ochre-velvet",
+          "allowed": [
+            "fabric",
+            "leather"
+          ]
+        },
+        "legs": {
+          "label": "Pés",
+          "default": "wood/walnut",
+          "allowed": [
+            "wood",
+            "metal",
+            "stone",
+            "paint",
+            "plastic"
+          ]
+        }
+      },
+      "tags": [
+        "sala",
+        "estar"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "chair/armchair-lounge",
+      "name": {
+        "pt-BR": "Poltrona lounge",
+        "en": "Lounge armchair"
+      },
+      "category": "chair",
+      "model": "procedural/armchair",
+      "dimensions": {
+        "width": 0.85,
+        "height": 0.85,
+        "depth": 0.85
+      },
+      "resizable": {
+        "width": [
+          0.65,
+          1.1
+        ],
+        "depth": [
+          0.65,
+          1.1
+        ],
+        "height": [
+          0.7,
+          1
+        ]
+      },
+      "materialSlots": {
+        "upholstery": {
+          "label": "Estofado",
+          "default": "leather/cognac",
+          "allowed": [
+            "fabric",
+            "leather"
+          ]
+        },
+        "frame": {
+          "label": "Estrutura",
+          "default": "wood/walnut",
+          "allowed": [
+            "wood",
+            "metal",
+            "stone",
+            "paint",
+            "plastic"
+          ]
+        }
+      },
+      "tags": [
+        "sala",
+        "leitura"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "table/dining-rect",
+      "name": {
+        "pt-BR": "Mesa de jantar retangular",
+        "en": "Rectangular dining table"
+      },
+      "category": "table",
+      "model": "procedural/table-dining",
+      "dimensions": {
+        "width": 1.6,
+        "height": 0.75,
+        "depth": 0.9
+      },
+      "resizable": {
+        "width": [
+          1,
+          3
+        ],
+        "depth": [
+          0.7,
+          1.2
+        ]
+      },
+      "materialSlots": {
+        "top": {
+          "label": "Tampo",
+          "default": "wood/walnut",
+          "allowed": [
+            "wood",
+            "stone",
+            "ceramic",
+            "paint"
+          ]
+        },
+        "legs": {
+          "label": "Pés",
+          "default": "wood/walnut",
+          "allowed": [
+            "wood",
+            "metal",
+            "stone",
+            "paint",
+            "plastic"
+          ]
+        }
+      },
+      "tags": [
+        "jantar"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "table/coffee-round",
+      "name": {
+        "pt-BR": "Mesa de centro redonda",
+        "en": "Round coffee table"
+      },
+      "category": "table",
+      "model": "procedural/table-coffee-round",
+      "dimensions": {
+        "width": 0.8,
+        "height": 0.4,
+        "depth": 0.8
+      },
+      "resizable": {
+        "width": [
+          0.5,
+          1.2
+        ],
+        "depth": [
+          0.5,
+          1.2
+        ],
+        "height": [
+          0.3,
+          0.5
+        ]
+      },
+      "materialSlots": {
+        "top": {
+          "label": "Tampo",
+          "default": "wood/walnut",
+          "allowed": [
+            "wood",
+            "stone",
+            "ceramic",
+            "paint"
+          ]
+        }
+      },
+      "tags": [
+        "sala"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "chair/dining-wood",
+      "name": {
+        "pt-BR": "Cadeira de jantar de madeira",
+        "en": "Wooden dining chair"
+      },
+      "category": "chair",
+      "model": "procedural/chair-dining",
+      "dimensions": {
+        "width": 0.46,
+        "height": 0.86,
+        "depth": 0.5
+      },
+      "materialSlots": {
+        "frame": {
+          "label": "Estrutura",
+          "default": "wood/walnut",
+          "allowed": [
+            "wood",
+            "metal",
+            "stone",
+            "paint",
+            "plastic"
+          ]
+        },
+        "seat": {
+          "label": "Assento",
+          "default": "fabric/rust-wool",
+          "allowed": [
+            "fabric",
+            "leather",
+            "wood"
+          ]
+        }
+      },
+      "tags": [
+        "jantar"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "chair/office",
+      "name": {
+        "pt-BR": "Cadeira de escritório",
+        "en": "Office chair"
+      },
+      "category": "chair",
+      "model": "procedural/chair-office",
+      "dimensions": {
+        "width": 0.6,
+        "height": 0.95,
+        "depth": 0.6
+      },
+      "materialSlots": {
+        "seat": {
+          "label": "Estofado",
+          "default": "fabric/charcoal-felt",
+          "allowed": [
+            "fabric",
+            "leather"
+          ]
+        },
+        "frame": {
+          "label": "Estrutura",
+          "default": "metal/black-matte",
+          "allowed": [
+            "wood",
+            "metal",
+            "stone",
+            "paint",
+            "plastic"
+          ]
+        }
+      },
+      "tags": [
+        "escritório"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "desk/simple",
+      "name": {
+        "pt-BR": "Escrivaninha simples",
+        "en": "Simple desk"
+      },
+      "category": "desk",
+      "model": "procedural/desk",
+      "dimensions": {
+        "width": 1.2,
+        "height": 0.75,
+        "depth": 0.6
+      },
+      "resizable": {
+        "width": [
+          0.8,
+          2
+        ],
+        "depth": [
+          0.5,
+          0.9
+        ]
+      },
+      "materialSlots": {
+        "top": {
+          "label": "Tampo",
+          "default": "wood/natural-oak",
+          "allowed": [
+            "wood",
+            "stone",
+            "paint"
+          ]
+        },
+        "legs": {
+          "label": "Pés",
+          "default": "metal/black-matte",
+          "allowed": [
+            "wood",
+            "metal",
+            "stone",
+            "paint",
+            "plastic"
+          ]
+        }
+      },
+      "tags": [
+        "escritório"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "bed/queen-modern",
+      "name": {
+        "pt-BR": "Cama de casal moderna",
+        "en": "Modern queen bed"
+      },
+      "category": "bed",
+      "model": "procedural/bed-queen",
+      "dimensions": {
+        "width": 1.6,
+        "height": 1,
+        "depth": 2.1
+      },
+      "resizable": {
+        "width": [
+          0.9,
+          2.1
+        ],
+        "depth": [
+          1.9,
+          2.2
+        ]
+      },
+      "materialSlots": {
+        "bedding": {
+          "label": "Roupa de cama",
+          "default": "fabric/linen",
+          "allowed": [
+            "fabric",
+            "leather"
+          ]
+        },
+        "accent": {
+          "label": "Manta",
+          "default": "fabric/rust-wool",
+          "allowed": [
+            "fabric",
+            "leather"
+          ]
+        },
+        "frame": {
+          "label": "Estrutura e cabeceira",
+          "default": "wood/walnut",
+          "allowed": [
+            "wood",
+            "fabric",
+            "leather",
+            "paint"
+          ]
+        }
+      },
+      "tags": [
+        "quarto"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "storage/nightstand",
+      "name": {
+        "pt-BR": "Criado-mudo",
+        "en": "Nightstand"
+      },
+      "category": "storage",
+      "model": "procedural/nightstand",
+      "dimensions": {
+        "width": 0.45,
+        "height": 0.5,
+        "depth": 0.4
+      },
+      "materialSlots": {
+        "body": {
+          "label": "Corpo",
+          "default": "wood/walnut",
+          "allowed": [
+            "wood",
+            "paint"
+          ]
+        }
+      },
+      "tags": [
+        "quarto"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "storage/wardrobe-2-door",
+      "name": {
+        "pt-BR": "Guarda-roupa de 2 portas",
+        "en": "2-door wardrobe"
+      },
+      "category": "storage",
+      "model": "procedural/wardrobe",
+      "dimensions": {
+        "width": 1.2,
+        "height": 2.2,
+        "depth": 0.6
+      },
+      "resizable": {
+        "width": [
+          0.8,
+          3
+        ],
+        "height": [
+          1.8,
+          2.6
+        ]
+      },
+      "materialSlots": {
+        "body": {
+          "label": "Corpo",
+          "default": "paint/white-matte",
+          "allowed": [
+            "wood",
+            "paint"
+          ]
+        },
+        "doors": {
+          "label": "Portas",
+          "default": "paint/terracotta",
+          "allowed": [
+            "wood",
+            "paint",
+            "fabric"
+          ]
+        }
+      },
+      "tags": [
+        "quarto"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "storage/tv-unit",
+      "name": {
+        "pt-BR": "Rack de TV",
+        "en": "TV unit"
+      },
+      "category": "storage",
+      "model": "procedural/tv-unit",
+      "dimensions": {
+        "width": 1.6,
+        "height": 0.5,
+        "depth": 0.4
+      },
+      "resizable": {
+        "width": [
+          1,
+          2.4
+        ]
+      },
+      "materialSlots": {
+        "body": {
+          "label": "Corpo",
+          "default": "wood/walnut",
+          "allowed": [
+            "wood",
+            "paint"
+          ]
+        }
+      },
+      "tags": [
+        "sala"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "shelf/bookcase-tall",
+      "name": {
+        "pt-BR": "Estante alta",
+        "en": "Tall bookcase"
+      },
+      "category": "shelf",
+      "model": "procedural/bookcase",
+      "dimensions": {
+        "width": 0.9,
+        "height": 1.9,
+        "depth": 0.35
+      },
+      "resizable": {
+        "width": [
+          0.5,
+          2
+        ],
+        "height": [
+          1,
+          2.4
+        ]
+      },
+      "materialSlots": {
+        "body": {
+          "label": "Corpo",
+          "default": "wood/walnut",
+          "allowed": [
+            "wood",
+            "paint"
+          ]
+        }
+      },
+      "tags": [
+        "sala",
+        "livros"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "shelf/wall-floating",
+      "name": {
+        "pt-BR": "Prateleiras flutuantes",
+        "en": "Floating shelves"
+      },
+      "category": "shelf",
+      "model": "procedural/wall-shelf",
+      "dimensions": {
+        "width": 1,
+        "height": 0.6,
+        "depth": 0.22
+      },
+      "mount": "wall",
+      "resizable": {
+        "width": [
+          0.4,
+          2
+        ]
+      },
+      "materialSlots": {
+        "body": {
+          "label": "Madeira",
+          "default": "wood/walnut",
+          "allowed": [
+            "wood",
+            "paint"
+          ]
+        }
+      },
+      "tags": [
+        "decoração"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "lighting/table-lamp",
+      "name": {
+        "pt-BR": "Abajur de mesa",
+        "en": "Table lamp"
+      },
+      "category": "lighting",
+      "model": "procedural/lamp-table",
+      "dimensions": {
+        "width": 0.3,
+        "height": 0.5,
+        "depth": 0.3
+      },
+      "mount": "surface",
+      "light": {
+        "type": "point",
+        "intensity": 300,
+        "temperatureK": 2700,
+        "on": true
+      },
+      "materialSlots": {
+        "base": {
+          "label": "Base",
+          "default": "metal/brass",
+          "allowed": [
+            "metal",
+            "wood"
+          ]
+        },
+        "shade": {
+          "label": "Cúpula",
+          "default": "light/lampshade",
+          "allowed": [
+            "light"
+          ]
+        }
+      },
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "lighting/floor-arc",
+      "name": {
+        "pt-BR": "Luminária de piso em arco",
+        "en": "Arc floor lamp"
+      },
+      "category": "lighting",
+      "model": "procedural/lamp-floor-arc",
+      "dimensions": {
+        "width": 0.9,
+        "height": 1.9,
+        "depth": 0.35
+      },
+      "light": {
+        "type": "point",
+        "intensity": 800,
+        "temperatureK": 2700,
+        "on": true
+      },
+      "materialSlots": {
+        "base": {
+          "label": "Estrutura",
+          "default": "metal/black-matte",
+          "allowed": [
+            "metal"
+          ]
+        },
+        "shade": {
+          "label": "Cúpula",
+          "default": "light/lampshade",
+          "allowed": [
+            "light"
+          ]
+        }
+      },
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "lighting/floor-lamp",
+      "name": {
+        "pt-BR": "Luminária de piso",
+        "en": "Floor lamp"
+      },
+      "category": "lighting",
+      "model": "procedural/lamp-floor",
+      "dimensions": {
+        "width": 0.35,
+        "height": 1.6,
+        "depth": 0.35
+      },
+      "light": {
+        "type": "point",
+        "intensity": 800,
+        "temperatureK": 2700,
+        "on": true
+      },
+      "materialSlots": {
+        "base": {
+          "label": "Estrutura",
+          "default": "metal/brass",
+          "allowed": [
+            "metal"
+          ]
+        },
+        "shade": {
+          "label": "Cúpula",
+          "default": "light/lampshade",
+          "allowed": [
+            "light"
+          ]
+        }
+      },
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "lighting/pendant-dome",
+      "name": {
+        "pt-BR": "Pendente cúpula",
+        "en": "Dome pendant"
+      },
+      "category": "lighting",
+      "model": "procedural/pendant-dome",
+      "dimensions": {
+        "width": 0.5,
+        "height": 0.9,
+        "depth": 0.5
+      },
+      "mount": "ceiling",
+      "light": {
+        "type": "point",
+        "intensity": 600,
+        "temperatureK": 2700,
+        "on": true
+      },
+      "materialSlots": {
+        "shade": {
+          "label": "Cúpula",
+          "default": "metal/black-matte",
+          "allowed": [
+            "metal",
+            "paint",
+            "light"
+          ]
+        }
+      },
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "lighting/desk-lamp",
+      "name": {
+        "pt-BR": "Luminária de mesa articulada",
+        "en": "Desk lamp"
+      },
+      "category": "lighting",
+      "model": "procedural/lamp-desk",
+      "dimensions": {
+        "width": 0.35,
+        "height": 0.45,
+        "depth": 0.2
+      },
+      "mount": "surface",
+      "light": {
+        "type": "spot",
+        "intensity": 400,
+        "temperatureK": 4000,
+        "on": true
+      },
+      "materialSlots": {
+        "base": {
+          "label": "Estrutura",
+          "default": "metal/black-matte",
+          "allowed": [
+            "metal"
+          ]
+        }
+      },
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "rug/rectangular",
+      "name": {
+        "pt-BR": "Tapete retangular",
+        "en": "Rectangular rug"
+      },
+      "category": "rug",
+      "model": "procedural/rug-rect",
+      "dimensions": {
+        "width": 2.4,
+        "height": 0.015,
+        "depth": 1.7
+      },
+      "resizable": {
+        "width": [
+          0.6,
+          5
+        ],
+        "depth": [
+          0.6,
+          5
+        ]
+      },
+      "materialSlots": {
+        "fabric": {
+          "label": "Tecido",
+          "default": "fabric/oat-knit",
+          "allowed": [
+            "fabric",
+            "leather"
+          ]
+        }
+      },
+      "tags": [
+        "sala",
+        "quarto"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "rug/round",
+      "name": {
+        "pt-BR": "Tapete redondo",
+        "en": "Round rug"
+      },
+      "category": "rug",
+      "model": "procedural/rug-round",
+      "dimensions": {
+        "width": 1.8,
+        "height": 0.015,
+        "depth": 1.8
+      },
+      "resizable": {
+        "width": [
+          0.6,
+          4
+        ],
+        "depth": [
+          0.6,
+          4
+        ]
+      },
+      "materialSlots": {
+        "fabric": {
+          "label": "Tecido",
+          "default": "fabric/boucle",
+          "allowed": [
+            "fabric",
+            "leather"
+          ]
+        }
+      },
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "plant/monstera-large",
+      "name": {
+        "pt-BR": "Costela-de-adão grande",
+        "en": "Large monstera"
+      },
+      "category": "plant",
+      "model": "procedural/plant-monstera",
+      "dimensions": {
+        "width": 0.7,
+        "height": 1.4,
+        "depth": 0.7
+      },
+      "resizable": {
+        "height": [
+          0.5,
+          2.2
+        ]
+      },
+      "materialSlots": {
+        "pot": {
+          "label": "Vaso",
+          "default": "stone/terrazzo",
+          "allowed": [
+            "stone",
+            "ceramic",
+            "paint"
+          ]
+        }
+      },
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "plant/tree-medium",
+      "name": {
+        "pt-BR": "Árvore média",
+        "en": "Medium tree"
+      },
+      "category": "plant",
+      "model": "procedural/tree",
+      "dimensions": {
+        "width": 3,
+        "height": 5,
+        "depth": 3
+      },
+      "resizable": {
+        "width": [
+          1,
+          8
+        ],
+        "height": [
+          2,
+          12
+        ],
+        "depth": [
+          1,
+          8
+        ]
+      },
+      "tags": [
+        "exterior"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "plant/palm",
+      "name": {
+        "pt-BR": "Palmeira",
+        "en": "Palm tree"
+      },
+      "category": "plant",
+      "model": "procedural/palm",
+      "dimensions": {
+        "width": 2.2,
+        "height": 4,
+        "depth": 2.2
+      },
+      "resizable": {
+        "height": [
+          1.5,
+          9
+        ]
+      },
+      "tags": [
+        "exterior"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "outdoor/sun-lounger",
+      "name": {
+        "pt-BR": "Espreguiçadeira",
+        "en": "Sun lounger"
+      },
+      "category": "outdoor",
+      "model": "procedural/lounger",
+      "dimensions": {
+        "width": 0.65,
+        "height": 0.9,
+        "depth": 1.95
+      },
+      "materialSlots": {
+        "fabric": {
+          "label": "Estofado",
+          "default": "fabric/linen",
+          "allowed": [
+            "fabric",
+            "leather"
+          ]
+        },
+        "frame": {
+          "label": "Estrutura",
+          "default": "wood/natural-oak",
+          "allowed": [
+            "wood",
+            "metal"
+          ]
+        }
+      },
+      "tags": [
+        "exterior",
+        "piscina"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "outdoor/umbrella",
+      "name": {
+        "pt-BR": "Guarda-sol",
+        "en": "Parasol"
+      },
+      "category": "outdoor",
+      "model": "procedural/umbrella",
+      "dimensions": {
+        "width": 2.6,
+        "height": 2.5,
+        "depth": 2.6
+      },
+      "materialSlots": {
+        "canopy": {
+          "label": "Tecido",
+          "default": "fabric/linen",
+          "allowed": [
+            "fabric",
+            "leather"
+          ]
+        },
+        "pole": {
+          "label": "Haste",
+          "default": "wood/natural-oak",
+          "allowed": [
+            "wood",
+            "metal"
+          ]
+        }
+      },
+      "tags": [
+        "exterior",
+        "piscina"
+      ],
+      "license": "Próprio (gerado por código neste repositório)"
+    },
+    {
+      "id": "other/box",
+      "name": {
+        "pt-BR": "Caixa",
+        "en": "Box"
+      },
+      "category": "other",
+      "model": "procedural/box",
+      "dimensions": {
+        "width": 0.5,
+        "height": 0.5,
+        "depth": 0.5
+      },
+      "resizable": {
+        "width": [
+          0.05,
+          10
+        ],
+        "height": [
+          0.05,
+          10
+        ],
+        "depth": [
+          0.05,
+          10
+        ]
+      },
+      "materialSlots": {
+        "body": {
+          "label": "Material",
+          "default": "wood/natural-oak"
+        }
+      },
+      "license": "Próprio (gerado por código neste repositório)"
+    }
+  ],
+  "materials": {
+    "wood/smoked-oak": {
+      "name": "Carvalho defumado",
+      "category": "wood",
+      "color": "#4a3426",
+      "roughness": 0.5,
+      "texture": {
+        "set": "planks-oak",
+        "tileSize": [
+          1.6,
+          1.6
+        ]
+      }
+    },
+    "wood/natural-oak": {
+      "name": "Carvalho natural",
+      "category": "wood",
+      "color": "#c79a6a",
+      "roughness": 0.55,
+      "texture": {
+        "set": "planks-oak",
+        "tileSize": [
+          1.6,
+          1.6
+        ]
+      }
+    },
+    "wood/light-ash": {
+      "name": "Freijó claro",
+      "category": "wood",
+      "color": "#dcc7a2",
+      "roughness": 0.55,
+      "texture": {
+        "set": "planks-oak",
+        "tileSize": [
+          1.6,
+          1.6
+        ]
+      }
+    },
+    "wood/walnut": {
+      "name": "Nogueira",
+      "category": "wood",
+      "color": "#6a4430",
+      "roughness": 0.5,
+      "texture": {
+        "set": "wood-grain",
+        "tileSize": [
+          1.2,
+          1.2
+        ]
+      }
+    },
+    "wood/cherry": {
+      "name": "Cerejeira",
+      "category": "wood",
+      "color": "#8c4a2c",
+      "roughness": 0.5,
+      "texture": {
+        "set": "wood-grain",
+        "tileSize": [
+          1.2,
+          1.2
+        ]
+      }
+    },
+    "wood/ebony": {
+      "name": "Ébano",
+      "category": "wood",
+      "color": "#2a221d",
+      "roughness": 0.45,
+      "texture": {
+        "set": "wood-grain",
+        "tileSize": [
+          1.2,
+          1.2
+        ]
+      }
+    },
+    "wood/pine": {
+      "name": "Pinus",
+      "category": "wood",
+      "color": "#d9b47c",
+      "roughness": 0.6,
+      "texture": {
+        "set": "wood-grain",
+        "tileSize": [
+          1.2,
+          1.2
+        ]
+      }
+    },
+    "wood/deck-cumaru": {
+      "name": "Deck de cumaru",
+      "category": "wood",
+      "color": "#8a5a36",
+      "roughness": 0.7,
+      "texture": {
+        "set": "deck-boards",
+        "tileSize": [
+          1.2,
+          1.2
+        ]
+      }
+    },
+    "stone/carrara": {
+      "name": "Mármore Carrara",
+      "category": "stone",
+      "color": "#ecebe8",
+      "roughness": 0.18,
+      "texture": {
+        "set": "marble",
+        "tileSize": [
+          2.4,
+          2.4
+        ]
+      }
+    },
+    "stone/slate": {
+      "name": "Ardósia",
+      "category": "stone",
+      "color": "#3f444b",
+      "roughness": 0.65,
+      "texture": {
+        "set": "stone-rough",
+        "tileSize": [
+          1.2,
+          1.2
+        ]
+      }
+    },
+    "stone/travertine": {
+      "name": "Travertino",
+      "category": "stone",
+      "color": "#dccaa8",
+      "roughness": 0.5,
+      "texture": {
+        "set": "stone-rough",
+        "tileSize": [
+          1.5,
+          1.5
+        ]
+      }
+    },
+    "stone/terrazzo": {
+      "name": "Terrazo",
+      "category": "stone",
+      "color": "#dcd5c8",
+      "roughness": 0.35,
+      "texture": {
+        "set": "terrazzo",
+        "tileSize": [
+          1.2,
+          1.2
+        ]
+      }
+    },
+    "concrete/polished": {
+      "name": "Concreto polido",
+      "category": "concrete",
+      "color": "#8d8d8a",
+      "roughness": 0.5,
+      "texture": {
+        "set": "concrete-fine",
+        "tileSize": [
+          2,
+          2
+        ]
+      }
+    },
+    "ceramic/white-tile": {
+      "name": "Azulejo branco",
+      "category": "ceramic",
+      "color": "#f1f1ee",
+      "roughness": 0.2,
+      "texture": {
+        "set": "tile-grid",
+        "tileSize": [
+          0.3,
+          0.3
+        ]
+      }
+    },
+    "ceramic/green-tile": {
+      "name": "Azulejo verde",
+      "category": "ceramic",
+      "color": "#5f8a6e",
+      "roughness": 0.2,
+      "texture": {
+        "set": "tile-grid",
+        "tileSize": [
+          0.15,
+          0.15
+        ]
+      }
+    },
+    "fabric/linen": {
+      "name": "Linho",
+      "category": "fabric",
+      "color": "#e9e3d6",
+      "roughness": 0.95,
+      "texture": {
+        "set": "weave",
+        "tileSize": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "fabric/boucle": {
+      "name": "Bouclé",
+      "category": "fabric",
+      "color": "#efebe2",
+      "roughness": 1,
+      "texture": {
+        "set": "boucle",
+        "tileSize": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "fabric/grey-wool": {
+      "name": "Lã cinza",
+      "category": "fabric",
+      "color": "#8f9296",
+      "roughness": 0.95,
+      "texture": {
+        "set": "weave",
+        "tileSize": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "fabric/oat-knit": {
+      "name": "Tricô aveia",
+      "category": "fabric",
+      "color": "#d8ccb4",
+      "roughness": 1,
+      "texture": {
+        "set": "knit",
+        "tileSize": [
+          0.6,
+          0.6
+        ]
+      }
+    },
+    "fabric/navy-velvet": {
+      "name": "Veludo azul-marinho",
+      "category": "fabric",
+      "color": "#22346c",
+      "roughness": 0.7,
+      "texture": {
+        "set": "velvet",
+        "tileSize": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "fabric/ochre-velvet": {
+      "name": "Veludo ocre",
+      "category": "fabric",
+      "color": "#d4a02c",
+      "roughness": 0.7,
+      "texture": {
+        "set": "velvet",
+        "tileSize": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "fabric/rust-wool": {
+      "name": "Lã ferrugem",
+      "category": "fabric",
+      "color": "#c4602e",
+      "roughness": 1,
+      "texture": {
+        "set": "weave",
+        "tileSize": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "fabric/charcoal-felt": {
+      "name": "Feltro grafite",
+      "category": "fabric",
+      "color": "#33353a",
+      "roughness": 1,
+      "texture": {
+        "set": "felt",
+        "tileSize": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "fabric/sage-linen": {
+      "name": "Linho sálvia",
+      "category": "fabric",
+      "color": "#a5ad8f",
+      "roughness": 0.95,
+      "texture": {
+        "set": "weave",
+        "tileSize": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "leather/cognac": {
+      "name": "Couro conhaque",
+      "category": "leather",
+      "color": "#a85a22",
+      "roughness": 0.5,
+      "texture": {
+        "set": "leather",
+        "tileSize": [
+          0.6,
+          0.6
+        ]
+      }
+    },
+    "leather/black": {
+      "name": "Couro preto",
+      "category": "leather",
+      "color": "#1f1f21",
+      "roughness": 0.45,
+      "texture": {
+        "set": "leather",
+        "tileSize": [
+          0.6,
+          0.6
+        ]
+      }
+    },
+    "leather/tan": {
+      "name": "Couro caramelo",
+      "category": "leather",
+      "color": "#c18a52",
+      "roughness": 0.5,
+      "texture": {
+        "set": "leather",
+        "tileSize": [
+          0.6,
+          0.6
+        ]
+      }
+    },
+    "paint/sand-limewash": {
+      "name": "Cal areia",
+      "category": "paint",
+      "color": "#e7d6b8",
+      "roughness": 0.9,
+      "texture": {
+        "set": "limewash",
+        "tileSize": [
+          2,
+          2
+        ]
+      }
+    },
+    "paint/white-matte": {
+      "name": "Branco fosco",
+      "category": "paint",
+      "color": "#f2efe8",
+      "roughness": 0.9,
+      "texture": {
+        "set": "paint-flat",
+        "tileSize": [
+          2,
+          2
+        ]
+      }
+    },
+    "paint/exterior-white": {
+      "name": "Branco de fachada",
+      "category": "paint",
+      "color": "#f4f2ec",
+      "roughness": 0.95,
+      "texture": {
+        "set": "paint-flat",
+        "tileSize": [
+          2,
+          2
+        ]
+      }
+    },
+    "paint/sage": {
+      "name": "Verde sálvia",
+      "category": "paint",
+      "color": "#a3b093",
+      "roughness": 0.9,
+      "texture": {
+        "set": "paint-flat",
+        "tileSize": [
+          2,
+          2
+        ]
+      }
+    },
+    "paint/terracotta": {
+      "name": "Terracota",
+      "category": "paint",
+      "color": "#b9603f",
+      "roughness": 0.9,
+      "texture": {
+        "set": "limewash",
+        "tileSize": [
+          2,
+          2
+        ]
+      }
+    },
+    "paint/rust": {
+      "name": "Ferrugem",
+      "category": "paint",
+      "color": "#b4532a",
+      "roughness": 0.85,
+      "texture": {
+        "set": "paint-flat",
+        "tileSize": [
+          2,
+          2
+        ]
+      }
+    },
+    "paint/navy": {
+      "name": "Azul-noite",
+      "category": "paint",
+      "color": "#1d2a4d",
+      "roughness": 0.85,
+      "texture": {
+        "set": "paint-flat",
+        "tileSize": [
+          2,
+          2
+        ]
+      }
+    },
+    "paint/charcoal": {
+      "name": "Grafite",
+      "category": "paint",
+      "color": "#35373b",
+      "roughness": 0.85,
+      "texture": {
+        "set": "paint-flat",
+        "tileSize": [
+          2,
+          2
+        ]
+      }
+    },
+    "paint/blush": {
+      "name": "Rosa antigo",
+      "category": "paint",
+      "color": "#d9b0a4",
+      "roughness": 0.9,
+      "texture": {
+        "set": "paint-flat",
+        "tileSize": [
+          2,
+          2
+        ]
+      }
+    },
+    "wallpaper/linen-beige": {
+      "name": "Papel linho bege",
+      "category": "wallpaper",
+      "color": "#d9cdb5",
+      "roughness": 0.9,
+      "texture": {
+        "set": "weave",
+        "tileSize": [
+          0.6,
+          0.6
+        ]
+      }
+    },
+    "metal/black-matte": {
+      "name": "Metal preto fosco",
+      "category": "metal",
+      "color": "#1c1d20",
+      "roughness": 0.45,
+      "metalness": 0.8
+    },
+    "metal/brass": {
+      "name": "Latão",
+      "category": "metal",
+      "color": "#c9a14a",
+      "roughness": 0.3,
+      "metalness": 0.9
+    },
+    "metal/chrome": {
+      "name": "Cromado",
+      "category": "metal",
+      "color": "#d9dde2",
+      "roughness": 0.12,
+      "metalness": 1
+    },
+    "glass/clear": {
+      "name": "Vidro incolor",
+      "category": "glass",
+      "color": "#cfe3f2",
+      "roughness": 0.05,
+      "opacity": 0.2
+    },
+    "glass/frosted": {
+      "name": "Vidro fosco",
+      "category": "glass",
+      "color": "#e3edf3",
+      "roughness": 0.5,
+      "opacity": 0.5
+    },
+    "plastic/white": {
+      "name": "Plástico branco",
+      "category": "plastic",
+      "color": "#f5f5f3",
+      "roughness": 0.4
+    },
+    "plant/leaf": {
+      "name": "Folhagem",
+      "category": "plant",
+      "color": "#3f7a3c",
+      "roughness": 0.8
+    },
+    "plant/leaf-light": {
+      "name": "Folhagem clara",
+      "category": "plant",
+      "color": "#5f9a4c",
+      "roughness": 0.8
+    },
+    "plant/bark": {
+      "name": "Tronco",
+      "category": "plant",
+      "color": "#5a4332",
+      "roughness": 0.9
+    },
+    "ground/grass": {
+      "name": "Grama",
+      "category": "ground",
+      "color": "#5a8f3e",
+      "roughness": 1,
+      "texture": {
+        "set": "grass",
+        "tileSize": [
+          2,
+          2
+        ]
+      }
+    },
+    "ground/soil": {
+      "name": "Terra",
+      "category": "ground",
+      "color": "#4a3526",
+      "roughness": 1,
+      "texture": {
+        "set": "soil",
+        "tileSize": [
+          1.5,
+          1.5
+        ]
+      }
+    },
+    "ground/gravel": {
+      "name": "Brita",
+      "category": "ground",
+      "color": "#a29d94",
+      "roughness": 1,
+      "texture": {
+        "set": "gravel",
+        "tileSize": [
+          1,
+          1
+        ]
+      }
+    },
+    "ground/sand": {
+      "name": "Areia",
+      "category": "ground",
+      "color": "#dcc79b",
+      "roughness": 1,
+      "texture": {
+        "set": "soil",
+        "tileSize": [
+          1.5,
+          1.5
+        ]
+      }
+    },
+    "water/pool": {
+      "name": "Água de piscina",
+      "category": "water",
+      "color": "#3fb6c9",
+      "roughness": 0.04,
+      "opacity": 0.82
+    },
+    "light/lampshade": {
+      "name": "Cúpula de luz",
+      "category": "light",
+      "color": "#f4e3c0",
+      "roughness": 0.9,
+      "emissive": "#ffcf85",
+      "emissiveIntensity": 0
+    }
+  },
+  "moods": [
+    {
+      "id": "cozy",
+      "name": {
+        "pt-BR": "Aconchegante",
+        "en": "Cozy"
+      },
+      "timeOfDay": "18:30",
+      "exposure": 1.05,
+      "palette": [
+        "paint/sand-limewash",
+        "wood/smoked-oak",
+        "fabric/navy-velvet",
+        "fabric/rust-wool",
+        "wood/walnut"
+      ]
+    },
+    {
+      "id": "bright",
+      "name": {
+        "pt-BR": "Claro",
+        "en": "Bright"
+      },
+      "timeOfDay": "12:45",
+      "exposure": 0.95,
+      "palette": [
+        "paint/white-matte",
+        "wood/light-ash",
+        "fabric/linen",
+        "fabric/sage-linen",
+        "stone/carrara"
+      ]
+    },
+    {
+      "id": "moody",
+      "name": {
+        "pt-BR": "Noturno",
+        "en": "Moody"
+      },
+      "timeOfDay": "22:15",
+      "exposure": 1.1,
+      "palette": [
+        "paint/charcoal",
+        "wood/ebony",
+        "leather/cognac",
+        "metal/brass",
+        "fabric/charcoal-felt"
+      ]
+    }
+  ]
+}
