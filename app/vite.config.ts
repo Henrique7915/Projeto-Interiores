@@ -53,7 +53,17 @@ export default defineConfig({
           { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml' },
         ],
       },
-      workbox: { maximumFileSizeToCacheInBytes: 6 * 1024 * 1024 },
+      workbox: {
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+        // modelos GLB e texturas (frente de Gráficos) ficam em /assets/: guardados na primeira vez para o app funcionar sem internet
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }: { url: URL }) => /\/assets\/(models|textures)\//.test(url.pathname),
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'design3d-assets', expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 90 } },
+          },
+        ],
+      },
     }),
   ],
   server: { port: 5173, fs: { allow: ['..'] }, proxy: { '/api': 'http://127.0.0.1:3737' } },
