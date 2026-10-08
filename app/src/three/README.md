@@ -13,7 +13,8 @@ import { SceneView, type SceneViewHandle } from './three'
   onPick={setSel}                    // clique em objeto, parede (side left/right), cômodo, abertura, zona; null = vazio
   onDragEnd={({ id, position, rotationDeg }) => ...}   // fim de arraste ou giro (R, Shift+R, Q, E); position no espaço da cena
   onDelete={(id) => ...}             // Delete/Backspace com objeto selecionado
-  quality="high" | "medium" | "low"  // low: sem sombras nem pós-processamento (celular); medium: sem oclusão ambiente
+  quality="high" | "medium" | "low"  // teto de qualidade; low: sem sombras/pós-processamento/luzes reais (celular); medium: sombras leves, sem oclusão ambiente
+  adaptive                           // padrão ligado: se o aparelho não acompanhar, desce high → medium → low sozinho
   // opcionais: padrão vem da cena
   timeOfDay={18.5}                   // horas decimais ou "HH:MM"; sem valor usa scene.environment.timeOfDay
   onTimeChange={setTime}             // usuário arrastou o sol (horas decimais)
@@ -42,6 +43,23 @@ Os painéis do App (moodboard, catálogo de móveis) montam suas listas a partir
 | `materials/` | biblioteca (`assets/catalog.json`), conjuntos de textura procedurais, materiais Three |
 | `lighting/` | sol e lua por hora do dia, atmosfera, luminárias acendem à noite, sol arrastável |
 | `interaction/Items.tsx` | seleção, arraste com grade e encaixe na parede |
+
+## Desempenho
+
+- O canvas usa `frameloop="demand"`: só desenha quando algo muda (câmera, hora, seleção, arraste, animações). Parado, não gasta GPU nem bateria. Quem anima em `useFrame` precisa chamar `invalidate()` enquanto não terminou (veja `Lighting` e `Wall`), e mudar um objeto Three direto (sem passar pelo React) também pede `invalidate()`.
+- Três níveis em `SETTINGS` (`SceneView.tsx`): sombras, resolução (`dpr`), pós-processamento, oclusão ambiente e se as luminárias acendem luzes reais (`LightBudget`). Em `low` elas só brilham (material emissivo).
+- `Governor` mede quadros em trechos contínuos e desce um nível se a média ficar abaixo de ~33 quadros/s por duas janelas seguidas.
+
+## Modelos GLB (Blender)
+
+- `assets/blender/modelos.py` gera os modelos por código: `blender --background --python assets/blender/modelos.py [-- sofa-3 armchair]` → `assets/models/<nome>.glb` (precisa do pacote `python3-numpy` para o exportador glTF).
+- Convenção: metros, origem no centro da base, frente +Z, topo +Y; o **nome do material no GLB é o slot do catálogo** (`upholstery`, `legs`...). Materiais com outros nomes (folhas, caules) ficam como estão no arquivo. Sem UVs: o motor gera UVs em metros ao carregar, então a textura mantém a escala real.
+- No catálogo: `model: "models/<nome>.glb"`. O nome do arquivo é também o do desenhista procedural em `furniture/builders*.tsx`, usado enquanto o GLB carrega ou se ele falhar. O modelo é esticado até as medidas do objeto na cena.
+- Modelos prontos: `sofa-3`, `armchair`, `bed-queen`, `chair-dining`, `plant-monstera`, `toilet`.
+
+## Páginas de desenvolvimento
+
+Com `npm run dev` rodando: `/src/three/dev/viewer.html?scene=studio|quintal&q=low|medium|high&adaptive=0&t=18.5&view=iso|top|front` (motor sozinho, expõe `window.__vp` e `window.__setT`) e `/src/three/dev/preview.html?preview=<catalogId>` (miniatura, usada por `assets/scripts/thumbnails.mjs`).
 
 ## Convenções
 

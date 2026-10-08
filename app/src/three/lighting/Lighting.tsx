@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { createContext, useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
 import { Environment, Lightformer, Line } from '@react-three/drei'
 import * as THREE from 'three'
 import { create } from 'zustand'
 import { atmosphereAt, bodyAt, timeFromRay } from './daylight'
+
+/** Se as luminárias podem acender luzes de verdade (pointLight). Em qualidade baixa só brilham (emissivo): celular não aguenta várias luzes. */
+export const LightBudget = createContext(true)
 
 /** Nível das luminárias (0..1), atualizado conforme a hora animada. Lido pelos móveis. */
 export const useLampLevel = create<{ lamp: number; set: (v: number) => void }>((set) => ({ lamp: 0, set: (lamp) => set({ lamp }) }))
@@ -14,6 +17,8 @@ interface Props {
   center: THREE.Vector3
   radius: number
   shadows: boolean
+  /** lado do mapa de sombra (px) */
+  shadowSize?: number
   onTimeChange?: (t: number) => void
   showGizmo?: boolean
   northDeg?: number
@@ -28,8 +33,9 @@ const shortest = (from: number, to: number) => {
   return d
 }
 
-export function Lighting({ time, center, radius, shadows, onTimeChange, showGizmo = true, northDeg = 0, sky = 'clear', exposure = 1 }: Props) {
-  const { scene, gl } = useThree()
+export function Lighting({ time, center, radius, shadows, shadowSize = 2048, onTimeChange, showGizmo = true, northDeg = 0, sky = 'clear', exposure = 1 }: Props) {
+  const { scene, gl, invalidate } = useThree()
+  const applied = useRef('')
   const sun = useRef<THREE.DirectionalLight>(null!)
   const hemi = useRef<THREE.HemisphereLight>(null!)
   const cur = useRef(time)
@@ -44,11 +50,22 @@ export function Lighting({ time, center, radius, shadows, onTimeChange, showGizm
     scene.background = new THREE.Color('#000')
   }, [scene])
 
+  // o canvas só desenha quando algo muda (frameloop="demand"): qualquer mudança de parâmetro pede um quadro
+  useEffect(() => {
+    applied.current = ''
+    invalidate()
+  }, [time, northDeg, sky, exposure, radius, center, invalidate])
+
   useFrame((_, dt) => {
     const d = shortest(cur.current, time)
+    const settled = dragging.current || Math.abs(d) < 0.001
     // durante o arraste seguimos o ponteiro direto; fora dele animamos
-    cur.current = dragging.current || Math.abs(d) < 0.001 ? time : (cur.current + d * Math.min(1, dt * 4) + 24) % 24
+    cur.current = settled ? time : (cur.current + d * Math.min(1, dt * 4) + 24) % 24
     const t = cur.current
+    // parado e sem mudança: nada a recalcular
+    if (settled && applied.current === `${t}`) return
+    applied.current = settled ? `${t}` : ''
+    if (!settled) invalidate()
     const atm = atmosphereAt(t)
     const body = bodyAt(t, northDeg)
 
@@ -122,7 +139,7 @@ export function Lighting({ time, center, radius, shadows, onTimeChange, showGizm
       <directionalLight
         ref={sun}
         castShadow={shadows}
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[shadowSize, shadowSize]}
         shadow-camera-left={-b}
         shadow-camera-right={b}
         shadow-camera-top={b}
