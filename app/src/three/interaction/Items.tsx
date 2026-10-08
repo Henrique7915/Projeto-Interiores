@@ -107,6 +107,8 @@ export function Items({ objects, walls, bounds, selectedId, interiorLights, onPi
     e.stopPropagation()
     onPick?.({ type: 'object', id: item.id })
     if (item.locked) return
+    // trava a câmera já no clique, senão os primeiros pixels do arraste ainda giram a órbita
+    if (controls) (controls as unknown as { enabled: boolean }).enabled = false
     const g = groups.current.get(item.id)
     if (!g) return
 
@@ -121,7 +123,7 @@ export function Items({ objects, walls, bounds, selectedId, interiorLights, onPi
       return ray.ray.intersectPlane(plane, hit)
     }
     const start = rayAt(e.nativeEvent)
-    if (!start) return
+    if (!start) { if (controls) (controls as unknown as { enabled: boolean }).enabled = true; return }
     const grab: Vec2 = [item.position[0] - start.x, item.position[2] - start.z]
     const down: Vec2 = [e.nativeEvent.clientX, e.nativeEvent.clientY]
     let moved = false
