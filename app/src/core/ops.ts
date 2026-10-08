@@ -34,6 +34,13 @@ const roomType = z.enum(['living', 'dining', 'kitchen', 'bedroom', 'bathroom', '
 const dims = z.object({ width: z.number().positive(), height: z.number().positive(), depth: z.number().positive() })
 const slots = z.record(z.string(), mat)
 
+/** Parede por id, ou pelo lado de um ambiente retangular (mais fácil para IA acertar a orientação). */
+const wallRef = {
+  wallId: z.string().optional().describe('id da parede'),
+  roomId: z.string().optional().describe('alternativa a wallId: id do ambiente retangular'),
+  roomSide: z.enum(['north', 'east', 'south', 'west']).optional().describe('lado do ambiente (north = menor Z, east = maior X, south = maior Z, west = menor X)'),
+}
+
 export const OpSchema = z.discriminatedUnion('op', [
   z.object({
     op: z.literal('addRoom'),
@@ -122,9 +129,9 @@ export const OpSchema = z.discriminatedUnion('op', [
   z.object({
     op: z.literal('addOpening'),
     id: optId,
-    wallId: z.string(),
+    ...wallRef,
     kind: openingKind,
-    offset: z.number().describe('distância (m) do início da parede ao CENTRO da abertura'),
+    offset: z.number().optional().describe('distância (m) ao CENTRO da abertura (padrão: meio da parede). Com wallId: contada do início da parede. Com roomId+roomSide: contada do lado oeste (norte/sul) ou do lado norte (leste/oeste)'),
     width: z.number().positive().optional(),
     height: z.number().positive().optional(),
     sill: z.number().min(0).optional().describe('altura do peitoril (m); portas = 0'),
@@ -157,8 +164,8 @@ export const OpSchema = z.discriminatedUnion('op', [
     id: optId,
     catalogId: z.string(),
     name: z.string().optional(),
-    wallId: z.string(),
-    offset: z.number().describe('distância (m) do início da parede ao centro do objeto'),
+    ...wallRef,
+    offset: z.number().optional().describe('distância (m) ao centro do objeto (padrão: meio da parede); mesma convenção de addOpening'),
     side: z.enum(['left', 'right']).default('right').describe('lado da parede onde fica o objeto; "right" = interior dos ambientes'),
     gap: z.number().min(0).default(0.02),
     y: z.number().optional(),
@@ -337,6 +344,26 @@ const zoneDefaultMaterial: Record<string, string> = {
   other: 'stone/slate',
 }
 
+/** Resolve a parede de um comando: por wallId, ou por roomId + roomSide (retângulos). `flip` = offset deve ser invertido. */
+function resolveWallRef(d: Scene, ref: { wallId?: string; roomId?: string; roomSide?: 'north' | 'east' | 'south' | 'west' }) {
+  if (ref.wallId) {
+    const w = findWall(d, ref.wallId)
+    if (!w) throw new Error(`Parede não encontrada: "${ref.wallId}"`)
+    return { w, flip: false }
+  }
+  if (!ref.roomId || !ref.roomSide) throw new Error('Informe wallId, ou roomId + roomSide (north/east/south/west).')
+  const r = findRoom(d, ref.roomId)
+  if (!r) throw new Error(`Ambiente não encontrado: "${ref.roomId}"`)
+  const b = bbox(r.entity.polygon)
+  const eps = 1e-3
+  const horizontal = ref.roomSide === 'north' || ref.roomSide === 'south'
+  const target = ref.roomSide === 'north' ? b.minZ : ref.roomSide === 'south' ? b.maxZ : ref.roomSide === 'west' ? b.minX : b.maxX
+  const hit = wallsOfRoom(r.container, ref.roomId).find((w) => (horizontal ? Math.abs(w.start[1] - target) < eps && Math.abs(w.end[1] - target) < eps : Math.abs(w.start[0] - target) < eps && Math.abs(w.end[0] - target) < eps))
+  if (!hit) throw new Error(`O ambiente "${ref.roomId}" não tem parede no lado ${ref.roomSide} (só funciona em ambientes retangulares com paredes).`)
+  const flip = horizontal ? hit.start[0] > hit.end[0] : hit.start[1] > hit.end[1]
+  return { w: { entity: hit, container: r.container, key: r.key }, flip }
+}
+
 function apply(d: Scene, op: Op, created: string[]) {
   const taken = allIds(d)
   const newOf = (id: string | undefined, base: string) => {
@@ -499,16 +526,17 @@ function apply(d: Scene, op: Op, created: string[]) {
       break
     }
     case 'addOpening': {
-      const w = wall(op.wallId)
+      const { w, flip } = resolveWallRef(d, op)
       const df = openingDefaults(op.kind)
       const id = newOf(op.id, op.kind)
       const width = op.width ?? df.width
       const len = wallLength(w.entity)
+      const rawOffset = op.offset === undefined ? len / 2 : flip ? len - op.offset : op.offset
       if (width > len) throw new Error(`Abertura (${width} m) maior que a parede (${round(len, 2)} m)`)
       const wallH = w.entity.height ?? (w.container as Level).height ?? D.wallHeight
       const sill = op.sill ?? df.sill
       const height = Math.min(op.height ?? df.height, wallH - sill)
-      list(w.container, 'openings').push({ id, wallId: op.wallId, kind: op.kind, offset: round(clamp(op.offset, width / 2, len - width / 2)), width, height, ...(sill ? { sill } : {}), ...strip({ hinge: op.hinge, opensTo: op.opensTo }) })
+      list(w.container, 'openings').push({ id, wallId: w.entity.id, kind: op.kind, offset: round(clamp(rawOffset, width / 2, len - width / 2)), width, height, ...(sill ? { sill } : {}), ...strip({ hinge: op.hinge, opensTo: op.opensTo }) })
       break
     }
     case 'updateOpening': {
@@ -555,11 +583,12 @@ function apply(d: Scene, op: Op, created: string[]) {
     case 'addObjectAtWall': {
       const cat = getCatalogItem(op.catalogId)
       if (!cat) throw new Error(`Item de catálogo desconhecido: "${op.catalogId}".`)
-      const w = wall(op.wallId)
+      const { w, flip } = resolveWallRef(d, op)
       const dm = op.dimensions ?? cat.dimensions
+      const offset = op.offset === undefined ? wallLength(w.entity) / 2 : flip ? wallLength(w.entity) - op.offset : op.offset
       const nR = wallNormalRight(w.entity)
       const n: [number, number] = op.side === 'right' ? nR : [-nR[0], -nR[1]]
-      const base = pointOnWall(w.entity, op.offset)
+      const base = pointOnWall(w.entity, offset)
       const push = (w.entity.thickness ?? D.wallThickness) / 2 + dm.depth / 2 + op.gap
       const id = newOf(op.id, op.name ?? nameSlug(cat.id))
       const yy = op.y ?? defaultElevation(cat.mount)
@@ -574,7 +603,7 @@ function apply(d: Scene, op: Op, created: string[]) {
         ...(op.dimensions ? { dimensions: op.dimensions } : {}),
         ...(op.materials ? { materials: op.materials } : {}),
         ...(cat.mount && cat.mount !== 'floor' ? { mount: cat.mount } : {}),
-        ...(cat.mount === 'wall' ? { wallId: op.wallId } : {}),
+        ...(cat.mount === 'wall' ? { wallId: w.entity.id } : {}),
         ...(room ? { roomId: room.room.id } : {}),
       })
       break
