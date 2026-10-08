@@ -1,12 +1,27 @@
 import { create } from 'zustand'
-import { applyOps, newScene, TEMPLATES, type ApplyResult, type OpInput, type Scene, type Selection } from '../core'
+import { applyOps, findAnnotation, findObject, findOpening, findRoof, findRoom, findSlabOpening, findWall, newScene, TEMPLATES, type ApplyResult, type OpInput, type Scene, type Selection } from '../core'
 import { prefs, saveProject } from '../lib/storage'
 
 export type ViewMode = '3d' | 'plan' | 'split'
 export type View3D = 'iso' | 'top' | 'front'
 export type Cutaway = 'auto' | 'none' | 'all'
-export type PlanTool = 'select' | 'room' | 'wall' | 'door' | 'window' | 'measure'
+export type PlanTool = 'select' | 'room' | 'wall' | 'door' | 'window' | 'measure' | 'dim' | 'text'
 export type DisplayUnit = 'm' | 'cm' | 'ft'
+/** Telhado e forro no 3D: auto = só com a câmera baixa. */
+export type RoofMode = 'auto' | 'show' | 'hide'
+/** upto = mostra só o andar em edição e os de baixo; all = todos. */
+export type LevelView = 'upto' | 'all'
+
+/** Andar em edição: o escolhido, ou o térreo se o escolhido sumiu. */
+export const activeLevelOf = (scene: Scene, id: string | null) => scene.levels.find((l) => l.id === id) ?? scene.levels[0]
+
+/** Andar onde está o item selecionado (para a planta acompanhar a seleção). */
+function levelOfSelection(scene: Scene, sel: Selection): string | undefined {
+  if (!sel || !('id' in sel)) return undefined
+  const f = sel.kind === 'room' ? findRoom : sel.kind === 'wall' ? findWall : sel.kind === 'opening' ? findOpening : sel.kind === 'object' ? findObject : sel.kind === 'roof' ? findRoof : sel.kind === 'slab' ? findSlabOpening : sel.kind === 'annotation' ? findAnnotation : undefined
+  const hit = f?.(scene, sel.id)
+  return hit && hit.key !== 'site' ? hit.key : undefined
+}
 
 /** Alvo de aplicação da paleta quando nada está selecionado (itens do moodboard). */
 export type PaintTarget = 'floors' | 'wallsInside' | 'wallsOutside' | 'ground' | 'furnitureMain' | 'furnitureAccent' | null
@@ -20,6 +35,9 @@ interface EditorState {
   tool: PlanTool
   view3d: View3D
   cutaway: Cutaway
+  activeLevel: string | null
+  roofMode: RoofMode
+  levelView: LevelView
   unit: DisplayUnit
   snap: number
   paintTarget: PaintTarget
@@ -40,6 +58,9 @@ interface EditorState {
   setTool: (t: PlanTool) => void
   setView3d: (v: View3D) => void
   setCutaway: (c: Cutaway) => void
+  setActiveLevel: (id: string) => void
+  setRoofMode: (m: RoofMode) => void
+  setLevelView: (v: LevelView) => void
   setUnit: (u: DisplayUnit) => void
   setSnap: (s: number) => void
   setPaintTarget: (t: PaintTarget) => void
@@ -57,6 +78,9 @@ export const useEditor = create<EditorState>((set, get) => ({
   tool: 'select',
   view3d: 'iso',
   cutaway: 'auto',
+  activeLevel: null,
+  roofMode: 'auto',
+  levelView: 'upto',
   unit: prefs.get<DisplayUnit>('unit', 'm'),
   snap: prefs.get<number>('snap', 0.05),
   paintTarget: null,
@@ -80,6 +104,10 @@ export const useEditor = create<EditorState>((set, get) => ({
         else if (op.op === 'addZone') set({ selection: { kind: 'zone', id } })
         else if (op.op === 'addOpening') set({ selection: { kind: 'opening', id } })
         else if (op.op === 'addWall') set({ selection: { kind: 'wall', id } })
+        else if (op.op === 'addRoof') set({ selection: { kind: 'roof', id } })
+        else if (op.op === 'addSlabOpening') set({ selection: { kind: 'slab', id } })
+        else if (op.op === 'addDimension' || op.op === 'addLabel') set({ selection: { kind: 'annotation', id } })
+        else if (op.op === 'addLevel') set({ activeLevel: id })
       }
     } else if (sel && 'id' in sel && ops.some((o) => 'op' in o && (o.op.startsWith('remove') || o.op === 'clear'))) {
       // limpa seleção de coisas removidas
@@ -109,7 +137,13 @@ export const useEditor = create<EditorState>((set, get) => ({
     if (opts?.keepHistory) set({ scene, past: [...get().past, cur].slice(-HISTORY_LIMIT), future: [], lastRemoteChange: opts.remote ? Date.now() : get().lastRemoteChange })
     else set({ scene, past: [], future: [], selection: null })
   },
-  select: (selection) => set({ selection, objectSlot: '', paintTarget: selection ? null : get().paintTarget }),
+  select: (selection) => {
+    const lv = levelOfSelection(get().scene, selection)
+    set({ selection, objectSlot: '', paintTarget: selection ? null : get().paintTarget, ...(lv ? { activeLevel: lv } : {}) })
+  },
+  setActiveLevel: (activeLevel) => set({ activeLevel }),
+  setRoofMode: (roofMode) => set({ roofMode }),
+  setLevelView: (levelView) => set({ levelView }),
   setViewMode: (viewMode) => (prefs.set('viewMode', viewMode), set({ viewMode })),
   setTool: (tool) => set({ tool }),
   setView3d: (view3d) => set({ view3d }),

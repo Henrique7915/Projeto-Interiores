@@ -50,6 +50,14 @@ export function describeScene(scene: Scene): string {
       const b = bbox(r.polygon)
       L.push(`• ambiente "${r.name}" [${r.id}]${r.type ? ` (${r.type})` : ''}: ${round(b.width, 2)} × ${round(b.depth, 2)} m, área ${round(polygonArea(r.polygon), 2)} m², perímetro ${round(polygonPerimeter(r.polygon), 2)} m, de (${round(b.minX, 2)}, ${round(b.minZ, 2)}) a (${round(b.maxX, 2)}, ${round(b.maxZ, 2)}), piso ${resolveMaterial(r.floor?.material, scene).name} [${r.floor?.material ?? '—'}]`)
     }
+    for (const r of lvl.roofs ?? []) {
+      const b = bbox(r.polygon)
+      L.push(`• telhado ${r.kind} [${r.id}]: ${round(b.width, 2)} × ${round(b.depth, 2)} m em (${round(b.minX, 2)}, ${round(b.minZ, 2)}), inclinação ${r.pitchDeg ?? '—'}°, beiral ${r.overhang ?? 0.4} m${r.material ? `, material ${r.material}` : ''}`)
+    }
+    for (const so of lvl.slabOpenings ?? []) {
+      const b = bbox(so.polygon)
+      L.push(`• vão no piso [${so.id}]${so.name ? ` "${so.name}"` : ''}: ${round(b.width, 2)} × ${round(b.depth, 2)} m em (${round(b.minX, 2)}, ${round(b.minZ, 2)})${so.railing ? ', com guarda-corpo' : ''}`)
+    }
   }
   for (const { key, c } of allContainers(scene)) {
     if (key === 'site') {
@@ -57,15 +65,20 @@ export function describeScene(scene: Scene): string {
       L.push(`# Terreno (site)${s.boundary ? ` limites ${JSON.stringify(s.boundary)}` : ''}, solo ${s.groundMaterial ?? 'ground/grass'}`)
       for (const z of s.zones ?? []) L.push(`• zona ${z.kind} "${z.name ?? z.id}" [${z.id}]: ${round(polygonArea(z.polygon), 2)} m², ${JSON.stringify(z.polygon)}, material ${z.material ?? '—'}${z.depth ? `, profundidade ${z.depth} m` : ''}`)
     }
+    if (key !== 'site' && scene.levels.length > 1) L.push(`## Paredes, aberturas e móveis do andar [${key}]`)
     for (const w of c.walls ?? []) {
       const ops = (c.openings ?? []).filter((o) => o.wallId === w.id)
-      L.push(`• parede ${w.kind ?? 'solid'} [${w.id}]${wallRoomIds(w).length ? ` (${wallRoomIds(w).length > 1 ? 'compartilhada pelos ambientes' : 'do ambiente'} ${wallRoomIds(w).join(' e ')})` : ''}: (${round(w.start[0], 2)}, ${round(w.start[1], 2)}) → (${round(w.end[0], 2)}, ${round(w.end[1], 2)}), ${round(wallLength(w), 2)} m, esp ${w.thickness ?? 0.15}, h ${w.height ?? '—'}, esquerda ${w.finish?.left ?? '—'}, direita ${w.finish?.right ?? '—'}` + (ops.length ? `; aberturas: ${ops.map((o) => `${o.kind} [${o.id}] centro a ${round(o.offset, 2)} m, ${o.width}×${o.height}${o.sill ? `, peitoril ${o.sill}` : ''}`).join('; ')}` : ''))
+      L.push(`• parede ${w.kind ?? 'solid'} [${w.id}]${wallRoomIds(w).length ? ` (${wallRoomIds(w).length > 1 ? 'compartilhada pelos ambientes' : 'do ambiente'} ${wallRoomIds(w).join(' e ')})` : ''}: (${round(w.start[0], 2)}, ${round(w.start[1], 2)}) → (${round(w.end[0], 2)}, ${round(w.end[1], 2)}), ${round(wallLength(w), 2)} m, esp ${w.thickness ?? 0.15}, h ${w.height ?? '—'}, esquerda ${w.finish?.left ?? '—'}, direita ${w.finish?.right ?? '—'}` + (ops.length ? `; aberturas: ${ops.map((o) => `${o.kind} [${o.id}] centro a ${round(o.offset, 2)} m, ${o.width}×${o.height}${o.sill ? `, peitoril ${o.sill}` : ''}${o.treatment && o.treatment.kind !== 'none' ? `, ${o.treatment.kind}${o.treatment.open !== undefined ? ` ${Math.round(o.treatment.open * 100)}% aberta` : ''}` : ''}`).join('; ')}` : ''))
     }
     for (const o of c.objects ?? []) {
       const d = objectDims(o)
       const m = objectMaterials(o)
       L.push(`• ${label(o)} [${o.id}] ${o.catalogId}: centro da base (${round(o.position[0], 2)}, ${round(o.position[1], 2)}, ${round(o.position[2], 2)}), rot ${round(o.rotationDeg ?? 0, 0)}°, ${d.width} × ${d.height} × ${d.depth} m (L×A×P), ${Object.entries(m).map(([k, v]) => `${k}=${v}`).join(', ')}`)
     }
+  }
+  for (const { c } of allContainers(scene)) {
+    for (const g of c.groups ?? []) L.push(`• grupo "${g.name ?? g.id}" [${g.id}]: ${g.objectIds.join(', ')} (movem juntos)`)
+    for (const a of c.annotations ?? []) L.push(a.kind === 'dimension' ? `• cota [${a.id}]: (${round(a.start[0], 2)}, ${round(a.start[1], 2)}) → (${round(a.end[0], 2)}, ${round(a.end[1], 2)})${a.text ? ` "${a.text}"` : ''}` : `• texto [${a.id}] em (${round(a.start[0], 2)}, ${round(a.start[1], 2)}): "${a.text}"`)
   }
   const issues = analyzeScene(scene)
   if (issues.length) L.push('Problemas detectados:\n' + issues.map((x) => `  - [${x.severity}] ${x.message}`).join('\n'))

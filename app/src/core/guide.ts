@@ -31,6 +31,14 @@ Circulação ≥ 0,80 (ideal 0,90). Sofá 3 lugares 2,2 × 0,95; mesa de centro 
 mesa de jantar 6 lugares 1,8 × 0,9 com 0,9 livre em volta; bancada 0,6 de profundidade; guarda-roupa 0,6 de profundidade; TV a ~2,5 m do sofá.
 Sempre use ids de catálogo reais (search_catalog). Se faltar um item, use o mais parecido e ajuste "dimensions".
 
+## Andares, telhado, escada, cortina, grupos e cotas
+Andares: addLevel {name?, height?} empilha um andar novo em cima do último (a elevação é calculada); crie os ambientes dele com addRoom {container: id do andar}. Use "container" também em addWall e addObject para escolher o andar; sem ele vale o térreo (ou o andar do ambiente em que o móvel cai). updateLevel {id, patch:{name?, height?, hidden?}} · removeLevel {id}.
+Telhado: addRoof {kind: gable (duas águas) | hip (quatro) | shed (uma) | flat, roomId (cobre o ambiente) ou x,z,width,depth, pitchDeg?, overhang?, material?}; fica no andar do ambiente (ou no mais alto). updateRoof {id, patch} · removeRoof {id}.
+Escada: ponha o objeto stairs/straight ou stairs/l-shaped no andar de BAIXO (addObject) e fure o piso do andar de CIMA com addSlabOpening {levelId, x, z, width, depth, railing?} sobre a escada. updateSlabOpening · removeSlabOpening.
+Cortina: setTreatment {id: id da janela, kind: curtain | sheer | blind | roller | none, material?, open?: 0..1}.
+Grupos: groupObjects {objectIds:[...], name?} faz móveis do mesmo andar se moverem juntos (mover um leva os outros); ungroup {id}.
+Cotas: addDimension {start:[x,z], end:[x,z], offset?, text?, container?} e addLabel {start, text, container?} desenham na planta; updateAnnotation · removeAnnotation.
+
 ## Exterior
 Terreno: setSite {width, depth}. Áreas: addZone {kind: grass | paving | deck | gravel | soil | water | pool | garden-bed | sand, x, z, width, depth}. Muros e cercas: addWall {kind:'fence'|'solid', container:'site'}. Plantas e móveis externos: addObject com catálogo "plant/…" e "outdoor/…".
 
@@ -49,5 +57,10 @@ updateOpening {id, patch} · removeOpening {id}
 addObject {id?, catalogId, x, z, y?, rotationDeg?, dimensions?, materials?: {slot: materialId}, name?}
 addObjectAtWall {id?, catalogId, wallId | (roomId + roomSide), offset?, side?: right|left, gap?, y?, dimensions?, materials?}
 updateObject {id, patch:{x?, z?, y?, rotationDeg?, dimensions?, materials?, name?, locked?, hidden?}} · duplicateObject {id, dx?, dz?} · removeObject {id}
+addLevel {id?, name?, height?} · updateLevel {id, patch:{name?, height?, hidden?}} · removeLevel {id}  (addRoom/addWall/addObject aceitam container: id do andar)
+addRoof {id?, kind?: gable|hip|shed|flat, roomId | (x, z, width, depth), pitchDeg?, ridgeDeg?, overhang?, material?, levelId?} · updateRoof {id, patch} · removeRoof {id}
+addSlabOpening {id?, levelId?, x, z, width, depth, railing?} · updateSlabOpening {id, patch} · removeSlabOpening {id}  (vão de escada no piso do andar de cima; a escada stairs/* vai no de baixo)
+setTreatment {id: janela, kind: curtain|sheer|blind|roller|none, material?, open?} · groupObjects {id?, objectIds, name?} · ungroup {id}
+addDimension {start, end, offset?, text?, container?} · addLabel {start, text, container?} · updateAnnotation {id, patch} · removeAnnotation {id}
 setMaterial {target: {type: room|roomWalls|wall|object|opening|zone|site, id?, side?, slot?}, material}
 setEnvironment {patch:{timeOfDay?: "HH:MM", sky?: clear|partly-cloudy|overcast, mood?, interiorLights?: auto|on|off}} · setMeta {patch:{name?, description?}} · clear {}`

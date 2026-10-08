@@ -19,6 +19,16 @@ npm run build        # tsc + vite build (app/dist)
 - **Celular:** abra o endereço publicado e use "Adicionar à tela inicial" (iPhone: Safari → Compartilhar) ou "Instalar app" (Android: Chrome). Os projetos ficam salvos no próprio aparelho; para levar para outro aparelho use Exportar (.json) ou o link compartilhável.
 - **Publicação:** `.github/workflows/pages.yml` publica o app no GitHub Pages a cada mudança na `main` (precisa do repositório público e de Settings → Pages → Source: GitHub Actions).
 
+## Andares, telhado, escada, cortina, grupos e cotas (schema v0.2)
+
+- **Andares:** o seletor fica na planta (canto esquerdo) e no 3D. `addLevel` empilha um andar em cima do último; a planta mostra só o andar em edição, com o de baixo em sombra. No 3D, "Até este andar" esconde os de cima.
+- **Telhado:** `addRoof` (plano, uma, duas ou quatro águas) sobre um ambiente ou área; aparece tracejado na planta. O botão "Telhado" do 3D alterna automático/mostrar/ocultar.
+- **Escada:** objeto `stairs/*` no andar de baixo + `addSlabOpening` (vão com guarda-corpo) no piso do andar de cima. O painel "Andares, telhado e escada" faz os dois de uma vez.
+- **Cortina:** `setTreatment` numa janela ou porta (cortina, voal, persiana, rolô, quanto está aberta).
+- **Grupos:** `groupObjects`; mover um móvel do grupo (na planta, no 3D ou por comando) leva os outros junto.
+- **Cotas e textos:** ferramentas "Cota fixa" e "Texto" da planta (`addDimension`, `addLabel`).
+- **Paredes compartilhadas:** ambientes encostados dividem uma parede só (`app.roomIds`).
+
 ## Estrutura
 
 | Pasta | O que tem |

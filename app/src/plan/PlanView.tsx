@@ -3,11 +3,15 @@ import {
   allContainers,
   bbox,
   dist,
+  findAnnotation,
   findObject,
   findOpening,
+  findRoof,
+  findSlabOpening,
   findRoom,
   findWall,
   getCatalogItem,
+  groupOfObject,
   nameOf,
   objectCorners,
   objectDims,
@@ -27,8 +31,9 @@ import {
   type Wall,
 } from '../core'
 import { fmtArea, fmtLen, parseLen } from '../lib/units'
-import { useEditor, type PlanTool } from '../state/store'
+import { activeLevelOf, useEditor, type PlanTool } from '../state/store'
 import { Icon, IconButton, toast } from '../ui/common'
+import { LevelBar } from '../ui/LevelBar'
 
 /** Estado da câmera 2D: centro do mundo (m) e escala (px por metro). */
 interface Cam {
@@ -47,6 +52,7 @@ type Drag =
   | { type: 'opening'; id: string }
   | { type: 'draw-room'; a: Point2; b: Point2 }
   | { type: 'measure'; a: Point2; b: Point2 }
+  | { type: 'dim'; a: Point2; b: Point2 }
 
 type Handle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
 
@@ -78,6 +84,7 @@ export function PlanView() {
   const tool = useEditor((s) => s.tool)
   const unit = useEditor((s) => s.unit)
   const snapStep = useEditor((s) => s.snap)
+  const activeLevelId = useEditor((s) => s.activeLevel)
   const { select, setTool, dispatch, beginGesture, endGesture } = useEditor.getState()
 
   const wrap = useRef<HTMLDivElement>(null)
@@ -88,6 +95,8 @@ export function PlanView() {
   const [hover, setHover] = useState<Point2 | null>(null)
   const [wallStart, setWallStart] = useState<Point2 | null>(null)
   const [lenText, setLenText] = useState('')
+  const [labelAt, setLabelAt] = useState<Point2 | null>(null)
+  const [labelText, setLabelText] = useState('')
   const pointers = useRef(new Map<number, { x: number; y: number }>())
   const pinch = useRef<{ d: number; cam: Cam } | null>(null)
   const fitted = useRef<string>('')
@@ -131,11 +140,16 @@ export function PlanView() {
   const sn = (v: number, alt = false) => (alt || !snapStep ? v : snapTo(v, snapStep))
   const snapPt = (p: Point2, alt = false): Point2 => [sn(p[0], alt), sn(p[1], alt)]
 
-  /* ───── coletas ───── */
-  const rooms = scene.levels.flatMap((l) => (l.rooms ?? []).map((r) => ({ r, l })))
+  /* ───── coletas: só o andar em edição (e o terreno); o de baixo aparece como sombra ───── */
+  const active = activeLevelOf(scene, activeLevelId)
+  const activeIdx = active ? scene.levels.indexOf(active) : -1
+  const below = activeIdx > 0 ? scene.levels[activeIdx - 1] : undefined
+  const shown: { key: string; c: Container }[] = [...(active ? [{ key: active.id, c: active as Container }] : []), ...(scene.site ? [{ key: 'site', c: scene.site as Container }] : [])]
+  const rooms = (active?.rooms ?? []).map((r) => ({ r, l: active! }))
   const zones = scene.site?.zones ?? []
-  const wallsAll = allContainers(scene).flatMap(({ c }) => (c.walls ?? []).map((w) => ({ w, c })))
-  const objs = allContainers(scene).flatMap(({ c }) => (c.objects ?? []).filter((o) => !o.hidden).map((o) => ({ o, c })))
+  const wallsAll = shown.flatMap(({ c }) => (c.walls ?? []).map((w) => ({ w, c })))
+  const objs = shown.flatMap(({ c }) => (c.objects ?? []).filter((o) => !o.hidden).map((o) => ({ o, c })))
+  const annots = shown.flatMap(({ c }) => c.annotations ?? [])
 
   /* ───── pontos de encaixe de paredes ───── */
   const wallSnap = (p: Point2, alt: boolean): Point2 => {
@@ -160,6 +174,8 @@ export function PlanView() {
     const w = evWorld(e)
     if (tool === 'room') return setD({ type: 'draw-room', a: snapPt(w, e.altKey), b: snapPt(w, e.altKey) })
     if (tool === 'measure') return setD({ type: 'measure', a: snapPt(w, e.altKey), b: snapPt(w, e.altKey) })
+    if (tool === 'dim') return setD({ type: 'dim', a: wallSnap(w, e.altKey), b: wallSnap(w, e.altKey) })
+    if (tool === 'text') return setLabelAt(snapPt(w, e.altKey)), setLabelText('')
     if (tool === 'wall') {
       const p = wallSnap(w, e.altKey)
       if (!wallStart) return setWallStart(p), setLenText('')
@@ -171,7 +187,7 @@ export function PlanView() {
 
   function commitWall(a: Point2, b: Point2) {
     if (dist(a, b) < 0.05) return
-    const r = dispatch([{ op: 'addWall', start: a, end: b, container: scene.levels[0] ? scene.levels[0].id : 'site' }])
+    const r = dispatch([{ op: 'addWall', start: a, end: b, container: active ? active.id : 'site' }])
     if (r.errors.length) toast(r.errors[0].message, 'err')
     setWallStart(b)
     setLenText('')
@@ -196,6 +212,8 @@ export function PlanView() {
       setCam({ ...d.cam, cx: d.cam.cx - (e.clientX - d.sx) / d.cam.k, cz: d.cam.cz - (e.clientY - d.sy) / d.cam.k })
     } else if (d.type === 'draw-room' || d.type === 'measure') {
       setD({ ...d, b: snapPt(w, e.altKey) })
+    } else if (d.type === 'dim') {
+      setD({ ...d, b: wallSnap(w, e.altKey) })
     } else if (d.type === 'object') {
       const p = snapPt([w[0] - d.off[0], w[1] - d.off[1]], e.altKey)
       if (!d.moved) {
@@ -252,8 +270,14 @@ export function PlanView() {
       const h = Math.abs(d.b[1] - d.a[1])
       if (w >= 0.5 && h >= 0.5) {
         const n = scene.levels.flatMap((l) => l.rooms ?? []).length + 1
-        dispatch([{ op: 'addRoom', name: `Ambiente ${n}`, x: Math.min(d.a[0], d.b[0]), z: Math.min(d.a[1], d.b[1]), width: w, depth: h }])
+        dispatch([{ op: 'addRoom', name: `Ambiente ${n}`, x: Math.min(d.a[0], d.b[0]), z: Math.min(d.a[1], d.b[1]), width: w, depth: h, ...(active ? { container: active.id } : {}) }])
         setTool('select')
+      }
+    } else if (d.type === 'dim') {
+      if (dist(d.a, d.b) >= 0.05) {
+        const r = dispatch([{ op: 'addDimension', start: d.a, end: d.b, offset: 0.4, ...(active ? { container: active.id } : {}) }])
+        if (r.errors.length) toast(r.errors[0].message, 'err')
+        else setTool('select')
       }
     } else if (d.type !== 'pan' && d.type !== 'measure') {
       endGesture()
@@ -277,6 +301,7 @@ export function PlanView() {
       if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') return
       if (e.key === 'Escape') {
         setWallStart(null)
+        setLabelAt(null)
         setD(null)
         if (useEditor.getState().tool !== 'select') setTool('select')
       }
@@ -287,6 +312,7 @@ export function PlanView() {
 
   useEffect(() => {
     if (tool !== 'wall') setWallStart(null)
+    if (tool !== 'text') setLabelAt(null)
   }, [tool])
 
   /* prévia da parede em desenho */
@@ -337,7 +363,7 @@ export function PlanView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cam, size])
 
-  const dimLine = (a: Point2, b: Point2, label: string, offset = 22, key?: string) => {
+  const dimLine = (a: Point2, b: Point2, label: string, offset = 22, key?: string, color?: string) => {
     const [x1, y1] = S(a)
     const [x2, y2] = S(b)
     const dx = x2 - x1
@@ -353,7 +379,7 @@ export function PlanView() {
     if (ang > 90 || ang < -90) ang += 180
     return (
       <g key={key} pointerEvents="none">
-        <line x1={x1 + ox} y1={y1 + oy} x2={x2 + ox} y2={y2 + oy} stroke="#7e8aab" strokeWidth={1} />
+        <line x1={x1 + ox} y1={y1 + oy} x2={x2 + ox} y2={y2 + oy} stroke={color ?? "#7e8aab"} strokeWidth={color ? 1.6 : 1} />
         <line x1={x1} y1={y1} x2={x1 + ox * 1.1} y2={y1 + oy * 1.1} stroke="#4c5877" strokeWidth={1} />
         <line x1={x2} y1={y2} x2={x2 + ox * 1.1} y2={y2 + oy * 1.1} stroke="#4c5877" strokeWidth={1} />
         <g transform={`translate(${mx},${my}) rotate(${ang})`}>
@@ -408,6 +434,8 @@ export function PlanView() {
     door: 'Clique em uma parede para colocar uma porta.',
     window: 'Clique em uma parede para colocar uma janela.',
     measure: 'Arraste para medir uma distância.',
+    dim: 'Arraste entre dois pontos para fixar uma cota na planta (ela fica no projeto).',
+    text: 'Clique onde quer escrever um texto na planta.',
   }
 
   const tools: { id: PlanTool; icon: string; label: string }[] = [
@@ -417,6 +445,8 @@ export function PlanView() {
     { id: 'door', icon: 'door', label: 'Porta' },
     { id: 'window', icon: 'window', label: 'Janela' },
     { id: 'measure', icon: 'ruler', label: 'Medir' },
+    { id: 'dim', icon: 'dim', label: 'Cota fixa' },
+    { id: 'text', icon: 'text', label: 'Texto' },
   ]
 
   return (
@@ -433,6 +463,12 @@ export function PlanView() {
       onDoubleClick={() => tool === 'wall' && setWallStart(null)}
     >
       <svg width={size.w} height={size.h}>
+        <defs>
+          <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="8" height="8" fill="#1a2033" />
+            <line x1="0" y1="0" x2="0" y2="8" stroke="#e0b37a" strokeWidth="2" opacity="0.7" />
+          </pattern>
+        </defs>
         <rect width={size.w} height={size.h} fill="#0f1320" />
         {gridLines}
 
@@ -452,6 +488,25 @@ export function PlanView() {
             </g>
           )
         })}
+
+        {/* sombra do andar de baixo, para alinhar paredes e escada */}
+        {below && (
+          <g pointerEvents="none" opacity={0.28}>
+            {(below.rooms ?? []).map((r) => (
+              <path key={'g' + r.id} d={polyPath(r.polygon)} fill="#8d97b8" fillOpacity={0.25} />
+            ))}
+            {(below.walls ?? []).map((w) => (
+              <path key={'gw' + w.id} d={polyPath(wallQuad(w))} fill="#d9deee" />
+            ))}
+            {(below.objects ?? [])
+              .filter((o) => getCatalogItem(o.catalogId)?.category === 'stairs' || o.catalogId.startsWith('stairs/'))
+              .map((o) => {
+                const d = objectDims(o)
+                const [cx, cy] = S([o.position[0], o.position[2]])
+                return <rect key={'gs' + o.id} transform={`translate(${cx},${cy}) rotate(${-(o.rotationDeg ?? 0)})`} x={(-d.width * cam.k) / 2} y={(-d.depth * cam.k) / 2} width={d.width * cam.k} height={d.depth * cam.k} fill="none" stroke="#f2b45a" strokeDasharray="5 3" />
+              })}
+          </g>
+        )}
 
         {/* ambientes */}
         {rooms.map(({ r }) => {
@@ -482,6 +537,21 @@ export function PlanView() {
                 {fmtArea(polygonArea(r.polygon))}
               </text>
             </g>
+          )
+        })}
+
+        {/* vãos no piso (escada) */}
+        {(active?.slabOpenings ?? []).map((so) => {
+          const sel = selection?.kind === 'slab' && selection.id === so.id
+          return (
+            <path
+              key={so.id}
+              d={polyPath(so.polygon)}
+              fill="url(#hatch)"
+              stroke={sel ? ACCENT : '#e0b37a'}
+              strokeWidth={sel ? 2.5 : 1.6}
+              onPointerDown={(e) => down(e, () => select({ kind: 'slab', id: so.id }))}
+            />
           )
         })}
 
@@ -581,6 +651,76 @@ export function PlanView() {
             </g>
           )
         })}
+
+        {/* telhados do andar (tracejado; clique na linha) */}
+        {(active?.roofs ?? []).map((r) => {
+          const sel = selection?.kind === 'roof' && selection.id === r.id
+          const b = bbox(r.polygon)
+          const lab = S([b.minX, b.minZ])
+          const name = { flat: 'Laje plana', shed: 'Telhado de uma água', gable: 'Telhado de duas águas', hip: 'Telhado de quatro águas' }[r.kind]
+          return (
+            <g key={r.id}>
+              <path d={polyPath(r.polygon)} fill="none" stroke={sel ? ACCENT : '#c97b5a'} strokeWidth={sel ? 2.5 : 1.6} strokeDasharray="9 5" pointerEvents="none" />
+              <path d={polyPath(r.polygon)} fill="none" stroke="transparent" strokeWidth={14} pointerEvents="stroke" style={{ cursor: 'pointer' }} onPointerDown={(e) => down(e, () => select({ kind: 'roof', id: r.id }))} />
+              {(sel || cam.k >= 30) && (
+                <text x={lab[0] + 6} y={lab[1] + 14} fontSize={11} fill={sel ? ACCENT : '#e0a58a'} pointerEvents="none">
+                  {name}
+                  {r.pitchDeg ? ` · ${r.pitchDeg}°` : ''}
+                </text>
+              )}
+            </g>
+          )
+        })}
+
+        {/* cotas fixas e textos */}
+        {annots.map((a) => {
+          const sel = selection?.kind === 'annotation' && selection.id === a.id
+          if (a.kind === 'dimension') {
+            const off = (a.offset ?? 0.4) * cam.k
+            const [x1, y1] = S(a.start)
+            const [x2, y2] = S(a.end)
+            const L = Math.hypot(x2 - x1, y2 - y1) || 1
+            const ox = (-(y2 - y1) / L) * off
+            const oy = ((x2 - x1) / L) * off
+            return (
+              <g key={a.id}>
+                {dimLine(a.start, a.end, a.text ?? fmtLen(dist(a.start, a.end), unit), off, 'ad' + a.id, sel ? ACCENT : '#6fcf97')}
+                <line x1={x1 + ox} y1={y1 + oy} x2={x2 + ox} y2={y2 + oy} stroke="transparent" strokeWidth={16} pointerEvents="stroke" style={{ cursor: 'pointer' }} onPointerDown={(e) => down(e, () => select({ kind: 'annotation', id: a.id }))} />
+              </g>
+            )
+          }
+          const [tx, ty] = S(a.start)
+          return (
+            <g key={a.id} style={{ cursor: 'pointer' }} onPointerDown={(e) => down(e, () => select({ kind: 'annotation', id: a.id }))}>
+              <rect x={tx - 4} y={ty - 14} width={a.text.length * 7 + 10} height={20} rx={6} fill="#0f1320" opacity={0.9} stroke={sel ? ACCENT : '#6fcf97'} strokeWidth={sel ? 2 : 1} />
+              <text x={tx + 1} y={ty} fontSize={12.5} fill="#e8eaf0">
+                {a.text}
+              </text>
+            </g>
+          )
+        })}
+
+        {/* grupo do objeto selecionado */}
+        {selObj &&
+          (() => {
+            const g = groupOfObject(selObj.container, selObj.entity.id)
+            if (!g) return null
+            const pts = g.objectIds.flatMap((id) => {
+              const m = (selObj.container.objects ?? []).find((q) => q.id === id)
+              return m ? objectCorners(m) : []
+            })
+            if (!pts.length) return null
+            const b = bbox(pts)
+            const [x0, y0] = S([b.minX, b.minZ])
+            return (
+              <g pointerEvents="none">
+                <rect x={x0 - 6} y={y0 - 6} width={b.width * cam.k + 12} height={b.depth * cam.k + 12} rx={8} fill="none" stroke={ACCENT} strokeWidth={1.4} strokeDasharray="3 4" />
+                <text x={x0 - 2} y={y0 - 12} fontSize={11} fill={ACCENT}>
+                  Grupo{g.name ? ` “${g.name}”` : ''} · move junto
+                </text>
+              </g>
+            )
+          })()}
 
         {/* cotas dos ambientes */}
         {rooms.map(({ r }) => {
@@ -695,6 +835,12 @@ export function PlanView() {
             <circle cx={S(wallStart)[0]} cy={S(wallStart)[1]} r={5} fill={ACCENT} />
           </g>
         )}
+        {drag?.type === 'dim' && (
+          <g pointerEvents="none">
+            <line x1={S(drag.a)[0]} y1={S(drag.a)[1]} x2={S(drag.b)[0]} y2={S(drag.b)[1]} stroke="#6fcf97" strokeWidth={2} />
+            {dist(drag.a, drag.b) > 0.02 && dimLine(drag.a, drag.b, fmtLen(dist(drag.a, drag.b), unit), 0.4 * cam.k, 'dm', '#6fcf97')}
+          </g>
+        )}
         {drag?.type === 'measure' && (
           <g pointerEvents="none">
             <line x1={S(drag.a)[0]} y1={S(drag.a)[1]} x2={S(drag.b)[0]} y2={S(drag.b)[1]} stroke="#6fcf97" strokeWidth={2} strokeDasharray="6 4" />
@@ -715,13 +861,36 @@ export function PlanView() {
         </g>
       </svg>
 
-      <div className="plan-tools plan-ui">
-        {tools.map((t) => (
-          <IconButton key={t.id} icon={t.icon} label={t.label} active={tool === t.id} onClick={() => setTool(t.id)} />
-        ))}
+      <div className="plan-left plan-ui">
+        <div className="plan-tools">
+          {tools.map((t) => (
+            <IconButton key={t.id} icon={t.icon} label={t.label} active={tool === t.id} onClick={() => setTool(t.id)} />
+          ))}
+        </div>
+        <LevelBar />
       </div>
       <div className="plan-hint plan-ui">
         {hint[tool]}
+        {tool === 'text' && labelAt && (
+          <input
+            className="lenbox"
+            autoFocus
+            value={labelText}
+            placeholder="texto"
+            onChange={(e) => setLabelText(e.target.value)}
+            onPointerDown={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              e.stopPropagation()
+              if (e.key === 'Enter' && labelText.trim()) {
+                const r = dispatch([{ op: 'addLabel', start: labelAt, text: labelText.trim(), ...(active ? { container: active.id } : {}) }])
+                if (r.errors.length) toast(r.errors[0].message, 'err')
+                setLabelAt(null)
+                setTool('select')
+              }
+              if (e.key === 'Escape') setLabelAt(null)
+            }}
+          />
+        )}
         {tool === 'wall' && wallStart && (
           <input
             className="lenbox"

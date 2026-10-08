@@ -38,6 +38,11 @@ const P: Record<string, string> = {
   file: 'M6 3h9l4 4v14H6zM14 3v5h5',
   chat: 'M4 5h16v11H9l-5 4z',
   menu: 'M4 7h16M4 12h16M4 17h16',
+  dim: 'M3 7v10M21 7v10M3 12h18M6 9l-3 3 3 3M18 9l3 3-3 3',
+  text: 'M5 6h14M12 6v13M9 19h6',
+  roof: 'M3 12 12 4l9 8M6 10v9h12v-9',
+  stairs: 'M4 20h5v-4h5v-4h5V8',
+  group: 'M4 4h7v7H4zM13 13h7v7h-7zM11 7.5h3a2 2 0 0 1 2 2V13',
 }
 export function Icon({ name, size = 18 }: { name: keyof typeof P | string; size?: number }) {
   return (

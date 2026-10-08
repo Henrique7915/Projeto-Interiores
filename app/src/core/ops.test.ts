@@ -8,6 +8,11 @@ async function overlapWarnings(scene: unknown): Promise<string[]> {
   const { validateScene } = await import('../../../schema/validar.mjs')
   return (validateScene(scene).warnings as string[]).filter((w) => w.includes('se sobrepõem'))
 }
+async function allWarnings(scene: unknown): Promise<string[]> {
+  // @ts-expect-error módulo .mjs da Arquitetura, sem tipos no app
+  const { validateScene } = await import('../../../schema/validar.mjs')
+  return validateScene(scene).warnings as string[]
+}
 
 describe('ops', () => {
   it('cria ambiente com 4 paredes (interior à direita) e área correta', () => {
@@ -251,5 +256,110 @@ describe('paredes compartilhadas entre ambientes vizinhos', () => {
     ]).scene
     expect(s.levels[0].walls).toHaveLength(10)
     expect(dup(s)).toEqual([])
+  })
+})
+
+describe('andares, telhado, escada, cortina, grupos e cotas (v0.2)', () => {
+  it('o sobrado de exemplo não gera nenhum aviso do validador nem problema de layout', async () => {
+    const s = TEMPLATES.find((t) => t.id === 'sobrado')!.build()
+    expect(await allWarnings(s)).toEqual([])
+    expect(analyzeScene(s)).toEqual([])
+    expect(s.levels).toHaveLength(2)
+    // paredes do andar de cima têm o pé-direito do andar e o telhado senta nelas
+    expect(s.levels[1].walls!.every((w) => w.height === s.levels[1].height)).toBe(true)
+    expect(s.levels[1].roofs![0].baseHeight).toBe(s.levels[1].height)
+    expect(s.levels[0].walls!.every((w) => w.height === s.levels[0].height)).toBe(true)
+    expect(s.levels[1].objects!.every((o) => (o as { roomId?: string }).roomId && ['quarto1', 'quarto2', 'hall'].includes((o as { roomId: string }).roomId))).toBe(true)
+  })
+  const casa = () =>
+    applyOps(newScene(), [
+      { op: 'addRoom', id: 'sala', name: 'Sala', x: 0, z: 0, width: 6, depth: 5 },
+      { op: 'addLevel', id: 'sup', name: '1º andar' },
+      { op: 'addRoom', id: 'quarto', name: 'Quarto', x: 0, z: 0, width: 6, depth: 5, container: 'sup' },
+    ])
+
+  it('andar novo empilha em cima do anterior (altura + laje) e valida', () => {
+    const r = casa()
+    expect(r.errors).toEqual([])
+    const [t, u] = r.scene.levels
+    expect(u.elevation).toBeCloseTo(t.height + 0.12, 3)
+    expect(validateSchema(r.scene).errors).toEqual([])
+  })
+  it('mudar o pé-direito de baixo empurra os andares de cima; remover desce', () => {
+    let s = casa().scene
+    s = applyOps(s, [{ op: 'updateLevel', id: 'terreo', patch: { height: 3 } }]).scene
+    expect(s.levels[1].elevation).toBeCloseTo(3.12, 3)
+    s = applyOps(s, [{ op: 'removeLevel', id: 'terreo' }]).scene
+    expect(s.levels).toHaveLength(1)
+    expect(s.levels[0].elevation).toBeCloseTo(0, 3)
+  })
+  it('telhado de duas águas sobre um ambiente, com cumeeira ao longo do lado maior', () => {
+    const s = applyOps(casa().scene, [{ op: 'addRoof', id: 'tel', kind: 'gable', roomId: 'quarto', overhang: 0.5 }]).scene
+    const r = s.levels[1].roofs![0]
+    expect(r.kind).toBe('gable')
+    expect(r.ridgeDeg).toBe(0)
+    expect(r.pitchDeg).toBe(30)
+    expect(r.polygon).toHaveLength(4)
+    expect(validateSchema(s).errors).toEqual([])
+    const s2 = applyOps(s, [{ op: 'updateRoof', id: 'tel', patch: { kind: 'hip', pitchDeg: 20 } }, { op: 'removeRoof', id: 'nada' }])
+    expect(s2.errors).toHaveLength(1)
+    expect(s2.scene.levels[1].roofs![0].kind).toBe('hip')
+  })
+  it('vão de escada no andar de cima e escada embaixo', () => {
+    const r = applyOps(casa().scene, [
+      { op: 'addSlabOpening', id: 'vao', levelId: 'sup', x: 4.5, z: 0.5, width: 1, depth: 3 },
+      { op: 'addObject', catalogId: 'stairs/straight', x: 5, z: 2, container: 'terreo' },
+    ])
+    expect(r.errors).toEqual([])
+    expect(r.scene.levels[1].slabOpenings![0].railing).toBe(true)
+    expect(validateSchema(r.scene).errors).toEqual([])
+  })
+  it('cortina em uma janela (e tirar)', () => {
+    let s = applyOps(casa().scene, [{ op: 'addOpening', id: 'j', roomId: 'sala', roomSide: 'north', kind: 'window' }, { op: 'setTreatment', id: 'j', kind: 'curtain', material: 'fabric/linen', open: 0.7 }])
+    expect(s.errors).toEqual([])
+    expect(s.scene.levels[0].openings![0].treatment).toMatchObject({ kind: 'curtain', open: 0.7 })
+    expect(validateSchema(s.scene).errors).toEqual([])
+    s = applyOps(s.scene, [{ op: 'setTreatment', id: 'j', kind: 'none' }])
+    expect(s.scene.levels[0].openings![0].treatment).toBeUndefined()
+  })
+  it('grupo: mover um móvel leva os outros; remover tira do grupo e desfaz grupo de 1', () => {
+    let s = applyOps(casa().scene, [
+      { op: 'addObject', id: 'mesa', catalogId: 'table/dining-rect', x: 2, z: 2 },
+      { op: 'addObject', id: 'c1', catalogId: 'chair/dining-wood', x: 1, z: 2 },
+      { op: 'addObject', id: 'c2', catalogId: 'chair/dining-wood', x: 3, z: 2 },
+      { op: 'groupObjects', id: 'jantar', objectIds: ['mesa', 'c1', 'c2'] },
+    ])
+    expect(s.errors).toEqual([])
+    s = applyOps(s.scene, [{ op: 'updateObject', id: 'mesa', patch: { x: 3, z: 3 } }])
+    const pos = (id: string) => s.scene.levels[0].objects!.find((o) => o.id === id)!.position
+    expect(pos('c1')).toEqual([2, 0, 3])
+    expect(pos('c2')).toEqual([4, 0, 3])
+    // rotacionar um só não move os outros
+    s = applyOps(s.scene, [{ op: 'updateObject', id: 'c1', patch: { rotationDeg: 90 } }])
+    expect(pos('c2')).toEqual([4, 0, 3])
+    s = applyOps(s.scene, [{ op: 'removeObject', id: 'c2' }])
+    expect(s.scene.levels[0].groups![0].objectIds).toEqual(['mesa', 'c1'])
+    s = applyOps(s.scene, [{ op: 'removeObject', id: 'c1' }])
+    expect(s.scene.levels[0].groups).toEqual([])
+    expect(validateSchema(s.scene).errors).toEqual([])
+  })
+  it('grupo exige objetos do mesmo andar', () => {
+    const r = applyOps(casa().scene, [
+      { op: 'addObject', id: 'a', catalogId: 'table/dining-rect', x: 2, z: 2, container: 'terreo' },
+      { op: 'addObject', id: 'b', catalogId: 'table/dining-rect', x: 2, z: 2, container: 'sup' },
+      { op: 'groupObjects', objectIds: ['a', 'b'] },
+    ])
+    expect(r.errors).toHaveLength(1)
+  })
+  it('cota e texto na planta', () => {
+    let r = applyOps(casa().scene, [
+      { op: 'addDimension', id: 'c1', start: [0, 0], end: [6, 0], offset: 0.6 },
+      { op: 'addLabel', id: 't1', start: [3, 2.5], text: 'Bancada aqui' },
+    ])
+    expect(r.errors).toEqual([])
+    expect(r.scene.levels[0].annotations).toHaveLength(2)
+    expect(validateSchema(r.scene).errors).toEqual([])
+    r = applyOps(r.scene, [{ op: 'updateAnnotation', id: 't1', patch: { text: 'Cozinha' } }, { op: 'removeAnnotation', id: 'c1' }])
+    expect(r.scene.levels[0].annotations).toEqual([{ id: 't1', kind: 'label', start: [3, 2.5], text: 'Cozinha' }])
   })
 })
