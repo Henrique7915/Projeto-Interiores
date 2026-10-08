@@ -10,18 +10,18 @@ npm run mcp                 # modo stdio (é o que o Claude Desktop/Code executa
 npm run mcp:http            # só o bridge + MCP por HTTP: http://127.0.0.1:3737/mcp
 ```
 
-Abra o app (`npm run dev`) → botão **IA** → aba **Minha IA (MCP)** → **Conectar**. O app e a IA passam a editar a mesma cena: o que a IA faz aparece ao vivo (e vira um passo de desfazer), e o que você edita a IA enxerga.
+Abra o app (`npm run dev`, ou o app publicado no GitHub Pages) → botão **IA** → aba **Minha IA (MCP)** → **Conectar**. O app e a IA passam a editar a mesma cena: o que a IA faz aparece ao vivo (e vira um passo de desfazer), e o que você edita a IA enxerga.
 
 ### Claude Desktop (`claude_desktop_config.json`)
 
 ```json
-{ "mcpServers": { "design3d": { "command": "npx", "args": ["tsx", "/CAMINHO/Projeto-Interiores/ai/src/cli.ts"] } } }
+{ "mcpServers": { "design3d": { "command": "/CAMINHO/Projeto-Interiores/node_modules/.bin/tsx", "args": ["/CAMINHO/Projeto-Interiores/ai/src/cli.ts"] } } }
 ```
 
 ### Claude Code
 
 ```bash
-claude mcp add design3d -- npx tsx /CAMINHO/Projeto-Interiores/ai/src/cli.ts
+claude mcp add design3d -- /CAMINHO/Projeto-Interiores/node_modules/.bin/tsx /CAMINHO/Projeto-Interiores/ai/src/cli.ts
 # ou, com `npm run mcp:http` rodando:
 claude mcp add --transport http design3d http://127.0.0.1:3737/mcp
 ```
@@ -53,7 +53,7 @@ Também há o recurso `design3d://guia` e o prompt `projetar_ambiente`.
 
 ## Segurança
 
-O bridge escuta só em `127.0.0.1` e recusa requisições de páginas de outras origens. Nada sai do computador, e a chave de API do chat do app nunca passa por aqui.
+O bridge escuta só em `127.0.0.1` e recusa requisições de páginas de outras origens (aceita só o app local, o app publicado em `https://henrique7915.github.io` e o que estiver em `D3D_ALLOWED_ORIGINS`). Nada sai do computador, e a chave de API do chat do app nunca passa por aqui.
 
 ## API do bridge (usada pelo app)
 

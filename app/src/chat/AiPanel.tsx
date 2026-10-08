@@ -7,6 +7,30 @@ import { Icon, toast } from '../ui/common'
 import { MODELS, runChatTurn, type ChatLine } from './anthropic'
 
 type Tab = 'chat' | 'mcp' | 'paste'
+
+/** Copia para a área de transferência; se o navegador negar, tenta o método antigo. */
+async function copyText(t: string, ok: string) {
+  try {
+    await navigator.clipboard.writeText(t)
+    return toast(ok)
+  } catch {
+    /* tenta o método antigo */
+  }
+  const ta = document.createElement('textarea')
+  ta.value = t
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0'
+  document.body.appendChild(ta)
+  ta.select()
+  const done = (() => {
+    try {
+      return document.execCommand('copy')
+    } catch {
+      return false
+    }
+  })()
+  ta.remove()
+  toast(done ? ok : 'Não consegui copiar: selecione o texto e copie à mão', done ? undefined : 'err')
+}
 const SUGGESTIONS = ['Crie uma sala de estar de 4 × 5 m com sofá azul de frente para a janela', 'Deixe o ambiente mais aconchegante', 'Troque o piso por carvalho claro', 'Adicione uma escrivaninha na parede norte', 'Confira se há móveis sobrepostos']
 
 export function AiPanel({ onClose }: { onClose: () => void }) {
@@ -110,28 +134,38 @@ function ChatTab() {
 function McpTab() {
   const { status, url, error } = useBridge()
   const [u, setU] = useState(url)
-  const repo = '/CAMINHO/PARA/Projeto-Interiores'
-  const desktop = JSON.stringify({ mcpServers: { design3d: { command: 'npx', args: ['tsx', `${repo}/ai/src/cli.ts`] } } }, null, 2)
-  const code = `claude mcp add design3d -- npx tsx ${repo}/ai/src/cli.ts`
+  const [repo, setRepo] = useState(() => prefs.get('repoPath', '~/Projeto-Interiores'))
+  const root = repo.trim().replace(/[\\/]+$/, '') || '~/Projeto-Interiores'
+  const tsx = `${root}/node_modules/.bin/tsx`
+  const cli = `${root}/ai/src/cli.ts`
+  const desktop = JSON.stringify({ mcpServers: { design3d: { command: tsx, args: [cli] } } }, null, 2)
+  const code = `claude mcp add design3d -- ${tsx} ${cli}`
   const codeHttp = `claude mcp add --transport http design3d ${DEFAULT_BRIDGE}/mcp`
-  const copy = (t: string) => navigator.clipboard.writeText(t).then(() => toast('Copiado'), () => toast('Não consegui copiar', 'err'))
+  const install = `git clone https://github.com/Henrique7915/Projeto-Interiores.git ${root}\ncd ${root}\nnpm install`
+  const copy = (t: string) => copyText(t, 'Copiado')
   return (
     <div className="ai-body">
       <p>
         Conecte a IA que você já usa (Claude Desktop, Claude Code ou qualquer cliente MCP). Ela enxerga a mesma cena que você e cria/edita ambientes por medidas. O servidor roda no seu computador.
       </p>
-      <h4>1. Estado do app</h4>
+      <h4>1. Instalar o servidor (uma vez)</h4>
+      <p className="muted">Precisa do Node.js 20+ e do git no seu computador. Troque a pasta se quiser instalar em outro lugar:</p>
+      <input className="txt" value={repo} onChange={(e) => (setRepo(e.target.value), prefs.set('repoPath', e.target.value))} aria-label="Pasta do projeto no seu computador" style={{ width: '100%', padding: 8, borderRadius: 9, background: '#0004', border: '1px solid var(--line)' }} />
+      <div className="codebox">{install}</div>
+      <button className="btn ghost" onClick={() => copy(install)}>Copiar</button>
+      <h4>2. Estado do app</h4>
       <p><span className={'status-dot' + (status === 'on' ? ' on' : '')} />{status === 'on' ? 'App conectado ao servidor MCP: mudanças da IA aparecem aqui ao vivo.' : status === 'connecting' ? 'Conectando…' : 'Não conectado.'}</p>
       {error && status !== 'on' && <p className="muted">{error}</p>}
       <div className="row">
         <input className="txt" value={u} onChange={(e) => setU(e.target.value)} style={{ flex: 1, padding: 8, borderRadius: 9, background: '#0004', border: '1px solid var(--line)' }} />
         {status === 'off' ? <button className="btn" onClick={() => connectBridge(u)}>Conectar</button> : <button className="btn ghost" onClick={disconnectBridge}>Desconectar</button>}
       </div>
-      <h4>2. Claude Desktop</h4>
-      <p className="muted">Em Configurações → Desenvolvedor → Editar config, adicione (troque o caminho do repositório) e reinicie:</p>
+      <p className="muted">Para o app aqui conversar com o servidor, deixe-o rodando (<code>npm run mcp:http</code> na pasta do projeto) ou abra o Claude Desktop/Code configurado abaixo. Funciona no Chrome, Edge e Firefox; o Safari bloqueia a conexão com o computador a partir de um site https.</p>
+      <h4>3. Claude Desktop</h4>
+      <p className="muted">Em Configurações → Desenvolvedor → Editar config, adicione (use o caminho completo, sem “~”) e reinicie:</p>
       <div className="codebox">{desktop}</div>
       <button className="btn ghost" onClick={() => copy(desktop)}>Copiar</button>
-      <h4>3. Claude Code</h4>
+      <h4>4. Claude Code</h4>
       <div className="codebox">{code}</div>
       <button className="btn ghost" onClick={() => copy(code)}>Copiar</button>
       <p className="muted">Ou, com o servidor HTTP rodando (<code>npm run mcp:http</code>):</p>
@@ -157,10 +191,14 @@ function PasteTab() {
     const materials = listMaterials(scene).map((m) => `${m.ref} (${m.name})`).join('; ')
     return `${AI_GUIDE}\n\n${COMMANDS_CHEATSHEET}\n\n## Catálogo (ids de catalogId)\n${catalog}\n\n## Materiais (ids)\n${materials}\n\n## Cena atual (resumo)\n${describeScene(scene)}\n\n## Cena atual (JSON)\n${sceneToJson(scene).replace(/\n\s*/g, '')}\n\n## Pedido do usuário\n${ask || '(descreva aqui o que deseja)'}\n\n## Formato da resposta\nResponda SOMENTE com um bloco de código JSON no formato {"commands":[ ... ]} usando os comandos acima (ids novos devem ser únicos e legíveis; preserve ids existentes). Antes do bloco, no máximo 2 frases explicando o que muda.`
   }
-  const copyPrompt = () => navigator.clipboard.writeText(build()).then(() => toast('Instruções copiadas: cole no seu chatbot'), () => toast('Não consegui copiar', 'err'))
+  const prompt = build()
+  const copyPrompt = () => copyText(prompt, 'Instruções copiadas: cole no seu chatbot')
   const apply = () => {
-    const r = applyOpsFromText(reply, useEditor.getState().dispatch)
-    setResult(r)
+    try {
+      setResult(applyOpsFromText(reply, useEditor.getState().dispatch))
+    } catch (e) {
+      setResult('⚠ ' + (e instanceof Error ? e.message : String(e)))
+    }
   }
   return (
     <div className="ai-body">
@@ -168,6 +206,11 @@ function PasteTab() {
       <h4>1. O que você quer?</h4>
       <textarea className="codebox" style={{ whiteSpace: 'pre-wrap', width: '100%' }} rows={3} value={ask} onChange={(e) => setAsk(e.target.value)} placeholder="Ex.: transforme em um quarto de bebê com tons suaves" />
       <button className="btn" onClick={copyPrompt}>Copiar instruções + cena</button>
+      <details>
+        <summary className="muted">Ver o que será copiado ({Math.round(prompt.length / 1000)} mil caracteres)</summary>
+        <textarea className="codebox" readOnly style={{ whiteSpace: 'pre-wrap', width: '100%', marginTop: 6 }} rows={8} value={prompt} onFocus={(e) => e.currentTarget.select()} />
+      </details>
+      <p className="muted">Cole no chatbot e envie. Ele responde com um bloco de código {'{"commands":[…]}'}: copie essa resposta e cole abaixo.</p>
       <h4>2. Cole a resposta da IA</h4>
       <textarea className="codebox" style={{ whiteSpace: 'pre-wrap', width: '100%' }} rows={6} value={reply} onChange={(e) => setReply(e.target.value)} placeholder='{"commands":[...]}' />
       <button className="btn" disabled={!reply.trim()} onClick={apply}>Aplicar na cena</button>

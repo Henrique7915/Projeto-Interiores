@@ -7,8 +7,11 @@ import { LocalStore, type BridgeEvent } from './store.ts'
 
 export const DEFAULT_PORT = Number(process.env.D3D_PORT ?? 3737)
 
-/** Origens que podem falar com o bridge: o app local (dev/preview) e as listadas em D3D_ALLOWED_ORIGINS. */
-function originAllowed(origin: string | undefined): boolean {
+/** App publicado do projeto (GitHub Pages): também pode falar com o bridge local. */
+export const PUBLISHED_APP_ORIGIN = 'https://henrique7915.github.io'
+
+/** Origens que podem falar com o bridge: o app local (dev/preview), o app publicado e as listadas em D3D_ALLOWED_ORIGINS. */
+export function originAllowed(origin: string | undefined): boolean {
   if (!origin) return true // curl, clientes MCP
   try {
     const u = new URL(origin)
@@ -16,6 +19,7 @@ function originAllowed(origin: string | undefined): boolean {
   } catch {
     return false
   }
+  if (origin === PUBLISHED_APP_ORIGIN) return true
   return (process.env.D3D_ALLOWED_ORIGINS ?? '').split(',').map((s) => s.trim()).filter(Boolean).includes(origin)
 }
 
