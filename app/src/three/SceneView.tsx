@@ -1,5 +1,5 @@
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
-import { Canvas, useThree } from '@react-three/fiber'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { CameraControls, Line } from '@react-three/drei'
 import { Bloom, EffectComposer, N8AO, ToneMapping, Vignette } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
@@ -7,13 +7,13 @@ import * as THREE from 'three'
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
 import type { View } from '../../../schema/types'
 import type { ObjectPatch, ScenePick, RenderScene } from './render/types'
-import type { Selection, SceneViewHandle, SceneViewProps, ViewPreset } from './types'
+import type { Quality, Selection, SceneViewHandle, SceneViewProps, ViewPreset } from './types'
 import { toRenderScene, parseTime } from './adapter/toRender'
 import { Architecture } from './Architecture'
 import { Site } from './Site'
 import { Plinth } from './Plinth'
 import { Items } from './interaction/Items'
-import { Lighting, useLampLevel } from './lighting/Lighting'
+import { LightBudget, Lighting, useLampLevel } from './lighting/Lighting'
 import { TIME_PRESETS } from './lighting/daylight'
 import { wallDir, wallLength, wallNormalRight } from './geometry/walls'
 
@@ -136,6 +136,45 @@ function Rig({ center, radius, view, handle }: { center: THREE.Vector3; radius: 
   )
 }
 
+/** Pede um novo quadro quando algo do React muda (o canvas usa frameloop="demand" para poupar bateria). */
+function Invalidate({ deps }: { deps: unknown[] }) {
+  const invalidate = useThree((s) => s.invalidate)
+  useEffect(() => invalidate(), deps) // eslint-disable-line react-hooks/exhaustive-deps
+  return null
+}
+
+/**
+ * Mede o tempo dos quadros em trechos contínuos (câmera mexendo, animações) e, se o aparelho não dá conta,
+ * pede para descer um nível de qualidade. Quadros isolados depois de ficar parado não contam.
+ */
+function Governor({ onDecline }: { onDecline: () => void }) {
+  const st = useRef({ last: 0, sum: 0, n: 0, skip: 120, bad: 0 })
+  useFrame(() => {
+    const s = st.current
+    const now = performance.now()
+    const gap = now - s.last
+    s.last = now
+    if (gap > 500) { s.sum = 0; s.n = 0; return } // veio de uma pausa: não é medida
+    if (s.skip > 0) { s.skip--; return } // aquecimento (compilação de shaders, texturas)
+    s.sum += gap
+    s.n++
+    if (s.n < 90) return
+    const avg = s.sum / s.n
+    s.sum = 0
+    s.n = 0
+    s.bad = avg > 30 ? s.bad + 1 : 0 // pior que ~33 quadros/s
+    if (s.bad >= 2) { s.bad = 0; s.skip = 120; onDecline() }
+  })
+  return null
+}
+
+const SETTINGS: Record<Quality, { shadows: false | 'percentage' | 'soft'; shadowSize: number; dpr: [number, number]; post: boolean; ao: boolean; lights: boolean }> = {
+  low: { shadows: false, shadowSize: 1024, dpr: [1, 1], post: false, ao: false, lights: false },
+  medium: { shadows: 'percentage', shadowSize: 1024, dpr: [1, 1.5], post: true, ao: false, lights: true },
+  high: { shadows: 'soft', shadowSize: 2048, dpr: [1, 2], post: true, ao: true, lights: true },
+}
+const NEXT_DOWN: Record<Quality, Quality> = { high: 'medium', medium: 'low', low: 'low' }
+
 function Effects({ lamp, ao }: { lamp: number; ao: boolean }) {
   const bloom = <Bloom intensity={0.15 + lamp * 0.55} luminanceThreshold={0.85} luminanceSmoothing={0.3} mipmapBlur />
   return ao ? (
@@ -171,7 +210,11 @@ export const SceneView = forwardRef<SceneViewHandle, SceneViewProps>(function Sc
   const { box, center, radius } = useMemo(() => sceneBounds(rs), [rs])
   const bounds: [number, number, number, number] = [box.min.x + 0.05, box.min.z + 0.05, box.max.x - 0.05, box.max.z - 0.05]
   const lamp = useLampLevel((s) => s.lamp)
-  const low = quality === 'low'
+  // o nível pedido é o teto; se o aparelho não acompanhar, desce sozinho (adaptive, padrão ligado)
+  const [tier, setTier] = useState<Quality>(quality)
+  useEffect(() => setTier(quality), [quality])
+  const cfg = SETTINGS[tier]
+  const low = tier === 'low'
   const snap = props.snap ?? scene.defaults?.snap ?? 0.05
   const hours = typeof timeOfDay === 'string' ? parseTime(timeOfDay, rs.env.timeOfDay) : timeOfDay ?? rs.env.timeOfDay
   const objects = useMemo(() => [...rs.objects, ...(rs.site?.objects ?? [])], [rs])
@@ -219,19 +262,24 @@ export const SceneView = forwardRef<SceneViewHandle, SceneViewProps>(function Sc
     <Canvas
       className={className}
       style={{ touchAction: 'none', width: '100%', height: '100%', ...style }}
-      shadows={low ? false : 'soft'}
-      dpr={low ? 1 : [1, 2]}
+      frameloop="demand"
+      shadows={cfg.shadows}
+      dpr={cfg.dpr}
       camera={{ fov: FOV, near: 0.1, far: 500, position: [10, 10, 10] }}
-      gl={{ antialias: low, powerPreference: 'high-performance', toneMapping: THREE.ACESFilmicToneMapping, preserveDrawingBuffer: true }}
+      gl={{ antialias: !cfg.post, powerPreference: 'high-performance', toneMapping: THREE.ACESFilmicToneMapping, preserveDrawingBuffer: true }}
       onPointerMissed={() => picked(null)}
     >
       <Rig center={center} radius={radius} view={view} handle={ref} />
-      <Lighting time={hours} center={center} radius={radius} shadows={!low} onTimeChange={onTimeChange} showGizmo={showSunGizmo} northDeg={rs.env.northDeg} sky={rs.env.sky} exposure={rs.env.exposure} />
+      <Lighting time={hours} center={center} radius={radius} shadows={!!cfg.shadows} shadowSize={cfg.shadowSize} onTimeChange={onTimeChange} showGizmo={showSunGizmo} northDeg={rs.env.northDeg} sky={rs.env.sky} exposure={rs.env.exposure} />
       {rs.site ? <Site site={rs.site} lowQuality={low} onPick={picked} /> : <Plinth box={box} />}
       <Architecture scene={rs} cutaway={cutaway} lowQuality={low} onPick={picked} />
+      <LightBudget.Provider value={cfg.lights}>
       <Items objects={objects} walls={walls} bounds={bounds} selectedId={selObj?.id ?? null} interiorLights={rs.env.interiorLights} onPick={picked} onDragEnd={dragEnd} snap={snap} lowQuality={low} />
+      </LightBudget.Provider>
       {pick && pick.type !== 'object' && pick.type !== 'opening' && <PickOutline rs={rs} pick={pick} />}
-      {!low && <Effects lamp={rs.env.interiorLights === 'on' ? 1 : rs.env.interiorLights === 'off' ? 0 : lamp} ao={quality === 'high'} />}
+      {cfg.post && <Effects lamp={rs.env.interiorLights === 'on' ? 1 : rs.env.interiorLights === 'off' ? 0 : lamp} ao={cfg.ao} />}
+      {props.adaptive !== false && tier !== 'low' && <Governor onDecline={() => setTier((t) => NEXT_DOWN[t])} />}
+      <Invalidate deps={[rs, pick, hours, cutaway, tier, view, snap, showSunGizmo]} />
     </Canvas>
   )
 })

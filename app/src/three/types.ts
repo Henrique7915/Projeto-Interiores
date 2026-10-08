@@ -27,6 +27,8 @@ export interface SceneViewProps {
   onDelete?: (id: string) => void
   /** low: sem sombras nem pós-processamento; medium: sombras + brilho; high: tudo (oclusão ambiente). */
   quality?: Quality
+  /** Se o aparelho não acompanhar, desce de nível sozinho (high → medium → low). Padrão: ligado. */
+  adaptive?: boolean
   className?: string
   style?: React.CSSProperties
 

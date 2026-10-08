@@ -1,9 +1,10 @@
 import type { ReactElement } from 'react'
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 import * as THREE from 'three'
 import type { Vec3 } from './parts'
 import { Box, Cyl, MATS, Sph, simpleMat } from './parts'
 import { CASA_BUILDERS } from './builders-casa'
+import { LightBudget } from '../lighting/Lighting'
 
 /** Dados que cada desenhista recebe. Medidas em metros; origem no centro da base; frente em +Z. */
 export interface BuildProps {
@@ -24,7 +25,8 @@ export interface BuildProps {
 const lightIntensity = (lumens: number) => Math.min(4, 0.9 + lumens / 400)
 
 function Glow({ pos, glow, lightColor, lumens, hasLight, distance = 5 }: { pos: Vec3; glow: number; lightColor: string; lumens: number; hasLight: boolean; distance?: number }) {
-  if (!hasLight || glow < 0.05) return null
+  const allowed = useContext(LightBudget)
+  if (!allowed || !hasLight || glow < 0.05) return null
   return <pointLight position={pos} intensity={glow * lightIntensity(lumens)} distance={distance} decay={2} color={lightColor} />
 }
 

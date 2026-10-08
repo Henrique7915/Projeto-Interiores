@@ -1,9 +1,10 @@
-import { useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import * as THREE from 'three'
 import type { RObject } from '../render/types'
 import { resolveMaterial } from '../materials/library'
 import { getThreeMaterial } from '../materials/three'
 import { BUILDERS } from './builders'
+import { GlbBoundary, GlbMesh, glbUrl } from './GlbModel'
 
 const lightColor = (kelvin: number, explicit?: string) => {
   if (explicit) return explicit
@@ -18,15 +19,18 @@ const lightColor = (kelvin: number, explicit?: string) => {
 
 /** Desenha o móvel de um RObject: escolhe o desenhista pelo catálogo e monta o material de cada slot. */
 export function FurnitureModel({ obj, glow, lowQuality }: { obj: RObject; glow: number; lowQuality?: boolean }) {
-  const name = obj.model.startsWith('procedural/') ? obj.model.slice('procedural/'.length) : 'box'
+  const isGlb = obj.model.startsWith('models/')
+  // models/<nome>.glb → desenhista procedural <nome> (usado enquanto o GLB carrega ou se falhar)
+  const name = isGlb ? obj.model.slice('models/'.length).replace(/\.glb$/i, '') : obj.model.startsWith('procedural/') ? obj.model.slice('procedural/'.length) : 'box'
   const Build = BUILDERS[name] ?? BUILDERS.box
   const fallback = useMemo(() => resolveMaterial('wood/natural-oak'), [])
   const m = (slot: string): THREE.Material => {
     const spec = obj.materials[slot] ?? (name === 'box' ? Object.values(obj.materials)[0] : undefined) ?? fallback
     return getThreeMaterial(spec, lowQuality)
   }
+  const slots = useMemo(() => new Set(Object.keys(obj.materials)), [obj.materials])
   const light = obj.light
-  return (
+  const procedural = (
     <Build
       s={obj.size}
       m={m}
@@ -36,5 +40,13 @@ export function FurnitureModel({ obj, glow, lowQuality }: { obj: RObject; glow: 
       hasLight={!!light && light.on !== false}
       clearance={obj.clearance}
     />
+  )
+  if (!isGlb) return procedural
+  return (
+    <GlbBoundary fallback={procedural}>
+      <Suspense fallback={procedural}>
+        <GlbMesh url={glbUrl(obj.model)} size={obj.size} slots={slots} material={m} />
+      </Suspense>
+    </GlbBoundary>
   )
 }

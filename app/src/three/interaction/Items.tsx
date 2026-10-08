@@ -87,7 +87,7 @@ const ItemNode = memo(function ItemNode({ obj, selected, glow, lowQuality, regis
 })
 
 export function Items({ objects, walls, bounds, selectedId, interiorLights, onPick, onDragEnd, snap = 0.05, lowQuality }: Props) {
-  const { camera, gl, controls } = useThree()
+  const { camera, gl, controls, invalidate } = useThree()
   const groups = useRef(new Map<string, THREE.Group>())
   const lamp = useLampLevel((s) => s.lamp)
   const glow = interiorLights === 'on' ? 1 : interiorLights === 'off' ? 0 : lamp
@@ -145,6 +145,7 @@ export function Items({ objects, walls, bounds, selectedId, interiorLights, onPi
       z = THREE.MathUtils.clamp(z, b[1], b[3])
       last = [x, item.position[1], z]
       g.position.set(...last)
+      invalidate()
     }
     const up = () => {
       window.removeEventListener('pointermove', move)
@@ -159,7 +160,7 @@ export function Items({ objects, walls, bounds, selectedId, interiorLights, onPi
     window.addEventListener('pointerup', up)
     window.addEventListener('pointercancel', up)
     cleanup.current = up
-  }, [camera, gl, controls, onPick])
+  }, [camera, gl, controls, invalidate, onPick])
 
   return (
     <group>

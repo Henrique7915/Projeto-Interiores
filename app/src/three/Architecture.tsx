@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 import type { Point2 } from '../../../schema/types'
@@ -191,10 +191,14 @@ export function Wall({ wall, all, mode, perimeter, lowQuality, onPick }: { wall:
     () => [getThreeMaterial(wall.left, lowQuality), getThreeMaterial(wall.right, lowQuality), getThreeMaterial(wall.top, lowQuality)],
     [wall.left, wall.right, wall.top, lowQuality],
   )
+  const invalidate = useThree((s) => s.invalidate)
+  useEffect(() => invalidate(), [target, invalidate])
   useFrame((_, dt) => {
     const s = group.current.scale.y
+    if (s === target) return
     const n = THREE.MathUtils.damp(s, target, 8, dt)
     group.current.scale.y = Math.abs(n - target) < 0.002 ? target : n
+    if (group.current.scale.y !== target) invalidate()
   })
 
   const click = (e: ThreeEvent<MouseEvent>) => {
