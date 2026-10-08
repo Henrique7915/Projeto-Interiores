@@ -1,0 +1,98 @@
+{
+  "$schema": "../scene.schema.json",
+  "format": "design3d.scene",
+  "version": "0.1.0",
+  "id": "studio-aconchegante",
+  "name": "Studio aconchegante",
+  "units": "m",
+  "createdAt": "2026-10-08T02:10:00Z",
+  "updatedAt": "2026-10-08T02:10:00Z",
+  "meta": {
+    "description": "Studio de 10 x 7 m inspirado no exemplo do Henrique: sala e jantar integrados, quarto com guarda-roupa e escritório com meia-parede.",
+    "author": "Design3D",
+    "tags": ["exemplo", "interno", "studio"],
+    "locale": "pt-BR"
+  },
+  "defaults": {
+    "wallHeight": 2.7,
+    "wallThickness": 0.15,
+    "wallMaterial": "paint/sand-limewash",
+    "floorMaterial": "wood/smoked-oak",
+    "ceilingMaterial": "paint/white-matte",
+    "snap": 0.05
+  },
+  "environment": {
+    "timeOfDay": "18:30",
+    "date": "2026-10-08",
+    "location": { "lat": -23.55, "lon": -46.63, "label": "São Paulo" },
+    "northDeg": 0,
+    "sky": "clear",
+    "mood": "cozy",
+    "interiorLights": "auto"
+  },
+  "materials": {
+    "slat-walnut": {
+      "name": "Ripado de nogueira",
+      "category": "wood",
+      "base": "wood/walnut",
+      "color": "#7a4a2a",
+      "roughness": 0.55,
+      "texture": { "set": "wood-slats", "tileSize": [0.6, 0.6] }
+    }
+  },
+  "levels": [
+    {
+      "id": "terreo",
+      "name": "Térreo",
+      "elevation": 0,
+      "height": 2.7,
+      "walls": [
+        { "id": "p-fundo", "name": "Parede do fundo", "start": [0, 0], "end": [10, 0], "finish": { "left": "paint/exterior-white", "right": "paint/sand-limewash" } },
+        { "id": "p-direita", "name": "Parede direita", "start": [10, 0], "end": [10, 7], "finish": { "left": "paint/exterior-white", "right": "paint/sand-limewash" } },
+        { "id": "p-frente", "name": "Parede da frente", "start": [10, 7], "end": [0, 7], "finish": { "left": "paint/exterior-white", "right": "paint/sand-limewash" } },
+        { "id": "p-esquerda", "name": "Parede esquerda", "start": [0, 7], "end": [0, 0], "finish": { "left": "paint/exterior-white", "right": "paint/sand-limewash" } },
+        { "id": "p-quarto", "name": "Divisória sala/quarto", "start": [6, 0], "end": [6, 4.5], "thickness": 0.12, "finish": { "left": "paint/sand-limewash", "right": "slat-walnut" } },
+        { "id": "p-escritorio", "name": "Meia-parede do escritório", "kind": "half", "start": [7, 4.5], "end": [10, 4.5], "thickness": 0.12, "height": 1.1, "finish": { "left": "paint/sand-limewash", "right": "paint/sand-limewash", "top": "wood/walnut" } }
+      ],
+      "openings": [
+        { "id": "a-porta-vidro", "wallId": "p-fundo", "kind": "sliding-door", "offset": 3.0, "width": 2.4, "height": 2.2, "sill": 0, "materials": { "frame": "metal/black-matte", "glass": "glass/clear" } },
+        { "id": "a-janela-quarto", "wallId": "p-fundo", "kind": "window", "offset": 8.0, "width": 1.4, "height": 1.3, "sill": 0.9 },
+        { "id": "a-janela-sala", "wallId": "p-esquerda", "kind": "window", "offset": 4.5, "width": 1.6, "height": 1.4, "sill": 0.8 },
+        { "id": "a-porta-entrada", "wallId": "p-frente", "kind": "door", "offset": 8.5, "width": 0.9, "height": 2.1, "hinge": "start", "opensTo": "right" },
+        { "id": "a-porta-quarto", "wallId": "p-quarto", "kind": "door", "offset": 3.8, "width": 0.8, "height": 2.1, "hinge": "end", "opensTo": "left" }
+      ],
+      "rooms": [
+        { "id": "c-sala", "name": "Sala e jantar", "type": "living", "polygon": [[0, 0], [6, 0], [6, 7], [0, 7]], "floor": { "material": "wood/smoked-oak" } },
+        { "id": "c-quarto", "name": "Quarto", "type": "bedroom", "polygon": [[6, 0], [10, 0], [10, 4.5], [6, 4.5]], "floor": { "material": "wood/smoked-oak" } },
+        { "id": "c-escritorio", "name": "Escritório", "type": "office", "polygon": [[6, 4.5], [10, 4.5], [10, 7], [6, 7]], "floor": { "material": "wood/smoked-oak" } }
+      ],
+      "objects": [
+        { "id": "o-tapete-sala", "name": "Tapete", "catalogId": "rug/rectangular", "position": [2.6, 0, 2.2], "dimensions": { "width": 2.4, "height": 0.01, "depth": 1.7 }, "materials": { "fabric": "fabric/oat-knit" }, "roomId": "c-sala" },
+        { "id": "o-sofa", "name": "Sofá em L", "catalogId": "sofa/modern-l", "position": [2.6, 0, 0.95], "rotationDeg": 0, "dimensions": { "width": 2.6, "height": 0.85, "depth": 1.6 }, "materials": { "upholstery": "fabric/navy-velvet", "cushions": "fabric/rust-wool" }, "roomId": "c-sala" },
+        { "id": "o-mesa-centro", "name": "Mesa de centro", "catalogId": "table/coffee-round", "position": [2.6, 0, 2.4], "dimensions": { "width": 0.8, "height": 0.4, "depth": 0.8 }, "materials": { "top": "wood/walnut" }, "roomId": "c-sala" },
+        { "id": "o-luminaria-piso", "name": "Luminária de piso", "catalogId": "lighting/floor-arc", "position": [0.5, 0, 0.5], "light": { "type": "point", "intensity": 800, "temperatureK": 2700 }, "roomId": "c-sala" },
+        { "id": "o-mesa-jantar", "name": "Mesa de jantar", "catalogId": "table/dining-rect", "position": [2.0, 0, 5.2], "dimensions": { "width": 1.6, "height": 0.75, "depth": 0.9 }, "materials": { "top": "wood/walnut", "legs": "wood/walnut" }, "roomId": "c-sala" },
+        { "id": "o-cadeira-1", "catalogId": "chair/dining-wood", "position": [1.6, 0, 4.5], "rotationDeg": 0, "materials": { "seat": "leather/cognac" }, "roomId": "c-sala" },
+        { "id": "o-cadeira-2", "catalogId": "chair/dining-wood", "position": [2.4, 0, 4.5], "rotationDeg": 0, "materials": { "seat": "leather/cognac" }, "roomId": "c-sala" },
+        { "id": "o-cadeira-3", "catalogId": "chair/dining-wood", "position": [1.6, 0, 5.9], "rotationDeg": 180, "materials": { "seat": "leather/cognac" }, "roomId": "c-sala" },
+        { "id": "o-cadeira-4", "catalogId": "chair/dining-wood", "position": [2.4, 0, 5.9], "rotationDeg": 180, "materials": { "seat": "leather/cognac" }, "roomId": "c-sala" },
+        { "id": "o-pendente-jantar", "name": "Pendente", "catalogId": "lighting/pendant-dome", "position": [2.0, 1.9, 5.2], "mount": "ceiling", "light": { "type": "point", "intensity": 600, "temperatureK": 2700 }, "roomId": "c-sala" },
+        { "id": "o-estante", "name": "Estante", "catalogId": "shelf/bookcase-tall", "position": [5.7, 0, 5.6], "rotationDeg": -90, "materials": { "body": "wood/walnut" }, "roomId": "c-sala" },
+        { "id": "o-planta-sala", "name": "Planta", "catalogId": "plant/monstera-large", "position": [0.5, 0, 6.4], "roomId": "c-sala" },
+        { "id": "o-prateleiras", "name": "Prateleiras", "catalogId": "shelf/wall-floating", "position": [4.6, 1.4, 0.2], "mount": "wall", "wallId": "p-fundo", "materials": { "body": "wood/walnut" }, "roomId": "c-sala" },
+        { "id": "o-cama", "name": "Cama casal", "catalogId": "bed/queen-modern", "position": [8.87, 0, 2.2], "rotationDeg": -90, "dimensions": { "width": 1.6, "height": 1.0, "depth": 2.1 }, "materials": { "bedding": "fabric/linen", "accent": "fabric/rust-wool", "frame": "fabric/navy-velvet" }, "roomId": "c-quarto" },
+        { "id": "o-criado-1", "catalogId": "storage/nightstand", "position": [9.65, 0, 0.95], "rotationDeg": -90, "materials": { "body": "wood/walnut" }, "roomId": "c-quarto" },
+        { "id": "o-criado-2", "catalogId": "storage/nightstand", "position": [9.65, 0, 3.45], "rotationDeg": -90, "materials": { "body": "wood/walnut" }, "roomId": "c-quarto" },
+        { "id": "o-abajur-1", "catalogId": "lighting/table-lamp", "position": [9.65, 0.5, 0.95], "mount": "surface", "parentId": "o-criado-1", "light": { "type": "point", "intensity": 300, "temperatureK": 2700 }, "roomId": "c-quarto" },
+        { "id": "o-guarda-roupa", "name": "Guarda-roupa", "catalogId": "storage/wardrobe-2-door", "position": [6.38, 0, 1.0], "rotationDeg": 90, "dimensions": { "width": 1.2, "height": 2.2, "depth": 0.6 }, "materials": { "body": "paint/white-matte", "doors": "paint/rust" }, "roomId": "c-quarto" },
+        { "id": "o-mesa-trabalho", "name": "Mesa de trabalho", "catalogId": "desk/simple", "position": [8.5, 0, 6.62], "rotationDeg": 180, "dimensions": { "width": 1.2, "height": 0.75, "depth": 0.6 }, "materials": { "top": "wood/smoked-oak", "legs": "metal/black-matte" }, "roomId": "c-escritorio" },
+        { "id": "o-cadeira-escritorio", "catalogId": "chair/office", "position": [8.5, 0, 6.0], "rotationDeg": 0, "roomId": "c-escritorio" },
+        { "id": "o-luminaria-mesa", "catalogId": "lighting/desk-lamp", "position": [8.0, 0.75, 6.7], "mount": "surface", "parentId": "o-mesa-trabalho", "light": { "type": "spot", "intensity": 400, "temperatureK": 4000 }, "roomId": "c-escritorio" }
+      ]
+    }
+  ],
+  "views": [
+    { "id": "v-isometrica", "name": "Vista geral", "mode": "orbit", "position": [14, 12, 16], "target": [5, 0, 3.5], "fovDeg": 35 },
+    { "id": "v-planta", "name": "Planta", "mode": "top", "position": [5, 20, 3.5], "target": [5, 0, 3.5] }
+  ]
+}
