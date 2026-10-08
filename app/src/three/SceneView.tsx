@@ -206,7 +206,7 @@ const toSelection = (p: ScenePick | null): Selection => (!p ? null : p.type === 
  */
 export const SceneView = forwardRef<SceneViewHandle, SceneViewProps>(function SceneView(props, ref) {
   const { scene, selection = null, onPick, onDragEnd, onDelete, timeOfDay, onTimeChange, view = 'iso', cutaway = 'auto', quality = 'high', showSunGizmo = true, className, style } = props
-  const rs = useMemo(() => toRenderScene(scene), [scene])
+  const rs = useMemo(() => toRenderScene(scene, { upToLevel: props.upToLevel }), [scene, props.upToLevel])
   const { box, center, radius } = useMemo(() => sceneBounds(rs), [rs])
   const bounds: [number, number, number, number] = [box.min.x + 0.05, box.min.z + 0.05, box.max.x - 0.05, box.max.z - 0.05]
   const lamp = useLampLevel((s) => s.lamp)
@@ -272,14 +272,14 @@ export const SceneView = forwardRef<SceneViewHandle, SceneViewProps>(function Sc
       <Rig center={center} radius={radius} view={view} handle={ref} />
       <Lighting time={hours} center={center} radius={radius} shadows={!!cfg.shadows} shadowSize={cfg.shadowSize} onTimeChange={onTimeChange} showGizmo={showSunGizmo} northDeg={rs.env.northDeg} sky={rs.env.sky} exposure={rs.env.exposure} />
       {rs.site ? <Site site={rs.site} lowQuality={low} onPick={picked} /> : <Plinth box={box} />}
-      <Architecture scene={rs} cutaway={cutaway} lowQuality={low} onPick={picked} />
+      <Architecture scene={rs} cutaway={cutaway} roofs={props.roofs} lowQuality={low} onPick={picked} />
       <LightBudget.Provider value={cfg.lights}>
       <Items objects={objects} walls={walls} bounds={bounds} selectedId={selObj?.id ?? null} interiorLights={rs.env.interiorLights} onPick={picked} onDragEnd={dragEnd} snap={snap} lowQuality={low} />
       </LightBudget.Provider>
       {pick && pick.type !== 'object' && pick.type !== 'opening' && <PickOutline rs={rs} pick={pick} />}
       {cfg.post && <Effects lamp={rs.env.interiorLights === 'on' ? 1 : rs.env.interiorLights === 'off' ? 0 : lamp} ao={cfg.ao} />}
       {props.adaptive !== false && tier !== 'low' && <Governor onDecline={() => setTier((t) => NEXT_DOWN[t])} />}
-      <Invalidate deps={[rs, pick, hours, cutaway, tier, view, snap, showSunGizmo]} />
+      <Invalidate deps={[rs, pick, hours, cutaway, props.roofs, tier, view, snap, showSunGizmo]} />
     </Canvas>
   )
 })

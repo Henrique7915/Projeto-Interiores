@@ -18,10 +18,22 @@ export interface ROpening {
   frame: MaterialSpec
   leaf: MaterialSpec
   glass: MaterialSpec
+  /** cortina ou persiana (schema v0.2) */
+  treatment?: RTreatment
+}
+
+export interface RTreatment {
+  kind: 'curtain' | 'sheer' | 'blind' | 'roller'
+  material: MaterialSpec
+  /** face da parede onde fica; sem valor, o lado de dentro */
+  side?: 'left' | 'right'
+  /** 0 = fechada, 1 = aberta */
+  open: number
 }
 
 export interface RWall {
   id: string
+  levelId: string
   kind: WallKind
   a: Point2
   b: Point2
@@ -44,6 +56,33 @@ export interface RRoom {
   polygon: Point2[]
   material: MaterialSpec
   elevation: number
+  levelId: string
+  /** forro desenhado só com `visible` ou rebaixo; `height` é relativo ao piso do cômodo */
+  ceiling?: { height: number; drop: number; material: MaterialSpec }
+}
+
+export interface RRoof {
+  id: string
+  levelId: string
+  kind: 'flat' | 'shed' | 'gable' | 'hip'
+  polygon: Point2[]
+  /** altura absoluta do beiral (piso do andar + baseHeight) */
+  elevation: number
+  pitchDeg: number
+  ridgeDeg: number
+  overhang: number
+  thickness: number
+  top: MaterialSpec
+  under: MaterialSpec
+}
+
+export interface RSlabOpening {
+  id: string
+  levelId: string
+  polygon: Point2[]
+  /** altura absoluta do piso do andar */
+  elevation: number
+  railing: boolean
 }
 
 export interface RLight {
@@ -88,7 +127,17 @@ export interface RZone {
   edgeMaterial?: MaterialSpec
 }
 
+/** relevo: pontos cotados [x, z, altura] interpolados; `flat` são áreas que ficam niveladas (casa, calçadas) */
+export interface RTerrain {
+  points: Point3[]
+  smoothing: number
+  flat: Point2[][]
+  /** retângulo que envolve a área trabalhada: [x0, z0, x1, z1] */
+  rect: [number, number, number, number]
+}
+
 export interface RSite {
+  terrain?: RTerrain
   boundary?: Point2[]
   ground: MaterialSpec
   zones: RZone[]
@@ -109,6 +158,8 @@ export interface RenderScene {
   walls: RWall[]
   rooms: RRoom[]
   objects: RObject[]
+  roofs: RRoof[]
+  slabOpenings: RSlabOpening[]
   site?: RSite
   env: REnvironment
   /** altura de cada andar, para câmera e recorte */

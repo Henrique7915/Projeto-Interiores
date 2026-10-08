@@ -1,7 +1,8 @@
-import type { Material, MaterialRef, Opening, Point3, Scene, SceneObject, Wall } from '../../../../schema/types'
+import type { Material, MaterialRef, Opening, Point2, Point3, Scene, SceneObject, Wall } from '../../../../schema/types'
 import { getCatalogItem } from '../catalog/registry'
 import { resolveMaterial, type MaterialSpec } from '../materials/library'
-import type { REnvironment, RLight, RObject, ROpening, RenderScene, RRoom, RSite, RWall, RZone } from '../render/types'
+import type { REnvironment, RLight, RObject, ROpening, RRoof, RSlabOpening, RTerrain, RenderScene, RRoom, RSite, RWall, RZone } from '../render/types'
+import { terrainHeight } from '../geometry/terrain'
 
 const DEG = Math.PI / 180
 
@@ -31,6 +32,15 @@ function toOpening(o: Opening, mats: Mats): ROpening {
     frame: slot('frame', windowLike || o.kind === 'sliding-door' ? 'metal/black-matte' : 'paint/white-matte'),
     leaf: slot('leaf', o.kind === 'garage-door' ? 'paint/charcoal' : 'wood/natural-oak'),
     glass: slot('glass', 'glass/clear'),
+    treatment:
+      o.treatment && o.treatment.kind !== 'none'
+        ? {
+            kind: o.treatment.kind,
+            material: resolveMaterial(o.treatment.material, mats, o.treatment.kind === 'sheer' ? 'fabric/linen' : o.treatment.kind === 'blind' ? 'wood/pine' : 'fabric/linen'),
+            side: o.treatment.side,
+            open: o.treatment.open ?? 0,
+          }
+        : undefined,
   }
 }
 
@@ -42,7 +52,7 @@ interface Ctx {
   wallMaterial: MaterialRef
 }
 
-function toWall(w: Wall, openings: Opening[], elevation: number, levelHeight: number, c: Ctx): RWall {
+function toWall(w: Wall, openings: Opening[], levelId: string, elevation: number, levelHeight: number, c: Ctx): RWall {
   const kind = w.kind ?? 'solid'
   const height = w.height ?? (kind === 'half' ? 1.1 : kind === 'fence' ? 1.8 : kind === 'railing' ? 1.0 : levelHeight)
   const thickness = w.thickness ?? (kind === 'fence' || kind === 'railing' ? 0.05 : c.wallThickness)
@@ -52,6 +62,7 @@ function toWall(w: Wall, openings: Opening[], elevation: number, levelHeight: nu
   const bb = w.finish?.baseboard
   return {
     id: w.id,
+    levelId,
     kind,
     a: w.start,
     b: w.end,
@@ -111,8 +122,13 @@ function toObject(o: SceneObject, elevation: number, levelHeight: number, c: Ctx
   }
 }
 
+export interface ToRenderOptions {
+  /** mostra só este andar e os de baixo (os de cima, com telhado e tudo, ficam escondidos) */
+  upToLevel?: string
+}
+
 /** Converte o `Scene` do schema na estrutura que o motor desenha. Puro e barato: pode rodar a cada mudança. */
-export function toRenderScene(scene: Scene): RenderScene {
+export function toRenderScene(scene: Scene, opts: ToRenderOptions = {}): RenderScene {
   const d = scene.defaults ?? {}
   const base: Ctx = {
     scene,
@@ -125,13 +141,18 @@ export function toRenderScene(scene: Scene): RenderScene {
   const walls: RWall[] = []
   const rooms: RRoom[] = []
   const objects: RObject[] = []
+  const roofs: RRoof[] = []
+  const slabOpenings: RSlabOpening[] = []
   const levels: RenderScene['levels'] = []
 
+  const cap = opts.upToLevel ? scene.levels.find((l) => l.id === opts.upToLevel)?.elevation : undefined
   for (const level of scene.levels) {
-    if (level.hidden) continue
+    if (level.hidden || (cap !== undefined && level.elevation > cap + 1e-6)) continue
     levels.push({ id: level.id, elevation: level.elevation, height: level.height })
-    for (const w of level.walls ?? []) walls.push(toWall(w, level.openings ?? [], level.elevation, level.height, base))
+    for (const w of level.walls ?? []) walls.push(toWall(w, level.openings ?? [], level.id, level.elevation, level.height, base))
     for (const r of level.rooms ?? []) {
+      const ceil = r.ceiling
+      const drop = ceil?.dropHeight ?? 0
       rooms.push({
         id: r.id,
         name: r.name,
@@ -139,9 +160,33 @@ export function toRenderScene(scene: Scene): RenderScene {
         polygon: r.polygon,
         material: resolveMaterial(r.floor?.material, scene.materials, d.floorMaterial ?? 'wood/natural-oak'),
         elevation: level.elevation + (r.floor?.elevation ?? 0),
+        levelId: level.id,
+        // o forro só é desenhado quando pedido (visible) ou rebaixado; no resto a vista de cima continua livre
+        ceiling: ceil?.visible || drop > 0
+          ? { height: ceil?.height ?? level.height, drop, material: resolveMaterial(ceil?.material, scene.materials, 'paint/white-matte') }
+          : undefined,
       })
     }
     for (const o of level.objects ?? []) objects.push(toObject(o, level.elevation, level.height, base))
+    for (const rf of level.roofs ?? []) {
+      const sloped = rf.kind !== 'flat'
+      roofs.push({
+        id: rf.id,
+        levelId: level.id,
+        kind: rf.kind,
+        polygon: rf.polygon,
+        elevation: level.elevation + (rf.baseHeight ?? level.height),
+        pitchDeg: sloped ? rf.pitchDeg ?? 30 : 0,
+        ridgeDeg: rf.ridgeDeg ?? 0,
+        overhang: rf.overhang ?? 0.4,
+        thickness: rf.thickness ?? 0.15,
+        top: resolveMaterial(rf.material, scene.materials, sloped ? 'ceramic/roof-tile' : 'concrete/exposed'),
+        under: resolveMaterial(rf.ceilingMaterial, scene.materials, 'paint/white-matte'),
+      })
+    }
+    for (const so of level.slabOpenings ?? []) {
+      slabOpenings.push({ id: so.id, levelId: level.id, polygon: so.polygon, elevation: level.elevation, railing: so.railing ?? false })
+    }
   }
 
   let site: RSite | undefined
@@ -156,12 +201,36 @@ export function toRenderScene(scene: Scene): RenderScene {
       depth: z.depth ?? (z.kind === 'pool' ? 1.4 : 0),
       edgeMaterial: z.edgeMaterial ? resolveMaterial(z.edgeMaterial, scene.materials) : undefined,
     }))
+
+    // relevo: nivelado sob o térreo e as zonas; objetos e cercas do terreno acompanham a altura do chão
+    let terrain: RTerrain | undefined
+    if (s.terrain?.points?.length) {
+      const lowest = Math.min(...scene.levels.map((l) => l.elevation))
+      const flat: Point2[][] = [
+        ...scene.levels.filter((l) => l.elevation === lowest).flatMap((l) => (l.rooms ?? []).map((r) => r.polygon)),
+        ...zones.map((z) => z.polygon),
+      ]
+      const xs = [...s.terrain.points.map((p) => p[0]), ...(s.boundary ?? []).map((p) => p[0])]
+      const zs = [...s.terrain.points.map((p) => p[1]), ...(s.boundary ?? []).map((p) => p[1])]
+      terrain = {
+        points: s.terrain.points,
+        smoothing: s.terrain.smoothing ?? 0.5,
+        flat,
+        rect: [Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)],
+      }
+    }
+    const ground = (x: number, z: number) => (terrain ? terrainHeight(terrain, x, z) : 0)
+    const r3 = (n: number) => Math.round(n * 1000) / 1000
+
     site = {
+      terrain,
       boundary: s.boundary,
       ground: resolveMaterial(s.groundMaterial, scene.materials, 'ground/grass'),
       zones,
-      walls: (s.walls ?? []).map((w) => toWall(w, s.openings ?? [], 0, base.wallHeight, { ...base, wallMaterial: 'paint/exterior-white' })),
-      objects: (s.objects ?? []).map((o) => toObject(o, 0, 6, base)),
+      walls: (s.walls ?? []).map((w) =>
+        toWall(w, s.openings ?? [], 'site', r3(ground((w.start[0] + w.end[0]) / 2, (w.start[1] + w.end[1]) / 2)), base.wallHeight, { ...base, wallMaterial: 'paint/exterior-white' }),
+      ),
+      objects: (s.objects ?? []).map((o) => toObject(o, r3(ground(o.position[0], o.position[2])), 6, base)),
     }
   }
 
@@ -173,5 +242,5 @@ export function toRenderScene(scene: Scene): RenderScene {
     interiorLights: e.interiorLights ?? 'auto',
     exposure: e.exposure ?? 1,
   }
-  return { walls, rooms, objects, site, env, levels }
+  return { walls, rooms, objects, roofs, slabOpenings, site, env, levels }
 }

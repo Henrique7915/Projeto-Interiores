@@ -1,5 +1,5 @@
 import type { Scene, View } from '../../../schema/types'
-import type { Cutaway } from './Architecture'
+import type { Cutaway, RoofMode } from './Architecture'
 import type { TimePreset } from './lighting/daylight'
 
 /** Referência a algo selecionável (mesma forma que o App usa em `core/schema.ts`). */
@@ -41,6 +41,10 @@ export interface SceneViewProps {
   view?: ViewPreset
   /** Paredes que escondem a vista ficam baixas: 'auto' pela câmera. */
   cutaway?: Cutaway
+  /** Telhado: 'auto' (padrão) só aparece com a câmera baixa; 'show' sempre; 'hide' nunca. */
+  roofs?: RoofMode
+  /** Mostra só este andar (id do Level) e os de baixo; sem valor, todos. */
+  upToLevel?: string
   /** Passo da grade ao arrastar (m); sem valor usa scene.defaults.snap. */
   snap?: number
   showSunGizmo?: boolean

@@ -2,11 +2,15 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 import type { Point2 } from '../../../schema/types'
-import type { ScenePick, RenderScene, ROpening, RRoom, RWall } from './render/types'
+import type { ScenePick, RenderScene, ROpening, RRoom, RWall, RSlabOpening } from './render/types'
 import { getThreeMaterial } from './materials/three'
 import { resolveMaterial } from './materials/library'
 import { isNotch } from './adapter/toRender'
 import { buildWallGeometry, pointInPolygon, wallLength, wallNormalRight, wallTransform } from './geometry/walls'
+import { floorGeometry, shapesWithHoles, slabGeometry } from './geometry/polygon'
+import { Treatment } from './Treatments'
+import { Ceiling } from './Ceilings'
+import { Roof, SlabRailing } from './Roofs'
 import { Box, MATS, simpleMat } from './furniture/parts'
 import { useLampLevel } from './lighting/Lighting'
 
@@ -18,6 +22,7 @@ interface CommonProps {
 }
 
 const TRIM = resolveMaterial('paint/white-matte')
+const NO_HOLES: Point2[][] = []
 
 /* ----------------------------- aberturas ----------------------------- */
 
@@ -182,7 +187,7 @@ function Baseboard({ w }: { w: RWall }) {
   )
 }
 
-export function Wall({ wall, all, mode, perimeter, lowQuality, onPick }: { wall: RWall; all: RWall[]; mode: WallMode; perimeter: boolean } & CommonProps) {
+export function Wall({ wall, all, mode, perimeter, inside = 'right', lowQuality, onPick }: { wall: RWall; all: RWall[]; mode: WallMode; perimeter: boolean; /** face voltada para dentro da casa (onde ficam cortinas) */ inside?: 'left' | 'right' } & CommonProps) {
   const geo = useMemo(() => buildWallGeometry(wall, all), [wall, all])
   const tf = wallTransform(wall)
   const group = useRef<THREE.Group>(null!)
@@ -216,60 +221,77 @@ export function Wall({ wall, all, mode, perimeter, lowQuality, onPick }: { wall:
       {wall.openings.map((o) => (
         <OpeningDecor key={o.id} o={o} t={wall.thickness} lowQuality={lowQuality} onPick={onPick} />
       ))}
+      {wall.openings.map((o) =>
+        o.treatment ? (
+          <Treatment key={`tr-${o.id}`} o={o} t={o.treatment} thickness={wall.thickness} wallHeight={wall.height} side={(o.treatment.side ?? inside) === 'right' ? 1 : -1} lowQuality={lowQuality} onPick={onPick} />
+        ) : null,
+      )}
     </group>
   )
 }
 
 /* -------------------------------- pisos ------------------------------- */
 
-function Room({ room, lowQuality, onPick }: { room: RRoom } & CommonProps) {
-  const geo = useMemo(() => {
-    const shape = new THREE.Shape(room.polygon.map(([x, z]) => new THREE.Vector2(x, -z)))
-    const g = new THREE.ShapeGeometry(shape)
-    g.rotateX(-Math.PI / 2)
-    const pos = g.getAttribute('position')
-    const uv = new Float32Array(pos.count * 2)
-    for (let i = 0; i < pos.count; i++) { uv[i * 2] = pos.getX(i); uv[i * 2 + 1] = pos.getZ(i) }
-    g.setAttribute('uv', new THREE.BufferAttribute(uv, 2))
-    return g
-  }, [room.polygon])
-  const slab = useMemo(() => {
-    const shape = new THREE.Shape(room.polygon.map(([x, z]) => new THREE.Vector2(x, -z)))
-    const g = new THREE.ExtrudeGeometry(shape, { depth: 0.18, bevelEnabled: false })
-    g.rotateX(-Math.PI / 2)
-    return g
-  }, [room.polygon])
+function Room({ room, holes, upper, lowQuality, onPick }: { room: RRoom; holes: Point2[][]; upper: boolean } & CommonProps) {
+  const shapes = useMemo(() => shapesWithHoles(room.polygon, holes), [room.polygon, holes])
+  const geo = useMemo(() => floorGeometry(shapes), [shapes])
+  const slab = useMemo(() => slabGeometry(shapes, 0.18), [shapes])
   const mat = getThreeMaterial(room.material, lowQuality)
   return (
     <group position={[0, room.elevation, 0]}>
       <mesh geometry={geo} material={mat} receiveShadow onClick={(e) => { if (e.delta > 4) return; e.stopPropagation(); onPick?.({ type: 'room', id: room.id }) }} />
-      <mesh geometry={slab} position={[0, -0.182, 0]} material={simpleMat('slab', { color: '#22252b', roughness: 0.8 })} receiveShadow />
+      {/* a laje dos andares de cima faz sombra no de baixo */}
+      <mesh geometry={slab} material={simpleMat('slab', { color: '#22252b', roughness: 0.8 })} receiveShadow castShadow={upper} />
     </group>
   )
 }
 
-/** Classifica cada parede: no perímetro (um lado sem piso) ou interna; devolve a normal externa. */
+/** Classifica cada parede: no perímetro (um lado sem piso) ou interna; devolve a normal externa. Cada andar separado. */
 export function classifyWalls(scene: Pick<RenderScene, 'walls' | 'rooms'>) {
-  const polys = scene.rooms.map((f) => f.polygon)
-  const info = new Map<string, { perimeter: boolean; outward: Point2 }>()
+  const byLevel = new Map<string, Point2[][]>()
+  for (const r of scene.rooms) byLevel.set(r.levelId, [...(byLevel.get(r.levelId) ?? []), r.polygon])
+  const info = new Map<string, { perimeter: boolean; outward: Point2; inside: 'left' | 'right' }>()
   for (const w of scene.walls) {
+    const polys = byLevel.get(w.levelId) ?? []
     const n = wallNormalRight(w)
     const mid: Point2 = [(w.a[0] + w.b[0]) / 2, (w.a[1] + w.b[1]) / 2]
     const off = w.thickness / 2 + 0.15
     const right = polys.some((p) => pointInPolygon([mid[0] + n[0] * off, mid[1] + n[1] * off], p))
     const left = polys.some((p) => pointInPolygon([mid[0] - n[0] * off, mid[1] - n[1] * off], p))
-    if (right && left) info.set(w.id, { perimeter: false, outward: n })
-    else if (right) info.set(w.id, { perimeter: true, outward: [-n[0], -n[1]] })
-    else info.set(w.id, { perimeter: true, outward: n })
+    if (right && left) info.set(w.id, { perimeter: false, outward: n, inside: 'right' })
+    else if (right) info.set(w.id, { perimeter: true, outward: [-n[0], -n[1]], inside: 'right' })
+    else info.set(w.id, { perimeter: true, outward: n, inside: left ? 'left' : 'right' })
   }
   return info
 }
 
-export function Architecture({ scene, cutaway = 'auto', lowQuality, onPick }: { scene: Pick<RenderScene, 'walls' | 'rooms'> & { levels: RenderScene['levels'] }; cutaway?: Cutaway } & CommonProps) {
+export type RoofMode = 'auto' | 'show' | 'hide'
+
+export function Architecture({ scene, cutaway = 'auto', roofs = 'auto', lowQuality, onPick }: { scene: Pick<RenderScene, 'walls' | 'rooms' | 'objects' | 'roofs' | 'slabOpenings'> & { levels: RenderScene['levels'] }; cutaway?: Cutaway; roofs?: RoofMode } & CommonProps) {
   const info = useMemo(() => classifyWalls(scene), [scene])
   const camera = useThree((s) => s.camera)
   const modes = useRef(new Map<string, WallMode>())
   const [, setTick] = useState(0)
+  // auto: o telhado só aparece com a câmera baixa (de cima ele esconderia a casa); histerese para não piscar
+  const [roofsOn, setRoofsOn] = useState(roofs === 'show')
+  const roofsOnRef = useRef(roofsOn)
+  roofsOnRef.current = roofsOn
+  const levelTop = useMemo(() => scene.levels.reduce((m, l) => Math.max(m, l.elevation + l.height), 0), [scene.levels])
+  // vãos de escada: cortam o piso do próprio andar e o forro do andar de baixo
+  const holesOf = useMemo(() => {
+    const m: Record<string, Point2[][]> = {}
+    for (const o of scene.slabOpenings) (m[o.levelId] ??= []).push(o.polygon)
+    return m
+  }, [scene.slabOpenings])
+  const ceilingHoles = useMemo(() => {
+    const m = new Map<string, Point2[][]>()
+    for (const r of scene.rooms) {
+      if (!r.ceiling) continue
+      const top = r.elevation + r.ceiling.height
+      m.set(r.id, scene.slabOpenings.filter((o: RSlabOpening) => o.elevation > top - 0.6 && o.elevation < top + 1.2).map((o) => o.polygon))
+    }
+    return m
+  }, [scene.rooms, scene.slabOpenings])
   const center = useMemo(() => {
     const c = new THREE.Vector2()
     let n = 0
@@ -295,14 +317,26 @@ export function Architecture({ scene, cutaway = 'auto', lowQuality, onPick }: { 
       if (prev !== mode) { modes.current.set(w.id, mode); changed = true }
     }
     if (changed) setTick((n) => n + 1)
+
+    const want = roofs === 'show' ? true : roofs === 'hide' ? false : (() => {
+      const dy = camera.position.y - levelTop * 0.5
+      const elev = (Math.atan2(dy, Math.hypot(camera.position.x - center.x, camera.position.z - center.y)) * 180) / Math.PI
+      return elev < (roofsOnRef.current ? 33 : 27)
+    })()
+    if (want !== roofsOnRef.current) setRoofsOn(want)
   })
 
   return (
     <group>
-      {scene.rooms.map((r) => <Room key={r.id} room={r} lowQuality={lowQuality} onPick={onPick} />)}
-      {scene.walls.map((w) => (
-        <Wall key={w.id} wall={w} all={scene.walls} mode={modes.current.get(w.id) ?? 'full'} perimeter={info.get(w.id)?.perimeter ?? true} lowQuality={lowQuality} onPick={onPick} />
+      {scene.rooms.map((r) => (
+        <Room key={r.id} room={r} holes={holesOf[r.levelId] ?? NO_HOLES} upper={r.elevation > 0.5} lowQuality={lowQuality} onPick={onPick} />
       ))}
+      {roofsOn && scene.rooms.map((r) => r.ceiling && <Ceiling key={`ce-${r.id}`} room={r} holes={ceilingHoles.get(r.id) ?? NO_HOLES} lowQuality={lowQuality} />)}
+      {scene.walls.map((w) => (
+        <Wall key={w.id} wall={w} all={scene.walls} mode={modes.current.get(w.id) ?? 'full'} perimeter={info.get(w.id)?.perimeter ?? true} inside={info.get(w.id)?.inside} lowQuality={lowQuality} onPick={onPick} />
+      ))}
+      {scene.slabOpenings.map((o) => <SlabRailing key={o.id} opening={o} walls={scene.walls} objects={scene.objects} lowQuality={lowQuality} />)}
+      {roofsOn && scene.roofs.map((r) => <Roof key={r.id} roof={r} lowQuality={lowQuality} />)}
     </group>
   )
 }

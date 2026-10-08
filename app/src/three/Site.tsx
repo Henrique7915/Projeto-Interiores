@@ -4,6 +4,7 @@ import type { Point2 } from '../../../schema/types'
 import type { ScenePick, RSite, RZone } from './render/types'
 import { getThreeMaterial } from './materials/three'
 import { Wall } from './Architecture'
+import { buildTerrainGeometry, TERRAIN_MARGIN } from './geometry/terrain'
 
 interface Props {
   site: RSite
@@ -33,15 +34,28 @@ function flat(poly: Point2[], holes: Point2[][] = []) {
 const isPool = (z: RZone) => z.kind === 'pool' || z.kind === 'water'
 
 function Ground({ site, lowQuality, onPick }: Props) {
+  const terrain = site.terrain
   const geo = useMemo(() => {
     const pts = site.boundary ?? site.zones.flatMap((z) => z.polygon)
     const xs = pts.map((p) => p[0]), zs = pts.map((p) => p[1])
     const m = 70
     const [x0, x1, z0, z1] = [Math.min(...xs) - m, Math.max(...xs) + m, Math.min(...zs) - m, Math.max(...zs) + m]
+    // com relevo, o plano grande ganha um furo do tamanho da malha do relevo (as piscinas são furadas lá)
+    if (terrain) {
+      const [a0, b0, a1, b1] = terrain.rect
+      const e = TERRAIN_MARGIN
+      return flat([[x0, z0], [x1, z0], [x1, z1], [x0, z1]], [[[a0 - e + 0.05, b0 - e + 0.05], [a1 + e - 0.05, b0 - e + 0.05], [a1 + e - 0.05, b1 + e - 0.05], [a0 - e + 0.05, b1 + e - 0.05]]])
+    }
     return flat([[x0, z0], [x1, z0], [x1, z1], [x0, z1]], site.zones.filter(isPool).map((z) => z.polygon))
-  }, [site])
+  }, [site, terrain])
+  const relief = useMemo(() => (terrain ? buildTerrainGeometry(terrain, site.zones.filter(isPool).map((z) => z.polygon)) : null), [terrain, site.zones])
+  const mat = getThreeMaterial(site.ground, lowQuality)
+  const click = (e: { delta: number; stopPropagation: () => void }) => { if (e.delta > 4) return; e.stopPropagation(); onPick?.({ type: 'zone', id: '__ground' }) }
   return (
-    <mesh geometry={geo} position={[0, -0.004, 0]} material={getThreeMaterial(site.ground, lowQuality)} receiveShadow onClick={(e) => { if (e.delta > 4) return; e.stopPropagation(); onPick?.({ type: 'zone', id: '__ground' }) }} />
+    <>
+      <mesh geometry={geo} position={[0, -0.004, 0]} material={mat} receiveShadow onClick={click} />
+      {relief && <mesh geometry={relief} position={[0, -0.002, 0]} material={mat} receiveShadow onClick={click} />}
+    </>
   )
 }
 
