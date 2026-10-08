@@ -8,6 +8,7 @@ import { useShortcuts } from './state/shortcuts'
 import { useIsMobile } from './state/hooks'
 import { Icon } from './ui/common'
 import { BottomPalette } from './ui/BottomPalette'
+import { ErrorBoundary } from './ui/ErrorBoundary'
 import { Toaster, toast } from './ui/common'
 import { LeftPanel } from './ui/LeftPanel'
 import { RightPanel } from './ui/RightPanel'
@@ -73,9 +74,11 @@ export function App() {
         </div>
         <RightPanel />
         {ai && (
-          <Suspense fallback={null}>
-            <AiPanel onClose={() => setAi(false)} />
-          </Suspense>
+          <ErrorBoundary onClose={() => setAi(false)}>
+            <Suspense fallback={<div className="panel ai"><p className="muted pad">Carregando…</p></div>}>
+              <AiPanel onClose={() => setAi(false)} />
+            </Suspense>
+          </ErrorBoundary>
         )}
       </div>
       {mobile && (
