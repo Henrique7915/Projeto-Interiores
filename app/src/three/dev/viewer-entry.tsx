@@ -3,16 +3,22 @@ import { createRoot } from 'react-dom/client'
 import { SceneView, type Selection, type SceneViewHandle } from '../index'
 import type { Scene } from '../../../../schema/types'
 import studio from '../../../../schema/exemplos/studio-aconchegante.json'
+import casa from '../../../../schema/exemplos/casa-dois-andares.json'
 import quintal from '../../../../schema/exemplos/quintal-com-piscina.json'
 
 // Visualizador só de desenvolvimento do motor 3D, sem o resto do app:
-//   /src/three/dev/viewer.html?scene=studio|quintal&q=low|medium|high&t=18.5&view=iso|top|front
+//   /src/three/dev/viewer.html?scene=studio|quintal|casa&roofs=auto|show|hide&upTo=<id do andar>&cutaway=auto|none|all&terrain=<fator do relevo>&q=low|medium|high&t=18.5&view=iso|top|front
 // Expõe window.__vp (handle) e window.__setT (muda a hora) para testes automatizados; adaptive=0 desliga o ajuste automático de qualidade.
-const SCENES: Record<string, Scene> = { studio: studio as unknown as Scene, quintal: quintal as unknown as Scene }
+const SCENES: Record<string, Scene> = { studio: studio as unknown as Scene, quintal: quintal as unknown as Scene, casa: casa as unknown as Scene }
 const q = new URLSearchParams(location.search)
 
 function Viewer() {
-  const [scene] = useState<Scene>(SCENES[q.get('scene') ?? 'studio'])
+  const [scene] = useState<Scene>(() => {
+    const base = SCENES[q.get('scene') ?? 'studio']
+    const k = Number(q.get('terrain') ?? 1) // terrain=3 exagera o relevo, para ver a malha
+    if (k === 1 || !base.site?.terrain) return base
+    return { ...base, site: { ...base.site, terrain: { ...base.site.terrain, points: base.site.terrain.points.map(([x, z, h]) => [x, z, h * k] as [number, number, number]) } } }
+  })
   const [sel, setSel] = useState<Selection>(null)
   const [t, setT] = useState<number | undefined>(q.get('t') ? Number(q.get('t')) : undefined)
   const ref = useRef<SceneViewHandle>(null)
@@ -29,6 +35,9 @@ function Viewer() {
         adaptive={q.get('adaptive') !== '0'}
         timeOfDay={t}
         onTimeChange={setT}
+        roofs={(q.get('roofs') as 'auto' | 'show' | 'hide') ?? undefined}
+        cutaway={(q.get('cutaway') as 'auto' | 'none' | 'all') ?? undefined}
+        upToLevel={q.get('upTo') ?? undefined}
         view={(q.get('view') as 'iso' | 'top' | 'front') ?? 'iso'}
       />
     </div>

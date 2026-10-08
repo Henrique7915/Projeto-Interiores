@@ -38,7 +38,7 @@ function mitre(w: WallView, at: 0 | 1, all: WallView[]): End {
   const node = at === 0 ? w.a : w.b
   const others: { w: WallView; dirAway: Vec2 }[] = []
   for (const o of all) {
-    if (o.id === w.id || o.elevation !== w.elevation) continue
+    if (o.id === w.id || o.levelId !== w.levelId) continue
     if (same(o.a, node)) others.push({ w: o, dirAway: wallDir(o) })
     else if (same(o.b, node)) { const d = wallDir(o); others.push({ w: o, dirAway: [-d[0], -d[1]] }) }
   }

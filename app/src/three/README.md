@@ -37,6 +37,10 @@ Os painéis do App (moodboard, catálogo de móveis) montam suas listas a partir
 | `SceneView.tsx` | componente público, câmera, atalhos, pós-processamento |
 | `adapter/toRender.ts` | `Scene` → `RenderScene` (materiais resolvidos, catálogo aplicado, padrões do schema) |
 | `Architecture.tsx` | pisos, paredes (esquadria nos cantos, recorte por câmera), portas e janelas, rodapé |
+| `Roofs.tsx`, `geometry/roof.ts` | telhado (flat, shed, gable, hip: cobre o retângulo orientado que envolve o polígono, mais o beiral) e guarda-corpo dos vãos de laje |
+| `Treatments.tsx` | cortina, voil, persiana e rolô nas aberturas |
+| `Ceilings.tsx` | forro liso ou rebaixado com sanca (só visível por baixo; some com a câmera alta) |
+| `geometry/polygon.ts`, `geometry/terrain.ts` | recorte de polígonos (vãos de escada), recuo, malha do relevo |
 | `Site.tsx` | terreno: grama, zonas (deck, pavimento, canteiro), piscina, muros e cercas |
 | `geometry/walls.ts` | geometria de parede com vãos e topo inclinado |
 | `furniture/builders.tsx` | móveis procedurais, um por `model: "procedural/<nome>"` do catálogo |
@@ -59,7 +63,7 @@ Os painéis do App (moodboard, catálogo de móveis) montam suas listas a partir
 
 ## Páginas de desenvolvimento
 
-Com `npm run dev` rodando: `/src/three/dev/viewer.html?scene=studio|quintal&q=low|medium|high&adaptive=0&t=18.5&view=iso|top|front` (motor sozinho, expõe `window.__vp` e `window.__setT`) e `/src/three/dev/preview.html?preview=<catalogId>` (miniatura, usada por `assets/scripts/thumbnails.mjs`).
+Com `npm run dev` rodando: `/src/three/dev/viewer.html?scene=studio|quintal|casa&q=low|medium|high&adaptive=0&t=18.5&view=iso|top|front&roofs=show|hide&upTo=<andar>&cutaway=none&terrain=<fator>` (motor sozinho, expõe `window.__vp` e `window.__setT`) e `/src/three/dev/preview.html?preview=<catalogId>` (miniatura, usada por `assets/scripts/thumbnails.mjs`).
 
 ## Convenções
 
