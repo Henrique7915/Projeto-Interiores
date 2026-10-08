@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { SceneView, type SceneViewHandle, type ViewPreset } from '../three'
 import { useEditor } from '../state/store'
-import type { Selection } from '../core'
 
 let handle: SceneViewHandle | null = null
 
@@ -19,19 +18,6 @@ export async function captureView(view?: ViewPreset): Promise<Blob> {
 export async function exportGLB(): Promise<Blob> {
   if (!handle) throw new Error('A vista 3D não está aberta.')
   return handle.exportGLB()
-}
-
-/**
- * O motor seleciona o móvel em pointerdown, mas o piso/parede atrás dele também recebe o `click` logo depois
- * e trocaria a seleção para o cômodo. Ignoramos esse clique "fantasma" até a Gráficos corrigir no motor
- * (Items.tsx: `onClick={(e) => e.stopPropagation()}` no grupo do móvel).
- */
-let lastObjectPick = 0
-const onPickFiltered = (sel: Selection, select: (s: Selection) => void) => {
-  const now = performance.now()
-  if (sel?.kind === 'object') lastObjectPick = now
-  else if (sel && now - lastObjectPick < 400) return
-  select(sel)
 }
 
 const isMobile = () => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches
@@ -80,7 +66,7 @@ export function ThreeHost() {
       }}
       scene={scene}
       selection={selection}
-      onPick={(sel) => onPickFiltered(sel, select)}
+      onPick={select}
       onDragEnd={onDragEnd}
       onDelete={onDelete}
       onTimeChange={onTimeChange}
