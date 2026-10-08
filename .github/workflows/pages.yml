@@ -1,0 +1,42 @@
+name: Publicar app (GitHub Pages)
+
+# Publica o app em https://<usuário>.github.io/<repositório>/ a cada mudança na main.
+# Só roda com o repositório público (Pages grátis) e depois de ligar
+# Settings → Pages → Source: "GitHub Actions".
+on:
+  push:
+    branches: [main]
+    paths: ['app/**', 'assets/**', 'schema/**', 'package.json', 'package-lock.json', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    name: Construir e publicar
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/dist
+      - id: deploy
+        uses: actions/deploy-pages@v4
