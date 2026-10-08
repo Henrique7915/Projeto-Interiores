@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://design3d.local/schema/catalog/0.1.0",
+  "title": "Design3D Catalog",
+  "description": "Contrato do catálogo de móveis/objetos (assets/catalog.json, conteúdo mantido pela frente de Gráficos) e da biblioteca de materiais (assets/materials.json). Uma cena referencia itens por catalogId e materiais por MaterialId.",
+  "type": "object",
+  "required": ["format", "version", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "format": { "const": "design3d.catalog" },
+    "version": { "type": "string", "pattern": "^0\\.1\\.\\d+$" },
+    "items": { "type": "array", "items": { "$ref": "#/$defs/CatalogItem" } },
+    "materials": {
+      "type": "object",
+      "description": "Biblioteca de materiais. Mesma forma de Material em scene.schema.json.",
+      "propertyNames": { "$ref": "scene.schema.json#/$defs/MaterialId" },
+      "additionalProperties": { "$ref": "scene.schema.json#/$defs/Material" }
+    },
+    "moods": {
+      "type": "array",
+      "description": "Presets de clima/iluminação (Aconchegante, Claro, Noturno...).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "$ref": "#/$defs/I18n" },
+          "timeOfDay": { "type": "string" },
+          "exposure": { "type": "number" },
+          "palette": { "type": "array", "items": { "$ref": "scene.schema.json#/$defs/MaterialRef" } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "I18n": {
+      "description": "Texto simples ou por idioma, ex.: { \"pt-BR\": \"Sofá\", \"en\": \"Sofa\" }.",
+      "oneOf": [
+        { "type": "string" },
+        { "type": "object", "additionalProperties": { "type": "string" }, "minProperties": 1 }
+      ]
+    },
+    "CatalogItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "category", "model", "dimensions"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*(/[a-z0-9][a-z0-9_-]*)*$", "description": "ex.: 'sofa/modern-3-seat'." },
+        "name": { "$ref": "#/$defs/I18n" },
+        "category": {
+          "enum": ["sofa", "chair", "table", "bed", "storage", "shelf", "desk", "lighting", "decor", "rug", "plant", "kitchen", "bathroom", "appliance", "electronics", "textile", "door", "window", "stairs", "outdoor", "structure", "other"]
+        },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "model": { "type": "string", "description": "Caminho do glTF/GLB relativo a assets/ (ex.: 'models/sofa-modern-3.glb'). Origem no centro da base, frente para +Z, 1 unidade = 1 m." },
+        "thumbnail": { "type": "string" },
+        "dimensions": { "$ref": "scene.schema.json#/$defs/Dimensions", "description": "Medidas padrão." },
+        "resizable": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Faixas de medida permitidas por eixo. Eixo ausente = não redimensionável.",
+          "properties": {
+            "width": { "$ref": "#/$defs/Range" },
+            "height": { "$ref": "#/$defs/Range" },
+            "depth": { "$ref": "#/$defs/Range" }
+          }
+        },
+        "mount": { "enum": ["floor", "wall", "ceiling", "surface"], "default": "floor" },
+        "materialSlots": {
+          "type": "object",
+          "propertyNames": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["default"],
+            "properties": {
+              "label": { "$ref": "#/$defs/I18n" },
+              "default": { "$ref": "scene.schema.json#/$defs/MaterialRef" },
+              "allowed": { "type": "array", "items": { "type": "string" }, "description": "Categorias de material aceitas (ex.: ['fabric','leather'])." }
+            }
+          }
+        },
+        "light": { "$ref": "scene.schema.json#/$defs/Light" },
+        "license": { "type": "string", "description": "Licença e origem do modelo (obrigatório antes de distribuir)." },
+        "source": { "type": "string" }
+      }
+    },
+    "Range": {
+      "type": "array",
+      "prefixItems": [{ "type": "number", "exclusiveMinimum": 0 }, { "type": "number", "exclusiveMinimum": 0 }],
+      "items": false,
+      "minItems": 2
+    }
+  }
+}

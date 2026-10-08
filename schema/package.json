@@ -1,0 +1,16 @@
+{
+  "name": "@design3d/schema",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Formato da cena do Design3D: JSON Schema, tipos TypeScript, validador e exemplos.",
+  "main": "validar.mjs",
+  "types": "types.ts",
+  "scripts": {
+    "validar": "node validar.mjs exemplos/*.json"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}
