@@ -253,9 +253,102 @@ def toilet():
     export('toilet')
 
 
+def sofa_chaise():
+    w, h, d = 2.5, 0.85, 1.6
+    leg_h, base_h, arm = 0.12, 0.3, 0.14
+    sd, cw = 0.95, 0.85
+    top = leg_h + base_h
+    mat('upholstery', (0.55, 0.57, 0.6), 0.9)
+    mat('cushions', (0.83, 0.63, 0.17), 0.7)
+    mat('legs', (0.42, 0.27, 0.19), 0.5)
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            if sx < 0 and sz > 0:
+                continue  # sem perna onde não há corpo (a chaise fica só à direita)
+            cyl('legs', 0.03, leg_h, (sx * (w / 2 - 0.1), leg_h / 2, sz * (d / 2 - 0.1)), r2=0.022, verts=12)
+    box('upholstery', (w, base_h, sd), (0, leg_h + base_h / 2, -d / 2 + sd / 2), 0.04, 4)
+    box('upholstery', (cw, base_h, d - sd), (w / 2 - cw / 2, leg_h + base_h / 2, -d / 2 + sd + (d - sd) / 2), 0.04, 4)
+    box('upholstery', (w, h - top, 0.22), (0, top + (h - top) / 2, -d / 2 + 0.11), 0.07, 4)
+    box('upholstery', (arm, 0.3, sd - 0.1), (-w / 2 + arm / 2, top + 0.15, -d / 2 + sd / 2 + 0.05), 0.05, 4)
+    n = 3
+    cwid = (w - cw - arm) / n
+    for i in range(n):
+        x = -w / 2 + arm + cwid * (i + 0.5)
+        box('upholstery', (cwid - 0.02, 0.14, sd - 0.24), (x, top + 0.07, -d / 2 + sd / 2 + 0.07), 0.05, 4)
+        box('upholstery', (cwid - 0.04, 0.36, 0.15), (x, top + 0.2, -d / 2 + 0.3), 0.06, 4, rot=(0.18, 0, 0))
+    box('upholstery', (cw - 0.02, 0.14, d - sd - 0.02), (w / 2 - cw / 2, top + 0.07, -d / 2 + sd + (d - sd) / 2), 0.05, 4)
+    box('cushions', (0.4, 0.4, 0.13), (-w / 2 + arm + 0.3, top + 0.33, -d / 2 + sd / 2 + 0.12), 0.05, 4, rot=(0.3, 0.1, 0.25))
+    export('sofa-chaise')
+
+
+def dresser():
+    w, h, d = 1.0, 0.85, 0.5
+    leg_h = 0.12
+    bh = h - leg_h
+    mat('body', (0.82, 0.72, 0.58), 0.55)
+    mat('handles', (0.79, 0.63, 0.29), 0.3, 0.9)
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            cyl('body', 0.03, leg_h, (sx * (w / 2 - 0.06), leg_h / 2, sz * (d / 2 - 0.06)), r2=0.02, verts=12)
+    box('body', (w, bh, d), (0, leg_h + bh / 2, 0), 0.015, 3)
+    rows = 4
+    rh = bh / rows
+    for r in range(rows):
+        y = leg_h + rh * (r + 0.5)
+        box('body', (w - 0.025, rh - 0.02, 0.02), (0, y, d / 2 + 0.004), 0.006, 2)
+        cyl('handles', 0.011, 0.016, (-0.1, y + 0.02, d / 2 + 0.025), verts=12, rot=(math.pi / 2, 0, 0))
+        cyl('handles', 0.011, 0.016, (0.1, y + 0.02, d / 2 + 0.025), verts=12, rot=(math.pi / 2, 0, 0))
+    export('dresser')
+
+
+def garden_bench():
+    w, h, d = 1.5, 0.85, 0.55
+    seat_h = h * 0.5
+    mat('frame', (0.11, 0.11, 0.12), 0.45, 0.7)
+    mat('slats', (0.55, 0.38, 0.2), 0.6)
+    for sx in (-1, 1):
+        x = sx * (w / 2 - 0.06)
+        box('frame', (0.05, seat_h, d), (x, seat_h / 2, 0), 0.01, 2)
+        box('frame', (0.05, h - seat_h * 0.8, 0.05), (x, seat_h * 0.8 + (h - seat_h * 0.8) / 2, -d / 2 + 0.06), 0.01, 2, rot=(0.2, 0, 0))
+        box('frame', (0.06, 0.04, d), (x, seat_h * 0.95, 0), 0.01, 2)
+    for i in range(4):
+        box('slats', (w, 0.03, (d - 0.04) / 4 - 0.012), (0, seat_h, -d / 2 + 0.1 + i * (d - 0.12) / 3), 0.006, 2)
+    for i in range(3):
+        box('slats', (w, 0.08, 0.025), (0, seat_h + 0.18 + i * 0.12, -d / 2 + 0.06 - i * 0.02), 0.006, 2, rot=(0.2, 0, 0))
+    export('garden-bench')
+
+
+def plant_fern():
+    w, h = 0.7, 0.9
+    from mathutils import Euler, Matrix
+    mat('pot', (0.72, 0.4, 0.28), 0.85)
+    mat('foliage', (0.2, 0.5, 0.2), 0.6)
+    mat('soil', (0.17, 0.12, 0.09), 1.0)
+    ph = h * 0.28
+    cyl('pot', w * 0.28, ph, (0, ph / 2, 0), r2=w * 0.34, verts=32, bevel=0.01)
+    cyl('soil', w * 0.3, 0.02, (0, ph, 0), verts=24)
+    n = 18
+    for i in range(n):
+        a = i * 2.39996
+        tier = i % 3
+        ln = (h - ph) * (0.85 + 0.12 * ((i * 5) % 3)) * (1.0 - 0.12 * tier)
+        tilt = 0.5 + 0.18 * tier + 0.05 * (i % 4)
+        # centro da fronda: parte do pé do vaso e sobe/cai para fora
+        out = math.sin(tilt) * ln * 0.5
+        up = math.cos(tilt) * ln * 0.5
+        c = (math.cos(a) * out, ph + up, math.sin(a) * out)
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=1, segments=16, ring_count=8, location=P(*c))
+        lf = bpy.context.active_object
+        lf.scale = (0.04 + 0.01 * tier, ln * 0.5, 0.008)
+        lf.rotation_euler = (Matrix.Rotation(-a + math.pi / 2, 3, 'Z') @ Euler((-tilt, 0, 0)).to_matrix()).to_euler()
+        _finish(lf, 'foliage')
+    export('plant-fern')
+
+
 MODELS = {
     'sofa-3': sofa_3, 'armchair': armchair, 'bed-queen': bed_queen,
     'chair-dining': chair_dining, 'plant-monstera': plant_monstera, 'toilet': toilet,
+    'sofa-chaise': sofa_chaise, 'dresser': dresser, 'garden-bench': garden_bench, 'plant-fern': plant_fern,
 }
 
 if __name__ == '__main__':
