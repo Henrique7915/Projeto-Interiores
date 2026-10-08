@@ -537,16 +537,17 @@ function apply(d: Scene, op: Op, created: string[]) {
       }
       const c = ensureLevel(d, key)
       const id = newOf(op.id, op.name ?? nameSlug(cat.id))
+      const inRoom = op.roomId ?? roomAt(d, op.x, op.z)?.room.id
       const obj: SceneObject = {
         id,
         catalogId: op.catalogId,
-        position: [op.x, op.y ?? defaultElevation(cat.mount), op.z],
+        position: [round(op.x, 4), round(op.y ?? defaultElevation(cat.mount), 4), round(op.z, 4)],
         ...(op.name ? { name: op.name } : {}),
         ...(op.rotationDeg ? { rotationDeg: normDeg(op.rotationDeg) } : {}),
         ...(op.dimensions ? { dimensions: op.dimensions } : {}),
         ...(op.materials ? { materials: op.materials } : {}),
         ...(cat.mount && cat.mount !== 'floor' ? { mount: cat.mount } : {}),
-        ...(op.roomId ? { roomId: op.roomId } : {}),
+        ...(inRoom && c !== d.site ? { roomId: inRoom } : {}),
       }
       list(c, 'objects').push(obj)
       break
@@ -584,7 +585,7 @@ function apply(d: Scene, op: Op, created: string[]) {
       for (const m of Object.values(op.patch.materials ?? {})) needMat(d, m)
       const { x, z, y, rotationDeg, materials, ...rest } = op.patch
       Object.assign(o.entity, strip(rest))
-      if (x !== undefined || y !== undefined || z !== undefined) o.entity.position = [x ?? o.entity.position[0], y ?? o.entity.position[1], z ?? o.entity.position[2]]
+      if (x !== undefined || y !== undefined || z !== undefined) o.entity.position = [round(x ?? o.entity.position[0], 4), round(y ?? o.entity.position[1], 4), round(z ?? o.entity.position[2], 4)]
       if (rotationDeg !== undefined) o.entity.rotationDeg = normDeg(rotationDeg)
       if (materials) o.entity.materials = { ...o.entity.materials, ...materials }
       break
