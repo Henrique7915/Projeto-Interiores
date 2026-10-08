@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { SceneView } from '../three'
 import { getViewHandle, setViewHandle } from './viewHandle'
-import { useEditor } from '../state/store'
+import { activeLevelOf, useEditor } from '../state/store'
 
 const isMobile = () => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches
 
@@ -14,6 +14,10 @@ export function ThreeHost() {
   const snap = useEditor((s) => s.snap)
   const view = useEditor((s) => s.view3d)
   const cutaway = useEditor((s) => s.cutaway)
+  const roofMode = useEditor((s) => s.roofMode)
+  const levelView = useEditor((s) => s.levelView)
+  const activeId = useEditor((s) => s.activeLevel)
+  const upTo = levelView === 'upto' && scene.levels.length > 1 ? activeLevelOf(scene, activeId)?.id : undefined
   const [low] = useState(isMobile)
 
   const onDragEnd = useCallback(
@@ -48,13 +52,15 @@ export function ThreeHost() {
         setViewHandle(h)
       }}
       scene={scene}
-      selection={selection}
+      selection={selection && (selection.kind === 'roof' || selection.kind === 'slab' || selection.kind === 'annotation') ? null : selection}
       onPick={select}
       onDragEnd={onDragEnd}
       onDelete={onDelete}
       onTimeChange={onTimeChange}
       view={view}
       cutaway={cutaway}
+      roofs={roofMode}
+      upToLevel={upTo}
       quality={low ? 'low' : 'high'}
       snap={snap}
     />
@@ -75,6 +81,15 @@ const CUTS: { id: 'auto' | 'none' | 'all'; label: string }[] = [
 ]
 
 function ViewControls() {
+  const scene = useEditor((s) => s.scene)
+  const activeId = useEditor((s) => s.activeLevel)
+  const setActive = useEditor((s) => s.setActiveLevel)
+  const levelView = useEditor((s) => s.levelView)
+  const setLevelView = useEditor((s) => s.setLevelView)
+  const roofMode = useEditor((s) => s.roofMode)
+  const setRoofMode = useEditor((s) => s.setRoofMode)
+  const hasRoofs = scene.levels.some((l) => (l.roofs ?? []).length > 0)
+  const active = activeLevelOf(scene, activeId)
   const view = useEditor((s) => s.view3d)
   const setView = useEditor((s) => s.setView3d)
   const cut = useEditor((s) => s.cutaway)
@@ -95,6 +110,28 @@ function ViewControls() {
           </option>
         ))}
       </select>
+      {scene.levels.length > 1 && (
+        <>
+          <select value={active?.id} onChange={(e) => setActive(e.target.value)} aria-label="Andar em edição">
+            {[...scene.levels].reverse().map((l) => (
+              <option key={l.id} value={l.id}>
+                Andar: {l.name}
+              </option>
+            ))}
+          </select>
+          <select value={levelView} onChange={(e) => setLevelView(e.target.value as 'upto')} aria-label="Andares visíveis">
+            <option value="upto">Até este andar</option>
+            <option value="all">Todos os andares</option>
+          </select>
+        </>
+      )}
+      {(hasRoofs || scene.levels.length > 1) && (
+        <select value={roofMode} onChange={(e) => setRoofMode(e.target.value as 'auto')} aria-label="Telhado">
+          <option value="auto">Telhado: auto</option>
+          <option value="show">Telhado: mostrar</option>
+          <option value="hide">Telhado: ocultar</option>
+        </select>
+      )}
     </div>
   )
 }

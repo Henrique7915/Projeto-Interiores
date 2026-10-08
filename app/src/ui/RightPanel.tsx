@@ -2,6 +2,7 @@ import { bbox, findObject, findOpening, findRoom, findWall, findZone, getCatalog
 import { fmtArea } from '../lib/units'
 import { useEditor } from '../state/store'
 import { Icon, LenInput, NumInput, Section, Swatch, TextInput } from './common'
+import { ExtraInspector, GroupControls, RoomRoofButtons, TreatmentControls } from './Structure'
 
 const PRESETS = [
   { id: 'morning', label: 'Manhã', t: 7.6, icon: 'sunrise' },
@@ -100,6 +101,8 @@ function Inspector({ scene }: { scene: Scene }) {
           <Swatch scene={scene} material={r.entity.floor?.material} size={40} />
           <span className="muted">Piso: {resolveMaterial(r.entity.floor?.material, scene).name}. Escolha outro na paleta.</span>
         </div>
+        <p className="muted small">Telhado sobre este ambiente:</p>
+        <RoomRoofButtons roomId={sel.id} />
         <Delete op="removeRoom" id={sel.id} />
       </Section>
     )
@@ -190,6 +193,7 @@ function Inspector({ scene }: { scene: Scene }) {
           <LenInput label="Posição (centro)" value={o.entity.offset} onCommit={(offset) => dispatch([{ op: 'updateOpening', id: sel.id, patch: { offset } }])} />
         </div>
         {wall && <p className="muted">Parede de {wallLength(wall.entity).toFixed(2)} m</p>}
+        <TreatmentControls openingId={sel.id} />
         <Delete op="removeOpening" id={sel.id} />
       </Section>
     )
@@ -243,10 +247,13 @@ function Inspector({ scene }: { scene: Scene }) {
           </button>
           <button className="btn ghost" onClick={() => patch({ locked: !e.locked })}>{e.locked ? 'Destravar' : 'Travar'}</button>
         </div>
+        <GroupControls obj={e} container={o.container} />
         <Delete op="removeObject" id={e.id} />
       </Section>
     )
   }
+
+  if (sel.kind === 'roof' || sel.kind === 'slab' || sel.kind === 'annotation') return <ExtraInspector scene={scene} />
 
   return (
     <Section title="Terreno">

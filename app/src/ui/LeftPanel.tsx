@@ -4,6 +4,7 @@ import { fmtArea } from '../lib/units'
 import { moods, addRoomAuto, setMood } from '../state/actions'
 import { useEditor, type PaintTarget } from '../state/store'
 import { Section, Swatch, TextInput, NumInput } from './common'
+import { StructureSection } from './Structure'
 
 interface Slot {
   id: PaintTarget
@@ -116,6 +117,7 @@ export function LeftPanel() {
           </ul>
         )}
       </Section>
+      <StructureSection />
     </aside>
   )
 }

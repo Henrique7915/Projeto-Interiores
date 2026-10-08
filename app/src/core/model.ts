@@ -1,6 +1,6 @@
 import { getCatalogItem } from './catalog'
 import { dist, footprintCorners, pointInPolygon } from './geometry'
-import type { Container, ContainerKey, Opening, Room, Scene, SceneObject, Wall, GroundZone } from './schema'
+import type { Annotation, Container, ContainerKey, Group, Opening, Room, Roof, Scene, SceneObject, SlabOpening, Wall, GroundZone, Level } from './schema'
 
 /** Ambiente dono da parede (o primeiro, se a parede é compartilhada). */
 export const ROOM_KEY = 'app.roomId'
@@ -32,6 +32,12 @@ export const findWall = (s: Scene, id: string) => locate<Wall>(s, id, (c) => c.w
 export const findOpening = (s: Scene, id: string) => locate<Opening>(s, id, (c) => c.openings)
 export const findObject = (s: Scene, id: string) => locate<SceneObject>(s, id, (c) => c.objects)
 export const findRoom = (s: Scene, id: string) => locate<Room>(s, id, (c) => (c as { rooms?: Room[] }).rooms)
+export const findRoof = (s: Scene, id: string) => locate<Roof>(s, id, (c) => (c as Level).roofs)
+export const findSlabOpening = (s: Scene, id: string) => locate<SlabOpening>(s, id, (c) => (c as Level).slabOpenings)
+export const findGroup = (s: Scene, id: string) => locate<Group>(s, id, (c) => c.groups)
+export const findAnnotation = (s: Scene, id: string) => locate<Annotation>(s, id, (c) => c.annotations)
+/** Grupo a que o objeto pertence (no mesmo contêiner), se houver. */
+export const groupOfObject = (c: Container, objectId: string): Group | undefined => (c.groups ?? []).find((g) => g.objectIds.includes(objectId))
 export const findZone = (s: Scene, id: string) => locate<GroundZone>(s, id, (c) => (c as { zones?: GroundZone[] }).zones)
 
 export const wallRoomIds = (w: Wall): string[] => {
@@ -82,7 +88,7 @@ export function allIds(scene: Scene): Set<string> {
   for (const v of scene.views ?? []) ids.add(v.id)
   for (const { c } of allContainers(scene)) {
     if ('id' in c) ids.add(c.id)
-    for (const l of [c.walls, c.openings, c.objects, (c as { rooms?: Room[] }).rooms, (c as { zones?: GroundZone[] }).zones]) for (const e of l ?? []) ids.add(e.id)
+    for (const l of [c.walls, c.openings, c.objects, c.groups, c.annotations, (c as Level).roofs, (c as Level).slabOpenings, (c as { rooms?: Room[] }).rooms, (c as { zones?: GroundZone[] }).zones]) for (const e of l ?? []) ids.add(e.id)
   }
   return ids
 }

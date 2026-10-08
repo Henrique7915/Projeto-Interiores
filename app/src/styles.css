@@ -134,7 +134,13 @@ small { color: var(--muted); font-size: 11.5px; }
 /* planta 2D */
 .plan-wrap { position: absolute; inset: 0; touch-action: none; }
 .plan-wrap svg { width: 100%; height: 100%; display: block; user-select: none; }
-.plan-tools { position: absolute; left: 12px; top: 12px; display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1px solid var(--line2); padding: 6px; border-radius: 14px; z-index: 3; }
+.plan-left { position: absolute; left: 12px; top: 12px; display: flex; flex-direction: column; gap: 8px; z-index: 3; align-items: flex-start; }
+.plan-tools { display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1px solid var(--line2); padding: 6px; border-radius: 14px; }
+.level-bar { display: flex; flex-direction: column; gap: 4px; background: var(--panel); border: 1px solid var(--line2); padding: 5px; border-radius: 14px; max-width: 108px; }
+.level-bar button { background: none; border: 0; color: var(--muted); padding: 6px 8px; border-radius: 9px; font-size: 12.5px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.level-bar button.on { background: #fff; color: #11141c; font-weight: 600; }
+.level-bar .lv-add { display: flex; align-items: center; justify-content: center; border: 1px dashed var(--line2); padding: 4px; }
+.level-bar .lv-add svg { width: 14px; height: 14px; }
 .plan-hint { position: absolute; left: 66px; top: 58px; background: var(--panel); border: 1px solid var(--line); padding: 6px 12px; border-radius: 10px; color: var(--muted); font-size: 12.5px; z-index: 3; max-width: calc(100% - 140px); }
 .plan-zoom { position: absolute; right: 12px; top: 12px; display: flex; gap: 6px; z-index: 3; align-items: center; }
 
@@ -192,7 +198,15 @@ small { color: var(--muted); font-size: 11.5px; }
 @media (max-width: 860px) { .mnav { display: flex; } }
 
 .v3d { position: relative; }
-.view-controls { position: absolute; left: 12px; top: 12px; display: flex; gap: 8px; align-items: center; z-index: 5; }
+.view-controls { position: absolute; left: 12px; top: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; z-index: 5; pointer-events: none; }
+.view-controls > * { pointer-events: auto; }
 .view-controls select { background: rgba(20, 24, 33, 0.85); color: var(--text, #e8eaf0); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 10px; padding: 6px 8px; }
 .view-controls .seg { background: rgba(20, 24, 33, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); }
 .lenbox { margin-left: 10px; width: 120px; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--accent); border-radius: 8px; padding: 3px 8px; outline: none; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips .btn { padding: 6px 10px; font-size: 12.5px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.muted.small { font-size: 12px; margin: 4px 0 0; }
+.check { display: flex; align-items: center; gap: 8px; color: var(--text, #e8eaf0); font-size: 13.5px; }
+.static { display: block; padding: 8px 0; font-weight: 600; }

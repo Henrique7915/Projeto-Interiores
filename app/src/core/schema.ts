@@ -30,10 +30,15 @@ export type {
   CatalogCategory,
   View,
   Defaults,
+  Roof,
+  SlabOpening,
+  Group,
+  Annotation,
+  OpeningTreatment,
 } from '../../../schema/types'
 
 export const SCENE_FORMAT = 'design3d.scene' as const
-export const SCENE_VERSION = '0.1.0'
+export const SCENE_VERSION = '0.2.0'
 
 /** Level ou Site: os dois guardam walls/openings/objects. */
 export type Container = Level | Site
@@ -46,6 +51,9 @@ export type Selection =
   | { kind: 'opening'; id: string }
   | { kind: 'object'; id: string }
   | { kind: 'zone'; id: string }
+  | { kind: 'roof'; id: string }
+  | { kind: 'slab'; id: string }
+  | { kind: 'annotation'; id: string }
   | { kind: 'site' }
   | null
 

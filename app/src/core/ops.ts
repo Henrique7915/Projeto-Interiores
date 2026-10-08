@@ -6,12 +6,17 @@ import {
   ROOM_KEY,
   allIds,
   edgeOfWall,
+  findAnnotation,
+  findGroup,
   findObject,
   findOpening,
+  findRoof,
   findRoom,
+  findSlabOpening,
   findWall,
   findZone,
   freshId,
+  groupOfObject,
   getContainer,
   hoursToTime,
   objectDims,
@@ -21,7 +26,7 @@ import {
   wallRoomIds,
   wallsOfRoom,
 } from './model'
-import type { Container, ContainerKey, Level, Opening, Room, Scene, SceneObject, Wall } from './schema'
+import type { Annotation, Container, ContainerKey, Group, Level, Opening, Room, Roof, Scene, SceneObject, SlabOpening, Wall } from './schema'
 
 /* ───────────── schemas (UI, chat de IA e servidor MCP usam os mesmos) ───────────── */
 
@@ -32,6 +37,8 @@ const optId = z.string().optional().describe('id opcional legível; se omitido �
 const wallKind = z.enum(['solid', 'half', 'glass', 'railing', 'fence'])
 const openingKind = z.enum(['door', 'double-door', 'sliding-door', 'garage-door', 'window', 'sliding-window', 'fixed-window', 'passage'])
 const zoneKind = z.enum(['grass', 'paving', 'deck', 'gravel', 'soil', 'water', 'pool', 'garden-bed', 'sand', 'other'])
+const roofKind = z.enum(['flat', 'shed', 'gable', 'hip'])
+const treatmentKind = z.enum(['curtain', 'sheer', 'blind', 'roller', 'none'])
 const roomType = z.enum(['living', 'dining', 'kitchen', 'bedroom', 'bathroom', 'office', 'laundry', 'hall', 'garage', 'balcony', 'storage', 'studio', 'other'])
 const dims = z.object({ width: z.number().positive(), height: z.number().positive(), depth: z.number().positive() })
 const slots = z.record(z.string(), mat)
@@ -202,6 +209,7 @@ export const OpSchema = z.discriminatedUnion('op', [
       z.object({ type: z.literal('object'), id: z.string(), slot: z.string().optional().describe('slot de material; padrão: o primeiro') }),
       z.object({ type: z.literal('opening'), id: z.string(), slot: z.string().default('frame') }),
       z.object({ type: z.literal('zone'), id: z.string() }),
+      z.object({ type: z.literal('roof'), id: z.string() }).describe('telhado (telhas)'),
       z.object({ type: z.literal('site') }).describe('solo do terreno'),
     ]),
     material: mat,
@@ -217,6 +225,112 @@ export const OpSchema = z.discriminatedUnion('op', [
       exposure: z.number().optional(),
     }),
   }),
+  /* ───── andares, telhado, escada, cortina, grupos e cotas (schema v0.2) ───── */
+  z.object({
+    op: z.literal('addLevel'),
+    id: optId,
+    name: z.string().optional().describe('ex.: "1º andar"'),
+    height: z.number().positive().optional().describe('pé-direito (m); padrão = o do andar de baixo'),
+    slabThickness: z.number().positive().optional().describe('espessura da laje (m), padrão 0.12'),
+  }),
+  z.object({
+    op: z.literal('updateLevel'),
+    id: z.string(),
+    patch: z.object({ name: z.string().optional(), height: z.number().positive().optional(), slabThickness: z.number().positive().optional(), hidden: z.boolean().optional() }),
+  }),
+  z.object({ op: z.literal('removeLevel'), id: z.string() }).describe('remove o andar com tudo que há nele'),
+  z.object({
+    op: z.literal('addRoof'),
+    id: optId,
+    name: z.string().optional(),
+    levelId: z.string().optional().describe('andar que recebe o telhado; padrão: o do ambiente (roomId) ou o mais alto'),
+    kind: roofKind.default('gable').describe('flat = laje plana · shed = uma água · gable = duas águas · hip = quatro águas'),
+    roomId: z.string().optional().describe('cobre este ambiente (usa o polígono dele)'),
+    x: z.number().optional(),
+    z: z.number().optional(),
+    width: z.number().positive().optional(),
+    depth: z.number().positive().optional(),
+    polygon: z.array(pt).min(3).optional(),
+    pitchDeg: z.number().min(0).max(70).optional().describe('inclinação em graus (padrão: 30 para duas/quatro águas, 15 para uma água)'),
+    ridgeDeg: z.number().optional().describe('direção da cumeeira (duas/quatro águas) ou da descida (uma água): 0 = ao longo de +X, 90 = ao longo de -Z. Padrão: ao longo do lado mais comprido'),
+    overhang: z.number().min(0).optional().describe('beiral (m), padrão 0.4'),
+    baseHeight: z.number().optional().describe('altura da base do telhado sobre o piso do andar (m); padrão: o pé-direito'),
+    thickness: z.number().positive().optional(),
+    material: mat.optional(),
+    ceilingMaterial: mat.optional(),
+  }),
+  z.object({
+    op: z.literal('updateRoof'),
+    id: z.string(),
+    patch: z.object({
+      name: z.string().optional(),
+      kind: roofKind.optional(),
+      polygon: z.array(pt).min(3).optional(),
+      pitchDeg: z.number().min(0).max(70).optional(),
+      ridgeDeg: z.number().optional(),
+      overhang: z.number().min(0).optional(),
+      baseHeight: z.number().optional(),
+      thickness: z.number().positive().optional(),
+      material: mat.optional(),
+      ceilingMaterial: mat.optional(),
+    }),
+  }),
+  z.object({ op: z.literal('removeRoof'), id: z.string() }),
+  z.object({
+    op: z.literal('addSlabOpening'),
+    id: optId,
+    name: z.string().optional(),
+    levelId: z.string().optional().describe('andar cujo piso é furado (o de cima da escada); padrão: o mais alto'),
+    x: z.number().optional(),
+    z: z.number().optional(),
+    width: z.number().positive().optional(),
+    depth: z.number().positive().optional(),
+    polygon: z.array(pt).min(3).optional(),
+    railing: z.boolean().default(true).describe('guarda-corpo em volta do vão'),
+  }).describe('vão no piso para a escada; ponha a escada (stairs/*) no andar de baixo, sob o vão'),
+  z.object({
+    op: z.literal('updateSlabOpening'),
+    id: z.string(),
+    patch: z.object({ name: z.string().optional(), polygon: z.array(pt).min(3).optional(), railing: z.boolean().optional() }),
+  }),
+  z.object({ op: z.literal('removeSlabOpening'), id: z.string() }),
+  z.object({
+    op: z.literal('setTreatment'),
+    id: z.string().describe('id da abertura (janela ou porta)'),
+    kind: treatmentKind.describe('curtain = cortina · sheer = voal · blind = persiana · roller = rolô · none = tirar'),
+    material: mat.optional().describe('tecido/cor'),
+    side: z.enum(['left', 'right']).optional().describe('lado da parede; padrão: o de dentro'),
+    open: z.number().min(0).max(1).optional().describe('0 = fechada, 1 = aberta'),
+  }),
+  z.object({
+    op: z.literal('groupObjects'),
+    id: optId,
+    name: z.string().optional(),
+    objectIds: z.array(z.string()).min(2).describe('móveis que passam a se mover juntos (do mesmo andar ou do terreno)'),
+  }),
+  z.object({ op: z.literal('ungroup'), id: z.string() }),
+  z.object({
+    op: z.literal('addDimension'),
+    id: optId,
+    start: pt,
+    end: pt,
+    offset: z.number().optional().describe('afastamento da linha de cota (m)'),
+    text: z.string().optional().describe('texto no lugar da medida automática'),
+    container,
+  }).describe('cota desenhada na planta'),
+  z.object({
+    op: z.literal('addLabel'),
+    id: optId,
+    start: pt.describe('onde fica o texto'),
+    text: z.string(),
+    container,
+  }).describe('texto solto na planta'),
+  z.object({
+    op: z.literal('updateAnnotation'),
+    id: z.string(),
+    patch: z.object({ start: pt.optional(), end: pt.optional(), offset: z.number().optional(), text: z.string().optional() }),
+  }),
+  z.object({ op: z.literal('removeAnnotation'), id: z.string() }),
   z.object({ op: z.literal('setMeta'), patch: z.object({ name: z.string().optional(), description: z.string().optional() }) }),
   z.object({ op: z.literal('clear') }),
 ])
@@ -231,7 +345,7 @@ export interface ApplyResult {
   errors: { index: number; message: string }[]
 }
 
-const D = { wallHeight: 2.7, wallThickness: 0.15, floor: 'wood/natural-oak', wallIn: 'paint/white-matte', wallOut: 'paint/exterior-white' }
+const D = { slab: 0.12, wallHeight: 2.7, wallThickness: 0.15, floor: 'wood/natural-oak', wallIn: 'paint/white-matte', wallOut: 'paint/exterior-white' }
 
 /* ───────────── aplicação ───────────── */
 
@@ -595,7 +709,7 @@ function apply(d: Scene, op: Op, created: string[]) {
       const defaults = d.defaults
       ;(lvl.rooms ??= []).push({ id, name: op.name, type: op.type, polygon: pts, floor: { material: op.floorMaterial ?? defaults?.floorMaterial ?? D.floor } })
       if (op.walls)
-        attachRoomWalls(lvl, { id, polygon: pts }, { height: op.wallHeight ?? defaults?.wallHeight ?? lvl.height ?? D.wallHeight, thickness: op.wallThickness ?? defaults?.wallThickness ?? D.wallThickness, inside: op.wallMaterial ?? defaults?.wallMaterial ?? D.wallIn, outside: op.exteriorMaterial ?? D.wallOut }, taken)
+        attachRoomWalls(lvl, { id, polygon: pts }, { height: op.wallHeight ?? lvl.height ?? defaults?.wallHeight ?? D.wallHeight, thickness: op.wallThickness ?? defaults?.wallThickness ?? D.wallThickness, inside: op.wallMaterial ?? defaults?.wallMaterial ?? D.wallIn, outside: op.exteriorMaterial ?? D.wallOut }, taken)
       break
     }
     case 'updateRoom': {
@@ -766,7 +880,7 @@ function apply(d: Scene, op: Op, created: string[]) {
       }
       const c = ensureLevel(d, key)
       const id = newOf(op.id, op.name ?? nameSlug(cat.id))
-      const inRoom = op.roomId ?? roomAt(d, op.x, op.z)?.room.id
+      const inRoom = op.roomId ?? (c === d.site ? undefined : ((c as Level).rooms ?? []).find((r) => pointInPolygon([op.x, op.z], r.polygon))?.id)
       const obj: SceneObject = {
         id,
         catalogId: op.catalogId,
@@ -794,7 +908,7 @@ function apply(d: Scene, op: Op, created: string[]) {
       const id = newOf(op.id, op.name ?? nameSlug(cat.id))
       const yy = op.y ?? defaultElevation(cat.mount)
       const rot = normDeg((Math.atan2(n[0], n[1]) * 180) / Math.PI)
-      const room = roomAt(d, base[0] + n[0] * push, base[1] + n[1] * push)
+      const room = ((w.container as Level).rooms ?? []).find((r) => pointInPolygon([base[0] + n[0] * push, base[1] + n[1] * push], r.polygon))
       list(w.container, 'objects').push({
         id,
         catalogId: op.catalogId,
@@ -805,7 +919,7 @@ function apply(d: Scene, op: Op, created: string[]) {
         ...(op.materials ? { materials: op.materials } : {}),
         ...(cat.mount && cat.mount !== 'floor' ? { mount: cat.mount } : {}),
         ...(cat.mount === 'wall' ? { wallId: w.entity.id } : {}),
-        ...(room ? { roomId: room.room.id } : {}),
+        ...(room ? { roomId: room.id } : {}),
       })
       break
     }
@@ -814,8 +928,18 @@ function apply(d: Scene, op: Op, created: string[]) {
       if (!o) throw new Error(`Objeto não encontrado: "${op.id}"`)
       for (const m of Object.values(op.patch.materials ?? {})) needMat(d, m)
       const { x, z, y, rotationDeg, materials, ...rest } = op.patch
+      const prev = [...o.entity.position]
       Object.assign(o.entity, strip(rest))
       if (x !== undefined || y !== undefined || z !== undefined) o.entity.position = [round(x ?? o.entity.position[0], 4), round(y ?? o.entity.position[1], 4), round(z ?? o.entity.position[2], 4)]
+      // objeto de um grupo leva o grupo junto (só no plano; altura e giro são do objeto)
+      const grp = groupOfObject(o.container, o.entity.id)
+      const mdx = o.entity.position[0] - prev[0]
+      const mdz = o.entity.position[2] - prev[2]
+      if (grp && (mdx || mdz) && !grp.locked)
+        for (const oid of grp.objectIds) {
+          const m = oid === o.entity.id ? undefined : (o.container.objects ?? []).find((q) => q.id === oid)
+          if (m && !m.locked) m.position = [round(m.position[0] + mdx, 4), m.position[1], round(m.position[2] + mdz, 4)]
+        }
       if (rotationDeg !== undefined) o.entity.rotationDeg = normDeg(rotationDeg)
       if (materials) o.entity.materials = { ...o.entity.materials, ...materials }
       break
@@ -836,6 +960,7 @@ function apply(d: Scene, op: Op, created: string[]) {
       if (!o) throw new Error(`Objeto não encontrado: "${op.id}"`)
       o.container.objects = (o.container.objects ?? []).filter((x) => x.id !== op.id)
       for (const ob of o.container.objects) if (ob.parentId === op.id) delete ob.parentId
+      if (o.container.groups) o.container.groups = o.container.groups.map((g) => ({ ...g, objectIds: g.objectIds.filter((x) => x !== op.id) })).filter((g) => g.objectIds.length >= 2)
       break
     }
     case 'setMaterial': {
@@ -870,6 +995,10 @@ function apply(d: Scene, op: Op, created: string[]) {
         const o = findOpening(d, t.id)
         if (!o) throw new Error(`Abertura não encontrada: "${t.id}"`)
         o.entity.materials = { ...o.entity.materials, [t.slot]: op.material }
+      } else if (t.type === 'roof') {
+        const r = findRoof(d, t.id)
+        if (!r) throw new Error(`Telhado não encontrado: "${t.id}"`)
+        r.entity.material = op.material
       } else if (t.type === 'zone') {
         const z = findZone(d, t.id)
         if (!z) throw new Error(`Zona não encontrada: "${t.id}"`)
@@ -878,6 +1007,151 @@ function apply(d: Scene, op: Op, created: string[]) {
         d.site ??= {}
         d.site.groundMaterial = op.material
       }
+      break
+    }
+    case 'addLevel': {
+      const below = d.levels[d.levels.length - 1]
+      const id = newOf(op.id, op.name ?? `${d.levels.length + 1} andar`)
+      const height = op.height ?? below?.height ?? D.wallHeight
+      d.levels.push({
+        id,
+        name: op.name ?? (d.levels.length ? `${d.levels.length}º andar` : 'Térreo'),
+        elevation: below ? round(below.elevation + below.height + (below.slabThickness ?? D.slab), 3) : 0,
+        height,
+        ...(op.slabThickness ? { slabThickness: op.slabThickness } : {}),
+      })
+      break
+    }
+    case 'updateLevel': {
+      const i = d.levels.findIndex((l) => l.id === op.id)
+      if (i < 0) throw new Error(`Andar não encontrado: "${op.id}"`)
+      const l = d.levels[i]
+      const before = l.height + (l.slabThickness ?? D.slab)
+      Object.assign(l, strip(op.patch))
+      const shift = round(l.height + (l.slabThickness ?? D.slab) - before, 3)
+      if (shift) for (const up of d.levels.slice(i + 1)) up.elevation = round(up.elevation + shift, 3)
+      break
+    }
+    case 'removeLevel': {
+      const i = d.levels.findIndex((l) => l.id === op.id)
+      if (i < 0) throw new Error(`Andar não encontrado: "${op.id}"`)
+      const [gone] = d.levels.splice(i, 1)
+      const shift = gone.height + (gone.slabThickness ?? D.slab)
+      for (const up of d.levels.slice(i)) up.elevation = round(up.elevation - shift, 3)
+      break
+    }
+    case 'addRoof': {
+      needMat(d, op.material)
+      needMat(d, op.ceilingMaterial)
+      const room = op.roomId ? findRoom(d, op.roomId) : undefined
+      if (op.roomId && !room) throw new Error(`Ambiente não encontrado: "${op.roomId}"`)
+      const lvl = (room ? (room.container as Level) : (ensureLevel(d, op.levelId ?? d.levels[d.levels.length - 1]?.id) as Level))
+      if (lvl === (d.site as unknown)) throw new Error('Telhado fica em um andar, não no terreno.')
+      const polygon = room ? room.entity.polygon : rectOrPoly(op)
+      const b = bbox(polygon)
+      const id = newOf(op.id, op.name ?? 'telhado')
+      const pitch = op.pitchDeg ?? (op.kind === 'flat' ? undefined : op.kind === 'shed' ? 15 : 30)
+      ;(lvl.roofs ??= []).push({
+        id,
+        ...(op.name ? { name: op.name } : {}),
+        kind: op.kind,
+        polygon,
+        baseHeight: op.baseHeight ?? lvl.height,
+        ...(pitch !== undefined ? { pitchDeg: pitch } : {}),
+        ...(op.kind !== 'flat' ? { ridgeDeg: op.ridgeDeg ?? (b.width >= b.depth ? 0 : 90) } : {}),
+        ...strip({ overhang: op.overhang, thickness: op.thickness, material: op.material, ceilingMaterial: op.ceilingMaterial }),
+      })
+      break
+    }
+    case 'updateRoof': {
+      const r = findRoof(d, op.id)
+      if (!r) throw new Error(`Telhado não encontrado: "${op.id}"`)
+      needMat(d, op.patch.material)
+      needMat(d, op.patch.ceilingMaterial)
+      const { polygon, ...rest } = op.patch
+      Object.assign(r.entity, strip(rest))
+      if (polygon) r.entity.polygon = ensureClockwise(polygon)
+      break
+    }
+    case 'removeRoof': {
+      const r = findRoof(d, op.id)
+      if (!r) throw new Error(`Telhado não encontrado: "${op.id}"`)
+      ;(r.container as Level).roofs = ((r.container as Level).roofs ?? []).filter((x) => x.id !== op.id)
+      break
+    }
+    case 'addSlabOpening': {
+      const lvl = ensureLevel(d, op.levelId ?? d.levels[d.levels.length - 1]?.id) as Level
+      if (lvl === (d.site as unknown)) throw new Error('Vão de escada fica em um andar, não no terreno.')
+      const id = newOf(op.id, op.name ?? 'vao-escada')
+      ;(lvl.slabOpenings ??= []).push({ id, ...(op.name ? { name: op.name } : {}), polygon: rectOrPoly(op), railing: op.railing })
+      break
+    }
+    case 'updateSlabOpening': {
+      const s = findSlabOpening(d, op.id)
+      if (!s) throw new Error(`Vão não encontrado: "${op.id}"`)
+      const { polygon, ...rest } = op.patch
+      Object.assign(s.entity, strip(rest))
+      if (polygon) s.entity.polygon = ensureClockwise(polygon)
+      break
+    }
+    case 'removeSlabOpening': {
+      const s = findSlabOpening(d, op.id)
+      if (!s) throw new Error(`Vão não encontrado: "${op.id}"`)
+      ;(s.container as Level).slabOpenings = ((s.container as Level).slabOpenings ?? []).filter((x) => x.id !== op.id)
+      break
+    }
+    case 'setTreatment': {
+      const o = findOpening(d, op.id)
+      if (!o) throw new Error(`Abertura não encontrada: "${op.id}"`)
+      needMat(d, op.material)
+      if (op.kind === 'none') delete o.entity.treatment
+      else o.entity.treatment = { kind: op.kind, ...strip({ material: op.material ?? o.entity.treatment?.material, side: op.side ?? o.entity.treatment?.side, open: op.open ?? o.entity.treatment?.open }) }
+      break
+    }
+    case 'groupObjects': {
+      const found = [...new Set(op.objectIds)].map((oid) => {
+        const o = findObject(d, oid)
+        if (!o) throw new Error(`Objeto não encontrado: "${oid}"`)
+        return o
+      })
+      if (found.length < 2) throw new Error('Um grupo precisa de pelo menos 2 objetos.')
+      const c = found[0].container
+      if (found.some((f) => f.container !== c)) throw new Error('Os objetos do grupo precisam estar no mesmo andar (ou todos no terreno).')
+      const ids = new Set(found.map((f) => f.entity.id))
+      c.groups = (c.groups ?? []).map((g) => ({ ...g, objectIds: g.objectIds.filter((x) => !ids.has(x)) })).filter((g) => g.objectIds.length >= 2)
+      const id = newOf(op.id, op.name ?? 'grupo')
+      c.groups.push({ id, ...(op.name ? { name: op.name } : {}), objectIds: [...ids] })
+      break
+    }
+    case 'ungroup': {
+      const g = findGroup(d, op.id)
+      if (!g) throw new Error(`Grupo não encontrado: "${op.id}"`)
+      g.container.groups = (g.container.groups ?? []).filter((x) => x.id !== op.id)
+      break
+    }
+    case 'addDimension': {
+      const c = ensureLevel(d, op.container ?? d.levels[0]?.id)
+      const id = newOf(op.id, 'cota')
+      if (dist(op.start, op.end) < 0.01) throw new Error('A cota precisa de dois pontos diferentes.')
+      ;(c.annotations ??= []).push({ id, kind: 'dimension', start: op.start, end: op.end, ...strip({ offset: op.offset, text: op.text }) })
+      break
+    }
+    case 'addLabel': {
+      const c = ensureLevel(d, op.container ?? d.levels[0]?.id)
+      const id = newOf(op.id, 'texto')
+      ;(c.annotations ??= []).push({ id, kind: 'label', start: op.start, text: op.text })
+      break
+    }
+    case 'updateAnnotation': {
+      const a = findAnnotation(d, op.id)
+      if (!a) throw new Error(`Anotação não encontrada: "${op.id}"`)
+      Object.assign(a.entity, strip(op.patch))
+      break
+    }
+    case 'removeAnnotation': {
+      const a = findAnnotation(d, op.id)
+      if (!a) throw new Error(`Anotação não encontrada: "${op.id}"`)
+      a.container.annotations = (a.container.annotations ?? []).filter((x) => x.id !== op.id)
       break
     }
     case 'setEnvironment':
