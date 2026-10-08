@@ -13,7 +13,7 @@ const SCENES: Record<string, Scene> = { studio: studio as unknown as Scene, quin
 const q = new URLSearchParams(location.search)
 
 function Viewer() {
-  const [scene] = useState<Scene>(() => {
+  const [scene, setScene] = useState<Scene>(() => {
     let base = SCENES[q.get('scene') ?? 'studio']
     const rk = q.get('roofKind') // gable|hip|shed|flat: troca o tipo do telhado da casa, para conferir cada forma
     if (rk) base = { ...base, levels: base.levels.map((l) => ({ ...l, roofs: l.roofs?.map((r) => ({ ...r, kind: rk as 'gable', ridgeDeg: Number(q.get('ridge') ?? r.ridgeDeg ?? 0) })) })) }
@@ -25,7 +25,8 @@ function Viewer() {
   const [t, setT] = useState<number | undefined>(q.get('t') ? Number(q.get('t')) : undefined)
   const ref = useRef<SceneViewHandle>(null)
   ;(window as unknown as { __setT: unknown }).__setT = setT
-  ;(window as unknown as { __vp: unknown }).__vp = ref
+  ;(window as unknown as { __vp: unknown; __scene: unknown }).__vp = ref
+  ;(window as unknown as { __scene: unknown }).__scene = scene
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
       <SceneView
@@ -33,6 +34,8 @@ function Viewer() {
         scene={scene}
         selection={sel}
         onPick={setSel}
+        // aplica o arraste na cena, como o app faz, para conferir que a câmera não reenquadra
+        onDragEnd={(d) => setScene((s) => ({ ...s, levels: s.levels.map((l) => ({ ...l, objects: l.objects?.map((o) => (o.id === d.id ? { ...o, position: d.position } : o)) })) }))}
         quality={(q.get('q') as 'low' | 'medium' | 'high') ?? 'high'}
         adaptive={q.get('adaptive') !== '0'}
         timeOfDay={t}

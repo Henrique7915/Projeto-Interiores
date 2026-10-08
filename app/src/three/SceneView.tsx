@@ -82,8 +82,9 @@ function Rig({ center, radius, view, handle }: { center: THREE.Vector3; radius: 
   useEffect(() => {
     applyPreset(view, !first.current)
     first.current = false
+    // valores, não o objeto `center`: ele é recriado a cada edição da cena e reenquadraria a câmera a cada arraste
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, center, radius])
+  }, [view, center.x, center.y, center.z, radius])
 
   useImperativeHandle(handle, () => ({
     // preserveDrawingBuffer: o canvas guarda o último quadro já com pós-processamento
