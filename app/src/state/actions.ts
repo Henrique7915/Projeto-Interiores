@@ -1,4 +1,4 @@
-import { bbox, encodeShare, findObject, findWall, getCatalogItem, getContainer, hoursToTime, objectMaterials, parseScene, roomAt, sceneToJson, slotNames, type OpInput, type Scene, type Selection } from '../core'
+import { getCatalog, nameOf, timeToHours, bbox, encodeShare, findObject, findWall, getCatalogItem, getContainer, hoursToTime, objectMaterials, parseScene, roomAt, sceneToJson, slotNames, type OpInput, type Scene, type Selection } from '../core'
 import { useEditor } from './store'
 import { download, toast } from '../ui/common'
 
@@ -57,14 +57,17 @@ export function applyMaterial(material: string) {
   }
 }
 
-export const MOODS = [
-  { id: 'cozy', name: 'Aconchegante', sub: 'luz dourada', time: 17.5, sky: 'clear' as const, lights: 'on' as const },
-  { id: 'bright', name: 'Claro', sub: 'meio-dia', time: 12.8, sky: 'clear' as const, lights: 'off' as const },
-  { id: 'moody', name: 'Noturno', sub: 'depois de escurecer', time: 21.5, sky: 'clear' as const, lights: 'on' as const },
-]
+const MOOD_SUB: Record<string, string> = { cozy: 'luz dourada', bright: 'meio-dia', moody: 'depois de escurecer' }
+/** Climas do catálogo oficial (assets/catalog.json): hora do dia, exposição e luzes internas. */
+export const moods = () =>
+  (getCatalog().moods ?? []).map((m) => {
+    const time = m.timeOfDay ?? '12:00'
+    return { id: m.id, name: nameOf(m.name), sub: MOOD_SUB[m.id] ?? '', time, exposure: m.exposure, lights: timeToHours(time) >= 17 || timeToHours(time) < 6 ? ('on' as const) : ('off' as const) }
+  })
 export function setMood(id: string) {
-  const m = MOODS.find((x) => x.id === id)!
-  useEditor.getState().dispatch([{ op: 'setEnvironment', patch: { mood: m.id, timeOfDay: hoursToTime(m.time), sky: m.sky, interiorLights: m.lights } }])
+  const m = moods().find((x) => x.id === id)
+  if (!m) return
+  useEditor.getState().dispatch([{ op: 'setEnvironment', patch: { mood: m.id, timeOfDay: m.time, sky: 'clear', interiorLights: m.lights, ...(m.exposure ? { exposure: m.exposure } : {}) } }])
 }
 
 /** Ambiente novo ao lado do que já existe, nas medidas informadas. */

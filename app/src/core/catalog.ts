@@ -1,11 +1,12 @@
-import { FALLBACK_CATALOG } from './fallbackCatalog'
+import officialCatalog from '../../../assets/catalog.json'
 import type { Catalog, CatalogItem, Material, Scene } from './schema'
 
 /**
- * Registro do catálogo em uso (itens + biblioteca de materiais). Começa com o catálogo embutido;
- * `loadCatalog()` troca pelo oficial (/assets/catalog.json, /assets/materials.json) quando existir.
+ * Registro do catálogo em uso (itens + biblioteca de materiais).
+ * A fonte da verdade é `assets/catalog.json` (frente Gráficos 3D); o motor 3D lê o mesmo arquivo.
+ * `setCatalog()` só serve para trocar o catálogo em testes ou por um pacote do usuário.
  */
-let current: Catalog = FALLBACK_CATALOG
+let current: Catalog = officialCatalog as unknown as Catalog
 let byId = indexItems(current)
 let version = 0
 const listeners = new Set<() => void>()
@@ -15,7 +16,7 @@ function indexItems(c: Catalog) {
 }
 
 export function setCatalog(c: Catalog) {
-  current = { ...c, materials: { ...FALLBACK_CATALOG.materials, ...(c.materials ?? {}) } }
+  current = c
   byId = indexItems(current)
   version++
   listeners.forEach((l) => l())
@@ -46,28 +47,6 @@ export function searchCatalog(query = '', category?: string, limit = 40) {
   return current.items
     .filter((i) => (!category || i.category === category) && (!q || [i.id, nameOf(i.name), i.category, ...(i.tags ?? [])].join(' ').toLowerCase().includes(q)))
     .slice(0, limit)
-}
-
-/** Tenta carregar o catálogo oficial publicado em `${base}catalog.json` e `${base}materials.json`. Silencioso se não existir. */
-export async function loadCatalog(base = './assets/'): Promise<boolean> {
-  try {
-    const [c, m] = await Promise.all([fetch(base + 'catalog.json'), fetch(base + 'materials.json').catch(() => undefined)])
-    if (!c.ok) return false
-    const cat = (await c.json()) as Catalog
-    if (cat?.format !== 'design3d.catalog' || !Array.isArray(cat.items)) return false
-    if (m?.ok) {
-      try {
-        const mj = await m.json()
-        cat.materials = { ...(mj.materials ?? mj), ...(cat.materials ?? {}) }
-      } catch {
-        /* materials.json opcional */
-      }
-    }
-    setCatalog(cat)
-    return true
-  } catch {
-    return false
-  }
 }
 
 export const MATERIAL_GROUPS: { id: string; label: string; categories: Material['category'][] }[] = [

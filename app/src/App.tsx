@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { decodeShare, loadCatalog } from './core'
+import { decodeShare } from './core'
 import { loadProject } from './lib/storage'
 import { lastProjectId } from './lib/storage'
 import { useEditor } from './state/store'
@@ -21,7 +21,6 @@ export function App() {
   useShortcuts()
 
   useEffect(() => {
-    void loadCatalog('./assets/')
     ;(async () => {
       const m = /#s=([\w-]+)/.exec(location.hash)
       if (m) {

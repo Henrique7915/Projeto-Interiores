@@ -170,9 +170,11 @@ export function Swatch({ scene, material, size = 36, selected, onClick, title }:
         : m.category === 'stone' || m.category === 'ceramic' || m.category === 'concrete'
           ? `linear-gradient(135deg, ${m.color}, color-mix(in srgb, ${m.color} 80%, #000))`
           : m.color
-  return (
-    <button type="button" className={'swatch' + (selected ? ' sel' : '')} style={{ width: size, height: size, background: bg }} onClick={onClick} title={title ?? m.name} aria-label={title ?? m.name} />
-  )
+  const cls = 'swatch' + (selected ? ' sel' : '')
+  const style = { width: size, height: size, background: bg }
+  // sem onClick vira só um visual (pode estar dentro de outro botão)
+  if (!onClick) return <span className={cls} style={style} title={title ?? m.name} />
+  return <button type="button" className={cls} style={style} onClick={onClick} title={title ?? m.name} aria-label={title ?? m.name} />
 }
 
 export function Section({ title, right, children }: { title: string; right?: ReactNode; children: ReactNode }) {

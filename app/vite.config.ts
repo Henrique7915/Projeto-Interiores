@@ -45,6 +45,6 @@ export default defineConfig({
       workbox: { maximumFileSizeToCacheInBytes: 6 * 1024 * 1024 },
     }),
   ],
-  server: { port: 5173, proxy: { '/api': 'http://127.0.0.1:3737' } },
+  server: { port: 5173, fs: { allow: ['..'] }, proxy: { '/api': 'http://127.0.0.1:3737' } },
   test: { environment: 'node' },
 })

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { bbox, polygonArea, resolveMaterial, type Scene } from '../core'
 import { fmtArea } from '../lib/units'
-import { MOODS, addRoomAuto, setMood } from '../state/actions'
+import { moods, addRoomAuto, setMood } from '../state/actions'
 import { useEditor, type PaintTarget } from '../state/store'
 import { Section, Swatch, TextInput, NumInput } from './common'
 
@@ -64,7 +64,7 @@ export function LeftPanel() {
       </div>
 
       <div className="moods">
-        {MOODS.map((m) => (
+        {moods().map((m) => (
           <button key={m.id} className={'mood' + (scene.environment?.mood === m.id ? ' on' : '')} onClick={() => setMood(m.id)}>
             <strong>{m.name}</strong>
             <small>{m.sub}</small>

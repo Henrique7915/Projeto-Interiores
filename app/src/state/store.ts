@@ -3,6 +3,8 @@ import { applyOps, newScene, TEMPLATES, type ApplyResult, type OpInput, type Sce
 import { prefs, saveProject } from '../lib/storage'
 
 export type ViewMode = '3d' | 'plan' | 'split'
+export type View3D = 'iso' | 'top' | 'front'
+export type Cutaway = 'auto' | 'none' | 'all'
 export type PlanTool = 'select' | 'room' | 'wall' | 'door' | 'window' | 'measure'
 export type DisplayUnit = 'm' | 'cm' | 'ft'
 
@@ -16,6 +18,8 @@ interface EditorState {
   selection: Selection
   viewMode: ViewMode
   tool: PlanTool
+  view3d: View3D
+  cutaway: Cutaway
   unit: DisplayUnit
   snap: number
   paintTarget: PaintTarget
@@ -34,6 +38,8 @@ interface EditorState {
   select: (s: Selection) => void
   setViewMode: (m: ViewMode) => void
   setTool: (t: PlanTool) => void
+  setView3d: (v: View3D) => void
+  setCutaway: (c: Cutaway) => void
   setUnit: (u: DisplayUnit) => void
   setSnap: (s: number) => void
   setPaintTarget: (t: PaintTarget) => void
@@ -49,6 +55,8 @@ export const useEditor = create<EditorState>((set, get) => ({
   selection: null,
   viewMode: prefs.get<ViewMode>('viewMode', 'split'),
   tool: 'select',
+  view3d: 'iso',
+  cutaway: 'auto',
   unit: prefs.get<DisplayUnit>('unit', 'm'),
   snap: prefs.get<number>('snap', 0.05),
   paintTarget: null,
@@ -104,6 +112,8 @@ export const useEditor = create<EditorState>((set, get) => ({
   select: (selection) => set({ selection, objectSlot: '', paintTarget: selection ? null : get().paintTarget }),
   setViewMode: (viewMode) => (prefs.set('viewMode', viewMode), set({ viewMode })),
   setTool: (tool) => set({ tool }),
+  setView3d: (view3d) => set({ view3d }),
+  setCutaway: (cutaway) => set({ cutaway }),
   setUnit: (unit) => (prefs.set('unit', unit), set({ unit })),
   setSnap: (snap) => (prefs.set('snap', snap), set({ snap })),
   setObjectSlot: (objectSlot) => set({ objectSlot }),

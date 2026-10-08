@@ -15,7 +15,9 @@ export function useShortcuts() {
       const sel = st.selection
       if (!sel) return
       if (e.key === 'Escape') return st.select(null)
-      if (e.key === 'Delete' || e.key === 'Backspace') {
+      // com o 3D aberto, o motor já trata R/Delete de móveis
+      const engineHandles = st.viewMode !== 'plan' && sel.kind === 'object'
+      if ((e.key === 'Delete' || e.key === 'Backspace') && !engineHandles) {
         e.preventDefault()
         const op = ({ room: 'removeRoom', wall: 'removeWall', opening: 'removeOpening', object: 'removeObject', zone: 'removeZone' } as const)[sel.kind as 'room']
         if (op && 'id' in sel) st.dispatch([{ op, id: sel.id } as never]), st.select(null)
@@ -25,7 +27,7 @@ export function useShortcuts() {
         const o = findObject(st.scene, sel.id)?.entity
         if (!o) return
         if (mod && e.key.toLowerCase() === 'd') return e.preventDefault(), void st.dispatch([{ op: 'duplicateObject', id: o.id }])
-        if (e.key.toLowerCase() === 'r') return void st.dispatch([{ op: 'updateObject', id: o.id, patch: { rotationDeg: (o.rotationDeg ?? 0) + (e.shiftKey ? -90 : 90) } }])
+        if (e.key.toLowerCase() === 'r') return engineHandles ? undefined : void st.dispatch([{ op: 'updateObject', id: o.id, patch: { rotationDeg: (o.rotationDeg ?? 0) + (e.shiftKey ? -90 : 90) } }])
         const step = e.shiftKey ? 1 : st.snap || 0.05
         const d: Record<string, [number, number]> = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }
         if (d[e.key]) {
