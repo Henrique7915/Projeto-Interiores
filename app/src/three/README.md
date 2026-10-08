@@ -43,7 +43,7 @@ Os painéis do App (moodboard, catálogo de móveis) montam suas listas a partir
 | `geometry/polygon.ts`, `geometry/terrain.ts` | recorte de polígonos (vãos de escada), recuo, malha do relevo |
 | `Site.tsx` | terreno: grama, zonas (deck, pavimento, canteiro), piscina, muros e cercas |
 | `geometry/walls.ts` | geometria de parede com vãos e topo inclinado |
-| `furniture/builders.tsx` | móveis procedurais, um por `model: "procedural/<nome>"` do catálogo |
+| `furniture/builders*.tsx` | móveis procedurais, um por `model: "procedural/<nome>"` do catálogo (`builders-extra.tsx` é a leva de sala, quarto, cozinha, lavanderia, luz e jardim) |
 | `materials/` | biblioteca (`assets/catalog.json`), conjuntos de textura procedurais, materiais Three |
 | `lighting/` | sol e lua por hora do dia, atmosfera, luminárias acendem à noite, sol arrastável |
 | `interaction/Items.tsx` | seleção, arraste com grade e encaixe na parede |
@@ -59,7 +59,7 @@ Os painéis do App (moodboard, catálogo de móveis) montam suas listas a partir
 - `assets/blender/modelos.py` gera os modelos por código: `blender --background --python assets/blender/modelos.py [-- sofa-3 armchair]` → `assets/models/<nome>.glb` (precisa do pacote `python3-numpy` para o exportador glTF).
 - Convenção: metros, origem no centro da base, frente +Z, topo +Y; o **nome do material no GLB é o slot do catálogo** (`upholstery`, `legs`...). Materiais com outros nomes (folhas, caules) ficam como estão no arquivo. Sem UVs: o motor gera UVs em metros ao carregar, então a textura mantém a escala real.
 - No catálogo: `model: "models/<nome>.glb"`. O nome do arquivo é também o do desenhista procedural em `furniture/builders*.tsx`, usado enquanto o GLB carrega ou se ele falhar. O modelo é esticado até as medidas do objeto na cena.
-- Modelos prontos: `sofa-3`, `armchair`, `bed-queen`, `chair-dining`, `plant-monstera`, `toilet`.
+- Modelos prontos: `sofa-3`, `armchair`, `bed-queen`, `chair-dining`, `plant-monstera`, `toilet`, `sofa-chaise`, `dresser`, `garden-bench`, `plant-fern`. O restante do catálogo (91 itens) é procedural, sem arquivo: leve para o celular.
 
 ## Páginas de desenvolvimento
 
