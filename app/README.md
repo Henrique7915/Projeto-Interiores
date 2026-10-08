@@ -13,6 +13,12 @@ npm run build        # tsc + vite build (app/dist)
 
 `assets/` (na raiz do repositório) é servido em `/assets/` no dev e copiado no build. O catálogo de móveis e materiais é `assets/catalog.json`, importado direto pelo app e pelo motor 3D (fonte única).
 
+## Usar no computador e no celular
+
+- **Computador:** abra o endereço publicado (ou rode `npm run dev` na raiz e abra http://localhost:5173). No Chrome ou Edge dá para instalar como app pelo ícone na barra de endereço.
+- **Celular:** abra o endereço publicado e use "Adicionar à tela inicial" (iPhone: Safari → Compartilhar) ou "Instalar app" (Android: Chrome). Os projetos ficam salvos no próprio aparelho; para levar para outro aparelho use Exportar (.json) ou o link compartilhável.
+- **Publicação:** `.github/workflows/pages.yml` publica o app no GitHub Pages a cada mudança na `main` (precisa do repositório público e de Settings → Pages → Source: GitHub Actions).
+
 ## Estrutura
 
 | Pasta | O que tem |
