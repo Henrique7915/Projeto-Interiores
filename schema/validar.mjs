@@ -65,6 +65,26 @@ function selfIntersects(poly) {
   return false;
 }
 
+// Duas paredes na mesma linha que se sobrepõem (ex.: cômodos colados, cada um com a sua parede) tapam portas
+// e piscam no 3D. É aviso, não erro: a cena abre, mas quase sempre é engano.
+function checkOverlappingWalls(walls, path, warnings) {
+  const TOL = 0.02;
+  for (let i = 0; i < walls.length; i++)
+    for (let j = i + 1; j < walls.length; j++) {
+      const a = walls[i], b = walls[j];
+      const L = dist(a.start, a.end);
+      if (L < EPS) continue;
+      const ux = (a.end[0] - a.start[0]) / L, uz = (a.end[1] - a.start[1]) / L;
+      const off = (p) => Math.abs((p[0] - a.start[0]) * uz - (p[1] - a.start[1]) * ux);
+      if (off(b.start) > TOL || off(b.end) > TOL) continue;
+      const t = (p) => (p[0] - a.start[0]) * ux + (p[1] - a.start[1]) * uz;
+      const lo = Math.max(0, Math.min(t(b.start), t(b.end)));
+      const hi = Math.min(L, Math.max(t(b.start), t(b.end)));
+      if (hi - lo > TOL)
+        warnings.push(`${path}: paredes '${a.id}' e '${b.id}' se sobrepõem em ${(hi - lo).toFixed(2)} m na mesma linha; use uma parede só (aberturas numa delas ficam tapadas pela outra)`);
+    }
+}
+
 /**
  * @param {object} scene
  * @param {{ catalog?: object }} [opts] com catálogo, avisa sobre catalogId e materiais desconhecidos
@@ -130,6 +150,31 @@ export function validateScene(scene, opts = {}) {
       if (selfIntersects(z.polygon)) errors.push(`${p}: polígono da zona '${z.id}' se cruza`);
     });
     (c.objects ?? []).forEach((o, i) => seeId(o.id, `${path}/objects/${i}`));
+    checkOverlappingWalls(c.walls ?? [], path, warnings);
+    // v0.2
+    (c.roofs ?? []).forEach((r, i) => {
+      seeId(r.id, `${path}/roofs/${i}`);
+      if (selfIntersects(r.polygon)) errors.push(`${path}/roofs/${i}: polígono do telhado '${r.id}' se cruza`);
+      if (r.kind !== "flat" && r.pitchDeg === undefined) warnings.push(`${path}/roofs/${i}: telhado '${r.id}' (${r.kind}) sem pitchDeg; o motor usa o padrão`);
+    });
+    (c.slabOpenings ?? []).forEach((v, i) => {
+      seeId(v.id, `${path}/slabOpenings/${i}`);
+      if (selfIntersects(v.polygon)) errors.push(`${path}/slabOpenings/${i}: polígono do vão '${v.id}' se cruza`);
+    });
+    const objIds = new Set((c.objects ?? []).map((o) => o.id));
+    const grouped = new Map();
+    (c.groups ?? []).forEach((g, i) => {
+      seeId(g.id, `${path}/groups/${i}`);
+      for (const id of g.objectIds) {
+        if (!objIds.has(id)) errors.push(`${path}/groups/${i}: grupo '${g.id}' tem objeto inexistente '${id}'`);
+        if (grouped.has(id)) errors.push(`${path}/groups/${i}: objeto '${id}' está nos grupos '${grouped.get(id)}' e '${g.id}'`);
+        grouped.set(id, g.id);
+      }
+    });
+    (c.annotations ?? []).forEach((a, i) => {
+      seeId(a.id, `${path}/annotations/${i}`);
+      if (a.kind === "dimension" && dist(a.start, a.end) < EPS) errors.push(`${path}/annotations/${i}: cota '${a.id}' tem comprimento zero`);
+    });
     return walls;
   };
 
@@ -178,6 +223,8 @@ function checkAgainstCatalog(scene, catalog, warnings) {
     (c.openings ?? []).forEach((o) => slots(o.materials, `${path} abertura '${o.id}'`));
     (c.rooms ?? []).forEach((r) => (mat(r.floor?.material, `${path} cômodo '${r.id}'`), mat(r.ceiling?.material, `${path} cômodo '${r.id}'`)));
     (c.zones ?? []).forEach((z) => (mat(z.material, `${path} zona '${z.id}'`), mat(z.edgeMaterial, `${path} zona '${z.id}'`)));
+    (c.roofs ?? []).forEach((r) => (mat(r.material, `${path} telhado '${r.id}'`), mat(r.ceilingMaterial, `${path} telhado '${r.id}'`)));
+    (c.openings ?? []).forEach((o) => mat(o.treatment?.material, `${path} abertura '${o.id}'`));
     mat(c.groundMaterial, path);
     (c.objects ?? []).forEach((o) => {
       if (!items.has(o.catalogId)) warnings.push(`${path} objeto '${o.id}': item '${o.catalogId}' não existe no catálogo`);

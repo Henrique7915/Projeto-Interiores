@@ -1,0 +1,741 @@
+{
+  "$schema": "../scene.schema.json",
+  "format": "design3d.scene",
+  "version": "0.2.0",
+  "id": "casa-dois-andares",
+  "name": "Casa de dois andares",
+  "units": "m",
+  "meta": {
+    "description": "Exemplo da v0.2: dois andares ligados por escada com vão na laje, telhado de duas águas, cortinas, forro rebaixado, grupo de jantar, cotas e terreno com leve declive.",
+    "tags": [
+      "exemplo",
+      "v0.2",
+      "casa"
+    ],
+    "locale": "pt-BR"
+  },
+  "defaults": {
+    "wallHeight": 2.8,
+    "wallThickness": 0.15
+  },
+  "environment": {
+    "timeOfDay": "16:00",
+    "northDeg": 0,
+    "sky": "clear",
+    "mood": "bright"
+  },
+  "levels": [
+    {
+      "id": "terreo",
+      "name": "Térreo",
+      "elevation": 0,
+      "height": 2.8,
+      "walls": [
+        {
+          "id": "t-norte",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            8,
+            0
+          ],
+          "finish": {
+            "left": "paint/exterior-white",
+            "right": "paint/white-matte"
+          }
+        },
+        {
+          "id": "t-leste",
+          "start": [
+            8,
+            0
+          ],
+          "end": [
+            8,
+            6
+          ],
+          "finish": {
+            "left": "paint/exterior-white",
+            "right": "paint/white-matte"
+          }
+        },
+        {
+          "id": "t-sul",
+          "start": [
+            8,
+            6
+          ],
+          "end": [
+            0,
+            6
+          ],
+          "finish": {
+            "left": "paint/exterior-white",
+            "right": "paint/white-matte"
+          }
+        },
+        {
+          "id": "t-oeste",
+          "start": [
+            0,
+            6
+          ],
+          "end": [
+            0,
+            0
+          ],
+          "finish": {
+            "left": "paint/exterior-white",
+            "right": "paint/white-matte"
+          }
+        },
+        {
+          "id": "t-div",
+          "start": [
+            4.5,
+            0
+          ],
+          "end": [
+            4.5,
+            6
+          ],
+          "thickness": 0.12,
+          "finish": {
+            "left": "ceramic/white-tile",
+            "right": "paint/white-matte"
+          }
+        }
+      ],
+      "openings": [
+        {
+          "id": "t-porta",
+          "wallId": "t-sul",
+          "kind": "door",
+          "offset": 5.5,
+          "width": 0.9,
+          "height": 2.1,
+          "hinge": "start",
+          "opensTo": "right"
+        },
+        {
+          "id": "t-janela-sala",
+          "wallId": "t-sul",
+          "kind": "sliding-window",
+          "offset": 2.5,
+          "width": 2.0,
+          "height": 1.4,
+          "sill": 0.8,
+          "treatment": {
+            "kind": "curtain",
+            "material": "fabric/linen",
+            "open": 0.7
+          }
+        },
+        {
+          "id": "t-janela-cozinha",
+          "wallId": "t-leste",
+          "kind": "window",
+          "offset": 3,
+          "width": 1.2,
+          "height": 1.0,
+          "sill": 1.1,
+          "treatment": {
+            "kind": "roller",
+            "material": "fabric/oat-knit",
+            "open": 0.5
+          }
+        },
+        {
+          "id": "t-passagem",
+          "wallId": "t-div",
+          "kind": "passage",
+          "offset": 4.6,
+          "width": 1.2,
+          "height": 2.2
+        }
+      ],
+      "rooms": [
+        {
+          "id": "c-sala",
+          "name": "Sala",
+          "type": "living",
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              4.5,
+              0
+            ],
+            [
+              4.5,
+              6
+            ],
+            [
+              0,
+              6
+            ]
+          ],
+          "floor": {
+            "material": "wood/natural-oak"
+          },
+          "ceiling": {
+            "height": 2.8,
+            "dropHeight": 0.25,
+            "material": "paint/white-matte"
+          }
+        },
+        {
+          "id": "c-cozinha",
+          "name": "Cozinha",
+          "type": "kitchen",
+          "polygon": [
+            [
+              4.5,
+              0
+            ],
+            [
+              8,
+              0
+            ],
+            [
+              8,
+              6
+            ],
+            [
+              4.5,
+              6
+            ]
+          ],
+          "floor": {
+            "material": "stone/terrazzo"
+          }
+        }
+      ],
+      "objects": [
+        {
+          "id": "o-escada",
+          "name": "Escada",
+          "catalogId": "stairs/straight",
+          "position": [
+            0.6,
+            0,
+            2.9
+          ],
+          "rotationDeg": 180,
+          "dimensions": {
+            "width": 0.9,
+            "height": 2.92,
+            "depth": 3.6
+          },
+          "materials": {
+            "steps": "wood/natural-oak"
+          },
+          "roomId": "c-sala"
+        },
+        {
+          "id": "o-sofa",
+          "catalogId": "sofa/three-seat",
+          "position": [
+            2.8,
+            0,
+            5.4
+          ],
+          "rotationDeg": 180,
+          "materials": {
+            "upholstery": "fabric/sage-linen"
+          },
+          "roomId": "c-sala"
+        },
+        {
+          "id": "o-mesa-centro",
+          "catalogId": "table/coffee-rect",
+          "position": [
+            2.8,
+            0,
+            4.3
+          ],
+          "roomId": "c-sala"
+        },
+        {
+          "id": "o-tapete",
+          "catalogId": "rug/rectangular",
+          "position": [
+            2.8,
+            0,
+            4.5
+          ],
+          "dimensions": {
+            "width": 2.2,
+            "height": 0.01,
+            "depth": 1.6
+          },
+          "roomId": "c-sala"
+        },
+        {
+          "id": "o-bancada",
+          "catalogId": "kitchen/counter",
+          "position": [
+            6.25,
+            0,
+            0.35
+          ],
+          "dimensions": {
+            "width": 3.0,
+            "height": 0.9,
+            "depth": 0.6
+          },
+          "roomId": "c-cozinha"
+        },
+        {
+          "id": "o-geladeira",
+          "catalogId": "appliance/fridge",
+          "position": [
+            7.6,
+            0,
+            1.4
+          ],
+          "rotationDeg": -90,
+          "roomId": "c-cozinha"
+        },
+        {
+          "id": "o-mesa",
+          "catalogId": "table/dining-round",
+          "position": [
+            6.2,
+            0,
+            3.8
+          ],
+          "roomId": "c-cozinha"
+        },
+        {
+          "id": "o-cad-1",
+          "catalogId": "chair/dining-wood",
+          "position": [
+            6.2,
+            0,
+            3.15
+          ],
+          "roomId": "c-cozinha"
+        },
+        {
+          "id": "o-cad-2",
+          "catalogId": "chair/dining-wood",
+          "position": [
+            6.2,
+            0,
+            4.45
+          ],
+          "rotationDeg": 180,
+          "roomId": "c-cozinha"
+        }
+      ],
+      "groups": [
+        {
+          "id": "g-jantar",
+          "name": "Conjunto de jantar",
+          "objectIds": [
+            "o-mesa",
+            "o-cad-1",
+            "o-cad-2"
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "id": "a-largura",
+          "kind": "dimension",
+          "start": [
+            0,
+            6
+          ],
+          "end": [
+            8,
+            6
+          ],
+          "offset": -0.6
+        },
+        {
+          "id": "a-nota",
+          "kind": "label",
+          "start": [
+            6.2,
+            5.4
+          ],
+          "text": "Ponto de gás"
+        }
+      ]
+    },
+    {
+      "id": "superior",
+      "name": "Andar de cima",
+      "elevation": 2.92,
+      "height": 2.6,
+      "walls": [
+        {
+          "id": "s-norte",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            8,
+            0
+          ],
+          "finish": {
+            "left": "paint/exterior-white",
+            "right": "paint/white-matte"
+          }
+        },
+        {
+          "id": "s-leste",
+          "start": [
+            8,
+            0
+          ],
+          "end": [
+            8,
+            6
+          ],
+          "finish": {
+            "left": "paint/exterior-white",
+            "right": "paint/white-matte"
+          }
+        },
+        {
+          "id": "s-sul",
+          "start": [
+            8,
+            6
+          ],
+          "end": [
+            0,
+            6
+          ],
+          "finish": {
+            "left": "paint/exterior-white",
+            "right": "paint/white-matte"
+          }
+        },
+        {
+          "id": "s-oeste",
+          "start": [
+            0,
+            6
+          ],
+          "end": [
+            0,
+            0
+          ],
+          "finish": {
+            "left": "paint/exterior-white",
+            "right": "paint/white-matte"
+          }
+        },
+        {
+          "id": "s-div",
+          "start": [
+            4,
+            0
+          ],
+          "end": [
+            4,
+            6
+          ],
+          "thickness": 0.12,
+          "finish": {
+            "left": "paint/sage",
+            "right": "paint/blush"
+          }
+        }
+      ],
+      "openings": [
+        {
+          "id": "s-janela-1",
+          "wallId": "s-sul",
+          "kind": "window",
+          "offset": 2,
+          "width": 1.4,
+          "height": 1.2,
+          "sill": 0.9,
+          "treatment": {
+            "kind": "sheer",
+            "material": "fabric/linen",
+            "open": 0.3
+          }
+        },
+        {
+          "id": "s-janela-2",
+          "wallId": "s-sul",
+          "kind": "window",
+          "offset": 6,
+          "width": 1.4,
+          "height": 1.2,
+          "sill": 0.9
+        },
+        {
+          "id": "s-porta-2",
+          "wallId": "s-div",
+          "kind": "door",
+          "offset": 1.0,
+          "width": 0.8,
+          "height": 2.1,
+          "hinge": "end",
+          "opensTo": "left"
+        }
+      ],
+      "rooms": [
+        {
+          "id": "c-quarto-1",
+          "name": "Quarto 1",
+          "type": "bedroom",
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              0,
+              6
+            ]
+          ],
+          "floor": {
+            "material": "wood/light-ash"
+          }
+        },
+        {
+          "id": "c-quarto-2",
+          "name": "Quarto 2",
+          "type": "bedroom",
+          "polygon": [
+            [
+              4,
+              0
+            ],
+            [
+              8,
+              0
+            ],
+            [
+              8,
+              6
+            ],
+            [
+              4,
+              6
+            ]
+          ],
+          "floor": {
+            "material": "wood/light-ash"
+          }
+        }
+      ],
+      "slabOpenings": [
+        {
+          "id": "v-escada",
+          "name": "Vão da escada",
+          "polygon": [
+            [
+              0.1,
+              1.1
+            ],
+            [
+              1.1,
+              1.1
+            ],
+            [
+              1.1,
+              4.7
+            ],
+            [
+              0.1,
+              4.7
+            ]
+          ],
+          "railing": true
+        }
+      ],
+      "objects": [
+        {
+          "id": "o-cama-1",
+          "catalogId": "bed/queen-modern",
+          "position": [
+            2.5,
+            0,
+            1.1
+          ],
+          "materials": {
+            "bedding": "fabric/linen"
+          },
+          "roomId": "c-quarto-1"
+        },
+        {
+          "id": "o-cama-2",
+          "catalogId": "bed/single",
+          "position": [
+            6,
+            0,
+            1.0
+          ],
+          "roomId": "c-quarto-2"
+        }
+      ],
+      "roofs": [
+        {
+          "id": "r-telhado",
+          "name": "Telhado",
+          "kind": "gable",
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              8,
+              0
+            ],
+            [
+              8,
+              6
+            ],
+            [
+              0,
+              6
+            ]
+          ],
+          "baseHeight": 2.6,
+          "pitchDeg": 30,
+          "ridgeDeg": 0,
+          "overhang": 0.5,
+          "material": "ceramic/terracotta",
+          "ceilingMaterial": "wood/pine"
+        }
+      ]
+    }
+  ],
+  "site": {
+    "boundary": [
+      [
+        -3,
+        -3
+      ],
+      [
+        11,
+        -3
+      ],
+      [
+        11,
+        12
+      ],
+      [
+        -3,
+        12
+      ]
+    ],
+    "groundMaterial": "ground/grass",
+    "terrain": {
+      "points": [
+        [
+          -3,
+          -3,
+          0.4
+        ],
+        [
+          11,
+          -3,
+          0.4
+        ],
+        [
+          -3,
+          12,
+          -0.3
+        ],
+        [
+          11,
+          12,
+          -0.3
+        ],
+        [
+          4,
+          3,
+          0
+        ]
+      ],
+      "smoothing": 0.5
+    },
+    "zones": [
+      {
+        "id": "z-calcada",
+        "name": "Calçada",
+        "kind": "paving",
+        "polygon": [
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            6
+          ],
+          [
+            6,
+            12
+          ],
+          [
+            5,
+            12
+          ]
+        ],
+        "material": "stone/slate"
+      }
+    ],
+    "objects": [
+      {
+        "id": "o-arvore",
+        "catalogId": "plant/tree-medium",
+        "position": [
+          9,
+          0,
+          9
+        ]
+      },
+      {
+        "id": "o-carro",
+        "catalogId": "outdoor/car",
+        "position": [
+          1.5,
+          0,
+          9
+        ],
+        "rotationDeg": 180
+      }
+    ]
+  },
+  "views": [
+    {
+      "id": "v-fachada",
+      "name": "Fachada",
+      "position": [
+        4,
+        4,
+        18
+      ],
+      "target": [
+        4,
+        2,
+        3
+      ]
+    }
+  ]
+}

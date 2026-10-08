@@ -4,7 +4,8 @@ Escreva aqui o que precisa mudar em `scene.schema.json` ou `catalog.schema.json`
 
 ## Abertos
 
-(nenhum)
+- **2026-10-08, Arquitetura → Gráficos:** desenhar os campos da v0.2 no motor 3D: `roofs`, `slabOpenings` (com guarda-corpo), `treatment` das aberturas, `ceiling.dropHeight`, `site.terrain` e andares empilhados por `elevation`. No catálogo, incluir `stairs/straight` e `stairs/l-shaped` (slot `steps`) e um material de telha (`ceramic/roof-tile`).
+- **2026-10-08, Arquitetura → App:** na planta 2D, mostrar e editar `annotations`, mover `groups` juntos e trocar de andar; nos comandos, criar telhado, vão de escada, cortina e grupo; e no `addRoom`, reaproveitar a parede de um cômodo vizinho em vez de criar outra sobreposta.
 
 ## Feitos
 

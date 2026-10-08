@@ -1,4 +1,4 @@
-// Tipos TypeScript do formato da cena Design3D v0.1.x.
+// Tipos TypeScript do formato da cena Design3D v0.1.x e v0.2.x (a 0.2 só acrescenta campos opcionais, marcados com v0.2).
 // Espelho de scene.schema.json e catalog.schema.json: ao mudar um, mude o outro.
 // Unidades em metros, ângulos em graus, Y para cima. Planta usa [x, z].
 
@@ -14,7 +14,7 @@ export type Color = `#${string}`;
 export type Extensions = Record<string, unknown>;
 
 export const SCENE_FORMAT = "design3d.scene" as const;
-export const SCENE_VERSION = "0.1.0" as const;
+export const SCENE_VERSION = "0.2.0" as const;
 
 export interface Scene {
   $schema?: string;
@@ -101,8 +101,65 @@ export interface Level {
   openings?: Opening[];
   rooms?: Room[];
   objects?: SceneObject[];
+  /** v0.2 */
+  roofs?: Roof[];
+  /** v0.2: vãos no piso (escada, mezanino). */
+  slabOpenings?: SlabOpening[];
+  /** v0.2 */
+  groups?: Group[];
+  /** v0.2: cotas e textos da planta. */
+  annotations?: Annotation[];
   hidden?: boolean;
   extensions?: Extensions;
+}
+
+/** v0.2: telhado sobre um polígono; baseHeight relativo ao piso do andar. */
+export interface Roof {
+  id: Id;
+  name?: string;
+  kind: "flat" | "shed" | "gable" | "hip";
+  polygon: Polygon;
+  baseHeight?: number;
+  pitchDeg?: number;
+  /** Direção da cumeeira (gable/hip) ou da descida (shed): 0 = ao longo de +X, 90 = ao longo de -Z. */
+  ridgeDeg?: number;
+  overhang?: number; // 0.4
+  thickness?: number; // 0.15
+  material?: MaterialRef;
+  ceilingMaterial?: MaterialRef;
+  extensions?: Extensions;
+}
+
+/** v0.2 */
+export interface SlabOpening {
+  id: Id;
+  name?: string;
+  polygon: Polygon;
+  railing?: boolean;
+  extensions?: Extensions;
+}
+
+/** v0.2: objetos que se movem juntos (um objeto só pode estar num grupo). */
+export interface Group {
+  id: Id;
+  name?: string;
+  objectIds: Id[];
+  locked?: boolean;
+  extensions?: Extensions;
+}
+
+/** v0.2: cota (start→end) ou texto (em start). */
+export type Annotation =
+  | { id: Id; kind: "dimension"; start: Point2; end: Point2; offset?: number; text?: string; extensions?: Extensions }
+  | { id: Id; kind: "label"; start: Point2; end?: Point2; offset?: number; text: string; extensions?: Extensions };
+
+/** v0.2: cortina ou persiana. */
+export interface OpeningTreatment {
+  kind: "curtain" | "sheer" | "blind" | "roller" | "none";
+  material?: MaterialRef;
+  side?: "left" | "right";
+  /** 0 = fechada, 1 = aberta. */
+  open?: number;
 }
 
 export type WallKind = "solid" | "half" | "glass" | "railing" | "fence";
@@ -147,6 +204,8 @@ export interface Opening {
   opensTo?: "left" | "right";
   catalogId?: string;
   materials?: MaterialSlots;
+  /** v0.2 */
+  treatment?: OpeningTreatment;
   extensions?: Extensions;
 }
 
@@ -160,7 +219,7 @@ export interface Room {
   type?: RoomType;
   polygon: Polygon;
   floor?: { material?: MaterialRef; elevation?: number };
-  ceiling?: { height?: number; material?: MaterialRef; visible?: boolean };
+  ceiling?: { height?: number; material?: MaterialRef; visible?: boolean; /** v0.2: rebaixo abaixo de height */ dropHeight?: number };
   extensions?: Extensions;
 }
 
@@ -228,6 +287,12 @@ export interface Site {
   walls?: Wall[];
   openings?: Opening[];
   objects?: SceneObject[];
+  /** v0.2: relevo por pontos cotados [x, z, altura]. */
+  terrain?: { points: Point3[]; smoothing?: number };
+  /** v0.2 */
+  groups?: Group[];
+  /** v0.2 */
+  annotations?: Annotation[];
   extensions?: Extensions;
 }
 
