@@ -184,15 +184,24 @@ function PasteTab() {
   const [reply, setReply] = useState('')
   const [result, setResult] = useState('')
 
+  /** Uma parte com defeito (ex.: resumo da cena) não pode derrubar a aba: vira aviso dentro do texto. */
+  const safe = (label: string, f: () => string) => {
+    try {
+      return f()
+    } catch (e) {
+      return `(não consegui gerar: ${label}: ${e instanceof Error ? e.message : String(e)})`
+    }
+  }
   const build = () => {
     const cats = new Map<string, string[]>()
-    for (const i of getCatalog().items) cats.set(i.category, [...(cats.get(i.category) ?? []), `${i.id} (${nameOf(i.name)} ${i.dimensions.width}×${i.dimensions.height}×${i.dimensions.depth})`])
-    const catalog = [...cats].map(([c, l]) => `${CATEGORY_LABEL[c] ?? c}: ${l.join('; ')}`).join('\n')
-    const materials = listMaterials(scene).map((m) => `${m.ref} (${m.name})`).join('; ')
-    return `${AI_GUIDE}\n\n${COMMANDS_CHEATSHEET}\n\n## Catálogo (ids de catalogId)\n${catalog}\n\n## Materiais (ids)\n${materials}\n\n## Cena atual (resumo)\n${describeScene(scene)}\n\n## Cena atual (JSON)\n${sceneToJson(scene).replace(/\n\s*/g, '')}\n\n## Pedido do usuário\n${ask || '(descreva aqui o que deseja)'}\n\n## Formato da resposta\nResponda SOMENTE com um bloco de código JSON no formato {"commands":[ ... ]} usando os comandos acima (ids novos devem ser únicos e legíveis; preserve ids existentes). Antes do bloco, no máximo 2 frases explicando o que muda.`
+    for (const i of getCatalog().items) cats.set(i.category, [...(cats.get(i.category) ?? []), safe(i.id, () => `${i.id} (${nameOf(i.name)} ${i.dimensions.width}×${i.dimensions.height}×${i.dimensions.depth})`)])
+    const catalog = safe('catálogo', () => [...cats].map(([c, l]) => `${CATEGORY_LABEL[c] ?? c}: ${l.join('; ')}`).join('\n'))
+    const materials = safe('materiais', () => listMaterials(scene).map((m) => `${m.ref} (${m.name})`).join('; '))
+    return `${AI_GUIDE}\n\n${COMMANDS_CHEATSHEET}\n\n## Catálogo (ids de catalogId)\n${catalog}\n\n## Materiais (ids)\n${materials}\n\n## Cena atual (resumo)\n${safe('resumo da cena', () => describeScene(scene))}\n\n## Cena atual (JSON)\n${safe('JSON da cena', () => sceneToJson(scene).replace(/\n\s*/g, ''))}\n\n## Pedido do usuário\n${ask || '(descreva aqui o que deseja)'}\n\n## Formato da resposta\nResponda SOMENTE com um bloco de código JSON no formato {"commands":[ ... ]} usando os comandos acima (ids novos devem ser únicos e legíveis; preserve ids existentes). Antes do bloco, no máximo 2 frases explicando o que muda.`
   }
-  const prompt = build()
-  const copyPrompt = () => copyText(prompt, 'Instruções copiadas: cole no seu chatbot')
+  // montado só ao copiar ou ao abrir a prévia: nunca durante a renderização da aba
+  const [preview, setPreview] = useState('')
+  const copyPrompt = () => copyText(build(), 'Instruções copiadas: cole no seu chatbot')
   const apply = () => {
     try {
       setResult(applyOpsFromText(reply, useEditor.getState().dispatch))
@@ -206,9 +215,10 @@ function PasteTab() {
       <h4>1. O que você quer?</h4>
       <textarea className="codebox" style={{ whiteSpace: 'pre-wrap', width: '100%' }} rows={3} value={ask} onChange={(e) => setAsk(e.target.value)} placeholder="Ex.: transforme em um quarto de bebê com tons suaves" />
       <button className="btn" onClick={copyPrompt}>Copiar instruções + cena</button>
-      <details>
-        <summary className="muted">Ver o que será copiado ({Math.round(prompt.length / 1000)} mil caracteres)</summary>
-        <textarea className="codebox" readOnly style={{ whiteSpace: 'pre-wrap', width: '100%', marginTop: 6 }} rows={8} value={prompt} onFocus={(e) => e.currentTarget.select()} />
+      <details onToggle={(e) => setPreview(e.currentTarget.open ? build() : '')}>
+        <summary className="muted">Ver o que será copiado</summary>
+        {preview && <textarea className="codebox" readOnly style={{ whiteSpace: 'pre-wrap', width: '100%', marginTop: 6 }} rows={8} value={preview} onFocus={(e) => e.currentTarget.select()} />}
+        {preview && <p className="muted">{Math.round(preview.length / 1000)} mil caracteres</p>}
       </details>
       <p className="muted">Cole no chatbot e envie. Ele responde com um bloco de código {'{"commands":[…]}'}: copie essa resposta e cole abaixo.</p>
       <h4>2. Cole a resposta da IA</h4>
