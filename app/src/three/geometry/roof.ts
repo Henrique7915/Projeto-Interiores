@@ -152,31 +152,44 @@ export function buildRoofGeometry(r: RRoof): THREE.BufferGeometry {
 }
 
 /**
- * Oitões (triângulos de parede sob a cumeeira) das duas extremidades de um telhado de duas águas:
- * dão volume à fachada em vez de deixar o vão aberto. Ficam recuados do beiral.
+ * Fechamentos de parede sob o telhado: os oitões (triângulos sob a cumeeira) do telhado de duas águas e,
+ * no de uma água, o lado alto e as duas empenas. Ficam recuados do beiral e dão volume à fachada
+ * em vez de deixar o vão aberto. Devolve null para telhado plano ou de quatro águas.
  */
 export function buildGableEnds(r: RRoof): THREE.BufferGeometry | null {
-  if (r.kind !== 'gable') return null
+  if (r.kind !== 'gable' && r.kind !== 'shed') return null
   const f = roofFrame(r)
   const tan = Math.tan((r.pitchDeg * Math.PI) / 180)
   if (tan <= 0) return null
+  const o = r.overhang
   const vc = (f.v0 + f.v1) / 2
-  const hv = (f.v1 - f.v0) / 2 - r.overhang
   const W = (u: number, v: number, y: number): P3 => [f.c[0] + u * f.u[0] + v * f.v[0], y, f.c[1] + u * f.u[1] + v * f.v[1]]
+  const faces: { pts: P3[]; out: [number, number] }[] = []
+  if (r.kind === 'gable') {
+    const hv = (f.v1 - f.v0) / 2 - o
+    for (const [u, s] of [[f.u0 + o, -1], [f.u1 - o, 1]] as const) {
+      faces.push({ pts: [W(u, vc - hv, 0), W(u, vc + hv, 0), W(u, vc, hv * tan)], out: [f.u[0] * s, f.u[1] * s] })
+    }
+  } else {
+    const h = (u: number) => (f.u1 - u) * tan
+    const ua = f.u0 + o, ub = f.u1 - o
+    for (const [v, s] of [[f.v0 + o, -1], [f.v1 - o, 1]] as const) {
+      faces.push({ pts: [W(ua, v, 0), W(ub, v, 0), W(ub, v, h(ub)), W(ua, v, h(ua))], out: [f.v[0] * s, f.v[1] * s] })
+    }
+    // lado alto (u0): parede de ponta a ponta
+    faces.push({ pts: [W(ua, f.v0 + o, 0), W(ua, f.v1 - o, 0), W(ua, f.v1 - o, h(ua)), W(ua, f.v0 + o, h(ua))], out: [-f.u[0], -f.u[1]] })
+  }
   const pos: number[] = []
-  const ride = hv * tan
-  for (const [u, s] of [[f.u0 + r.overhang, -1], [f.u1 - r.overhang, 1]] as const) {
-    const tri: P3[] = [W(u, vc - hv, 0), W(u, vc + hv, 0), W(u, vc, ride)]
-    const a = new THREE.Vector3(...tri[0]), b = new THREE.Vector3(...tri[1]), c = new THREE.Vector3(...tri[2])
-    const n = b.sub(a).cross(c.sub(a))
-    const out = new THREE.Vector3(f.u[0] * s, 0, f.u[1] * s)
-    const t2 = n.dot(out) > 0 ? tri : [tri[0], tri[2], tri[1]]
-    t2.forEach((p) => pos.push(...p))
+  for (const { pts, out } of faces) {
+    const a = new THREE.Vector3(...pts[0]), b = new THREE.Vector3(...pts[1]), c = new THREE.Vector3(...pts[2])
+    const n = b.clone().sub(a).cross(c.clone().sub(a))
+    const ord = n.dot(new THREE.Vector3(out[0], 0, out[1])) > 0 ? pts : [...pts].reverse()
+    for (let i = 1; i < ord.length - 1; i++) pos.push(...ord[0], ...ord[i], ...ord[i + 1])
   }
   const g = new THREE.BufferGeometry()
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
   const uv: number[] = []
-  for (let i = 0; i < pos.length; i += 3) uv.push(pos[i], pos[i + 1])
+  for (let i = 0; i < pos.length; i += 3) uv.push(pos[i] + pos[i + 2], pos[i + 1])
   g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2))
   g.computeVertexNormals()
   return g

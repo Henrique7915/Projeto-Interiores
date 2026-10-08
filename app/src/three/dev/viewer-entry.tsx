@@ -14,7 +14,9 @@ const q = new URLSearchParams(location.search)
 
 function Viewer() {
   const [scene] = useState<Scene>(() => {
-    const base = SCENES[q.get('scene') ?? 'studio']
+    let base = SCENES[q.get('scene') ?? 'studio']
+    const rk = q.get('roofKind') // gable|hip|shed|flat: troca o tipo do telhado da casa, para conferir cada forma
+    if (rk) base = { ...base, levels: base.levels.map((l) => ({ ...l, roofs: l.roofs?.map((r) => ({ ...r, kind: rk as 'gable', ridgeDeg: Number(q.get('ridge') ?? r.ridgeDeg ?? 0) })) })) }
     const k = Number(q.get('terrain') ?? 1) // terrain=3 exagera o relevo, para ver a malha
     if (k === 1 || !base.site?.terrain) return base
     return { ...base, site: { ...base.site, terrain: { ...base.site.terrain, points: base.site.terrain.points.map(([x, z, h]) => [x, z, h * k] as [number, number, number]) } } }
