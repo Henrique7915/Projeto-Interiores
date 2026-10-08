@@ -128,6 +128,11 @@ export const items = [
     materialSlots: { post: slot('Poste', 'wood/deck-cumaru', ['wood', 'metal', 'paint']), box: slot('Caixa', 'metal/black-matte', ['metal', 'paint']) }, tags: ['exterior'] },
   { id: 'outdoor/car', name: L('Carro', 'Car'), category: 'outdoor', model: 'procedural/car', dimensions: { width: 1.8, height: 1.5, depth: 4.4 },
     materialSlots: { body: slot('Pintura', 'paint/ink-blue', ['paint', 'metal']) }, tags: ['exterior', 'garagem'] },
+  // Escadas (o topo chega à altura do andar de cima; dimensions.height = pé-direito + laje)
+  { id: 'stairs/straight', name: L('Escada reta', 'Straight stairs'), category: 'stairs', model: 'procedural/stairs-straight', dimensions: { width: 0.9, height: 2.9, depth: 3.6 }, resizable: { width: [0.7, 1.6], height: [1.2, 4.5], depth: [1.8, 6] },
+    materialSlots: { steps: slot('Degraus', 'wood/natural-oak', ['wood', 'stone', 'concrete', 'ceramic', 'paint']) }, tags: ['escada', 'interior'] },
+  { id: 'stairs/l-shaped', name: L('Escada em L', 'L-shaped stairs'), category: 'stairs', model: 'procedural/stairs-l', dimensions: { width: 1.8, height: 2.9, depth: 2.7 }, resizable: { width: [1.4, 3], height: [1.2, 4.5], depth: [1.4, 4] },
+    materialSlots: { steps: slot('Degraus', 'wood/natural-oak', ['wood', 'stone', 'concrete', 'ceramic', 'paint']) }, tags: ['escada', 'interior'] },
   // Genérico
   { id: 'other/box', name: L('Caixa', 'Box'), category: 'other', model: 'procedural/box', dimensions: { width: 0.5, height: 0.5, depth: 0.5 }, resizable: { width: [0.05, 10], height: [0.05, 10], depth: [0.05, 10] },
     materialSlots: { body: slot('Material', 'wood/natural-oak') } },

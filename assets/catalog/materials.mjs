@@ -25,6 +25,7 @@ const M = [
   ['ceramic/white-tile', 'Azulejo branco', 'ceramic', '#f1f1ee', 0.2, { texture: ['tile-grid', 0.3] }],
   ['ceramic/porcelain-white', 'Porcelana branca', 'ceramic', '#f7f7f5', 0.1],
   ['ceramic/terracotta', 'Cerâmica terracota', 'ceramic', '#b8683f', 0.7, { texture: ['tile-grid', 0.3] }],
+  ['ceramic/roof-tile', 'Telha cerâmica', 'ceramic', '#a8492d', 0.75, { texture: ['roof-tile', 0.4] }],
   ['ceramic/green-tile', 'Azulejo verde', 'ceramic', '#5f8a6e', 0.2, { texture: ['tile-grid', 0.15] }],
   // Tecido e couro
   ['fabric/linen', 'Linho', 'fabric', '#e9e3d6', 0.95, { texture: ['weave', 0.5] }],
