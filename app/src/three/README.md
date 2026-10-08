@@ -4,22 +4,27 @@ Desenha um `Scene` do [schema](../../../schema/README.md) com React Three Fiber.
 O motor só lê a cena: toda mudança sai por eventos e o App transforma em comandos.
 
 ```tsx
-import { SceneView } from './three'
+import { SceneView, type SceneViewHandle } from './three'
 
 <SceneView
-  scene={scene}                      // Scene do schema (obrigatório)
-  selection={pick}                   // ScenePick | null: destaque no 3D
-  onPick={setPick}                   // clique em objeto, parede (lado), cômodo, abertura, zona; null = vazio
-  onDragEnd={(id, { position, rotationDeg }) => ...}   // fim de arraste ou giro (R, Shift+R, Q, E)
+  ref={handle}                       // SceneViewHandle (abaixo)
+  scene={scene}                      // Scene do schema (obrigatório; nunca é alterada aqui dentro)
+  selection={sel}                    // { kind: 'room'|'wall'|'opening'|'object'|'zone'|'site', id, side? } | null
+  onPick={setSel}                    // clique em objeto, parede (side left/right), cômodo, abertura, zona; null = vazio
+  onDragEnd={({ id, position, rotationDeg }) => ...}   // fim de arraste ou giro (R, Shift+R, Q, E); position no espaço da cena
   onDelete={(id) => ...}             // Delete/Backspace com objeto selecionado
+  quality="high" | "medium" | "low"  // low: sem sombras nem pós-processamento (celular); medium: sem oclusão ambiente
+  // opcionais: padrão vem da cena
   timeOfDay={18.5}                   // horas decimais ou "HH:MM"; sem valor usa scene.environment.timeOfDay
-  onTimeChange={setTime}             // usuário arrastou o sol
+  onTimeChange={setTime}             // usuário arrastou o sol (horas decimais)
   view="iso" | "top" | "front"
   cutaway="auto" | "none" | "all"    // paredes que tapam a vista ficam baixas
-  quality="high" | "low"             // low: sem sombras nem pós-processamento (celular)
-  ref={handle}                       // handle.capture() devolve PNG; handle.setView(...)
+  snap={0.05}                        // grade do arraste (m); padrão scene.defaults.snap
 />
 ```
+
+`SceneViewHandle`: `capture(): Promise<Blob>` (PNG), `exportGLB(): Promise<Blob>`, `setView(view | 'iso'|'top'|'front')` (vista salva do schema ou preset), `getView()` (posição/alvo/fov atuais, para salvar uma vista), `timeOfPreset('Manhã'|…)`.
+O contrato completo está em `types.ts` e `CONTRATO.md`.
 
 Outros exports de `index.ts`: `CATALOG`, `MATERIAL_LIBRARY`, `materialsByCategory`, `resolveMaterial`, `catalogItems`, `getCatalogItem`, `catalogMoods`, `TIME_PRESETS`, `formatTime`.
 Os painéis do App (moodboard, catálogo de móveis) montam suas listas a partir deles; os slots de cada móvel estão em `CATALOG.items[].materialSlots`.
