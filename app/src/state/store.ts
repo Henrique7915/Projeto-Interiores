@@ -81,10 +81,10 @@ export const useEditor = create<EditorState>((set, get) => ({
         else if (op.op === 'addOpening') set({ selection: { kind: 'opening', id } })
         else if (op.op === 'addWall') set({ selection: { kind: 'wall', id } })
       }
-    } else if (sel) {
+    } else if (sel && 'id' in sel && ops.some((o) => 'op' in o && (o.op.startsWith('remove') || o.op === 'clear'))) {
       // limpa seleção de coisas removidas
-      const exists = JSON.stringify(r.scene).includes(`"${'id' in sel ? sel.id : ''}"`)
-      if (!exists) set({ selection: null })
+      const json = JSON.stringify(r.scene)
+      if (!json.includes(`"id":"${sel.id}"`)) set({ selection: null })
     }
     return r
   },
