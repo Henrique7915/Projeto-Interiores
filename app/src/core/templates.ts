@@ -1,6 +1,7 @@
 import { applyOps, type OpInput } from './ops'
 import { wallsOfRoom } from './model'
-import { newScene } from './serialize'
+import { newScene, parseScene } from './serialize'
+import casaJoao from '../../../schema/exemplos/casa-joao.json'
 import type { Scene } from './schema'
 
 /** Projetos de exemplo para começar (tudo em medidas reais). */
@@ -173,6 +174,12 @@ export const TEMPLATES: Template[] = [
           { op: 'addRoof', id: 'telhado', kind: 'gable', levelId: 'superior', x: 0, z: 0, width: 10, depth: 5, pitchDeg: 25, overhang: 0.5, material: 'ceramic/roof-tile' },
         ],
       ),
+  },
+  {
+    id: 'casa-joao',
+    name: 'Casa do João (prancha A2)',
+    description: 'Casa de dois andares com piscina, área gourmet, sauna e garagem para 4 carros, montada a partir do projeto em PDF.',
+    build: () => parseScene(structuredClone(casaJoao)),
   },
   {
     id: 'vazio',

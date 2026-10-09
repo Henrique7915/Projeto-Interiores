@@ -5,6 +5,7 @@ import type { Vec3 } from './parts'
 import { Box, Cyl, MATS, Sph, simpleMat } from './parts'
 import { CASA_BUILDERS } from './builders-casa'
 import { EXTRA_BUILDERS } from './builders-extra'
+import { LAZER_BUILDERS } from './builders-lazer'
 import { Glow, useGlowMaterial } from './glow'
 
 /** Dados que cada desenhista recebe. Medidas em metros; origem no centro da base; frente em +Z. */
@@ -530,4 +531,5 @@ export const BUILDERS: Record<string, (p: BuildProps) => ReactElement> = {
   box: BoxGeneric,
   ...CASA_BUILDERS,
   ...EXTRA_BUILDERS,
+  ...LAZER_BUILDERS,
 }

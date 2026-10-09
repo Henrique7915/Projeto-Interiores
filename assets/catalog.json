@@ -4050,6 +4050,207 @@
       "thumbnail": "thumbnails/plant-cactus.png"
     },
     {
+      "id": "outdoor/hot-tub",
+      "name": {
+        "pt-BR": "Spa / ofurô",
+        "en": "Hot tub"
+      },
+      "category": "outdoor",
+      "model": "procedural/hot-tub",
+      "dimensions": {
+        "width": 2.1,
+        "height": 0.9,
+        "depth": 2.1
+      },
+      "resizable": {
+        "width": [
+          1.4,
+          3
+        ],
+        "height": [
+          0.7,
+          1.1
+        ],
+        "depth": [
+          1.4,
+          3
+        ]
+      },
+      "materialSlots": {
+        "shell": {
+          "label": "Concha",
+          "default": "ceramic/porcelain-white",
+          "allowed": [
+            "ceramic",
+            "stone",
+            "paint",
+            "plastic"
+          ]
+        },
+        "skirt": {
+          "label": "Saia",
+          "default": "wood/deck-cumaru",
+          "allowed": [
+            "wood",
+            "stone",
+            "paint",
+            "concrete"
+          ]
+        }
+      },
+      "tags": [
+        "exterior",
+        "lazer",
+        "piscina"
+      ],
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/outdoor-hot-tub.png"
+    },
+    {
+      "id": "bathroom/sauna-bench",
+      "name": {
+        "pt-BR": "Banco de sauna (dois degraus)",
+        "en": "Sauna bench"
+      },
+      "category": "bathroom",
+      "model": "procedural/sauna-bench",
+      "dimensions": {
+        "width": 1.8,
+        "height": 0.9,
+        "depth": 1.1
+      },
+      "resizable": {
+        "width": [
+          0.8,
+          3
+        ],
+        "height": [
+          0.7,
+          1.1
+        ],
+        "depth": [
+          0.7,
+          1.4
+        ]
+      },
+      "materialSlots": {
+        "wood": {
+          "label": "Madeira",
+          "default": "wood/pine",
+          "allowed": [
+            "wood"
+          ]
+        }
+      },
+      "tags": [
+        "sauna",
+        "lazer"
+      ],
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/bathroom-sauna-bench.png"
+    },
+    {
+      "id": "appliance/laundry-tub",
+      "name": {
+        "pt-BR": "Tanque de lavar roupa",
+        "en": "Laundry tub"
+      },
+      "category": "appliance",
+      "model": "procedural/laundry-tub",
+      "dimensions": {
+        "width": 0.7,
+        "height": 0.85,
+        "depth": 0.55
+      },
+      "resizable": {
+        "width": [
+          0.5,
+          1.2
+        ]
+      },
+      "materialSlots": {
+        "body": {
+          "label": "Tanque",
+          "default": "ceramic/porcelain-white",
+          "allowed": [
+            "ceramic",
+            "stone",
+            "concrete",
+            "plastic",
+            "metal"
+          ]
+        },
+        "tap": {
+          "label": "Torneira",
+          "default": "metal/chrome",
+          "allowed": [
+            "metal"
+          ]
+        }
+      },
+      "tags": [
+        "lavanderia",
+        "serviço"
+      ],
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/appliance-laundry-tub.png"
+    },
+    {
+      "id": "outdoor/dog-house",
+      "name": {
+        "pt-BR": "Casinha de cachorro",
+        "en": "Dog house"
+      },
+      "category": "outdoor",
+      "model": "procedural/dog-house",
+      "dimensions": {
+        "width": 0.8,
+        "height": 0.8,
+        "depth": 0.9
+      },
+      "resizable": {
+        "width": [
+          0.5,
+          1.4
+        ],
+        "height": [
+          0.5,
+          1.2
+        ],
+        "depth": [
+          0.5,
+          1.5
+        ]
+      },
+      "materialSlots": {
+        "body": {
+          "label": "Paredes",
+          "default": "wood/pine",
+          "allowed": [
+            "wood",
+            "paint",
+            "plastic"
+          ]
+        },
+        "roof": {
+          "label": "Telhado",
+          "default": "ceramic/roof-tile",
+          "allowed": [
+            "ceramic",
+            "wood",
+            "metal",
+            "paint"
+          ]
+        }
+      },
+      "tags": [
+        "exterior",
+        "canil"
+      ],
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/outdoor-dog-house.png"
+    },
+    {
       "id": "other/box",
       "name": {
         "pt-BR": "Caixa",

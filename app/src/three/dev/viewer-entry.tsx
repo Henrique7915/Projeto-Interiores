@@ -5,11 +5,12 @@ import type { Scene } from '../../../../schema/types'
 import studio from '../../../../schema/exemplos/studio-aconchegante.json'
 import casa from '../../../../schema/exemplos/casa-dois-andares.json'
 import quintal from '../../../../schema/exemplos/quintal-com-piscina.json'
+import joao from '../../../../schema/exemplos/casa-joao.json'
 
 // Visualizador só de desenvolvimento do motor 3D, sem o resto do app:
-//   /src/three/dev/viewer.html?scene=studio|quintal|casa&roofs=auto|show|hide&upTo=<id do andar>&cutaway=auto|none|all&terrain=<fator do relevo>&q=low|medium|high&t=18.5&view=iso|top|front
+//   /src/three/dev/viewer.html?scene=studio|quintal|casa|joao&roofs=auto|show|hide&upTo=<id do andar>&cutaway=auto|none|all&terrain=<fator do relevo>&q=low|medium|high&t=18.5&view=iso|top|front
 // Expõe window.__vp (handle) e window.__setT (muda a hora) para testes automatizados; adaptive=0 desliga o ajuste automático de qualidade.
-const SCENES: Record<string, Scene> = { studio: studio as unknown as Scene, quintal: quintal as unknown as Scene, casa: casa as unknown as Scene }
+const SCENES: Record<string, Scene> = { studio: studio as unknown as Scene, quintal: quintal as unknown as Scene, casa: casa as unknown as Scene, joao: joao as unknown as Scene }
 const q = new URLSearchParams(location.search)
 
 function Viewer() {
