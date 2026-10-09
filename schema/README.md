@@ -8,7 +8,7 @@ Este é o contrato entre as três frentes e qualquer IA que edite ambientes. Uma
 | `catalog.schema.json` | Contrato do catálogo de móveis, materiais e presets de clima (`assets/catalog.json`) |
 | `types.ts` | Tipos TypeScript equivalentes, para o app importar |
 | `validar.mjs` | Validador: schema + regras de consistência. `node validar.mjs cena.json`, ou `import { validateScene, validateCatalog }`. Com `assets/catalog.json` presente, valida o catálogo e avisa sobre itens e materiais que não existem nele |
-| `exemplos/` | `studio-aconchegante.json` (interno, inspirado no exemplo), `quintal-com-piscina.json` (externo) e `casa-dois-andares.json` (v0.2: andares, escada, telhado, relevo) |
+| `exemplos/` | `studio-aconchegante.json` (interno, inspirado no exemplo), `quintal-com-piscina.json` (externo), `casa-dois-andares.json` (v0.2: andares, escada, telhado, relevo) e `casa-joao.json` (projeto real tirado de uma planta em PDF: dois andares, piscina, área gourmet, sauna) |
 
 Para validar: `cd schema && npm install && npm run validar`.
 

@@ -1,0 +1,3714 @@
+{
+ "$schema": "../scene.schema.json",
+ "format": "design3d.scene",
+ "version": "0.2.0",
+ "id": "casa-joao",
+ "name": "Casa do João",
+ "units": "m",
+ "meta": {
+  "description": "Casa de dois andares do projeto \"PROJETO JOÃO1-A2\": terreno 40,7 × 15,2 m com garagem para 4 carros, piscina, área gourmet, sauna com spa sob pergolado, lavanderia e canil. Térreo com cozinha e jantar, estar, quarto, escritório e varanda; andar de cima (+3,12) com suíte e closet, sala de estar, dois quartos e WC social.",
+  "tags": [
+   "projeto",
+   "casa",
+   "dois andares",
+   "piscina"
+  ],
+  "locale": "pt-BR"
+ },
+ "defaults": {
+  "wallHeight": 3.0,
+  "wallThickness": 0.15
+ },
+ "environment": {
+  "timeOfDay": "15:00",
+  "northDeg": 0,
+  "sky": "clear",
+  "mood": "bright"
+ },
+ "levels": [
+  {
+   "id": "terreo",
+   "name": "Térreo",
+   "elevation": 0,
+   "height": 3.0,
+   "slabThickness": 0.12,
+   "walls": [
+    {
+     "id": "t-norte",
+     "start": [
+      25.255,
+      1.225
+     ],
+     "end": [
+      38.46,
+      1.225
+     ]
+    },
+    {
+     "id": "t-leste",
+     "start": [
+      38.46,
+      1.225
+     ],
+     "end": [
+      38.46,
+      13.765
+     ]
+    },
+    {
+     "id": "t-sul",
+     "start": [
+      38.46,
+      13.765
+     ],
+     "end": [
+      33.965,
+      13.765
+     ]
+    },
+    {
+     "id": "t-varanda",
+     "start": [
+      33.965,
+      13.765
+     ],
+     "end": [
+      33.965,
+      4.795
+     ]
+    },
+    {
+     "id": "t-oeste",
+     "start": [
+      25.255,
+      4.795
+     ],
+     "end": [
+      25.255,
+      1.225
+     ]
+    },
+    {
+     "id": "t-cozinha-sul",
+     "start": [
+      25.255,
+      4.795
+     ],
+     "end": [
+      38.46,
+      4.795
+     ]
+    },
+    {
+     "id": "t-quarto1-sul",
+     "start": [
+      33.965,
+      8.335
+     ],
+     "end": [
+      38.46,
+      8.335
+     ]
+    },
+    {
+     "id": "t-escritorio-norte",
+     "start": [
+      33.965,
+      10.335
+     ],
+     "end": [
+      38.46,
+      10.335
+     ]
+    },
+    {
+     "id": "t-banho-oeste",
+     "start": [
+      36.005,
+      8.335
+     ],
+     "end": [
+      36.005,
+      10.335
+     ]
+    },
+    {
+     "id": "t-banho1-oeste",
+     "start": [
+      37.075,
+      1.225
+     ],
+     "end": [
+      37.075,
+      4.795
+     ]
+    },
+    {
+     "id": "t-banho1-sul",
+     "start": [
+      37.075,
+      3.225
+     ],
+     "end": [
+      38.46,
+      3.225
+     ]
+    },
+    {
+     "id": "t-bloco-norte",
+     "start": [
+      11.85,
+      1.225
+     ],
+     "end": [
+      17.1,
+      1.225
+     ]
+    },
+    {
+     "id": "t-sauna-oeste",
+     "start": [
+      11.85,
+      4.205
+     ],
+     "end": [
+      11.85,
+      1.225
+     ]
+    },
+    {
+     "id": "t-sauna-leste",
+     "start": [
+      13.8,
+      1.225
+     ],
+     "end": [
+      13.8,
+      4.205
+     ]
+    },
+    {
+     "id": "t-sauna-sul",
+     "start": [
+      13.8,
+      4.205
+     ],
+     "end": [
+      11.85,
+      4.205
+     ]
+    },
+    {
+     "id": "t-bloco-meio",
+     "start": [
+      13.8,
+      2.875
+     ],
+     "end": [
+      17.1,
+      2.875
+     ]
+    },
+    {
+     "id": "t-lavabo1-oeste",
+     "start": [
+      15.45,
+      1.225
+     ],
+     "end": [
+      15.45,
+      2.875
+     ]
+    },
+    {
+     "id": "t-bloco-leste",
+     "start": [
+      17.1,
+      0.15
+     ],
+     "end": [
+      17.1,
+      4.28
+     ]
+    }
+   ],
+   "openings": [
+    {
+     "id": "t-porta-entrada",
+     "wallId": "t-norte",
+     "kind": "door",
+     "offset": 9.135,
+     "width": 0.8,
+     "height": 2.1,
+     "hinge": "start",
+     "opensTo": "right"
+    },
+    {
+     "id": "t-jan-banho1",
+     "wallId": "t-norte",
+     "kind": "window",
+     "offset": 12.52,
+     "width": 0.6,
+     "height": 0.6,
+     "sill": 1.6
+    },
+    {
+     "id": "t-jan-banho2",
+     "wallId": "t-leste",
+     "kind": "window",
+     "offset": 8.13,
+     "width": 0.6,
+     "height": 0.6,
+     "sill": 1.6
+    },
+    {
+     "id": "t-jan-quarto1",
+     "wallId": "t-varanda",
+     "kind": "sliding-window",
+     "offset": 7.175,
+     "width": 1.4,
+     "height": 1.0,
+     "sill": 1.1
+    },
+    {
+     "id": "t-passagem-hall",
+     "wallId": "t-varanda",
+     "kind": "passage",
+     "offset": 4.405,
+     "width": 1.0,
+     "height": 2.1
+    },
+    {
+     "id": "t-jan-escritorio",
+     "wallId": "t-varanda",
+     "kind": "sliding-window",
+     "offset": 1.71,
+     "width": 1.4,
+     "height": 1.0,
+     "sill": 1.1
+    },
+    {
+     "id": "t-jan-cozinha",
+     "wallId": "t-oeste",
+     "kind": "sliding-window",
+     "offset": 0.92,
+     "width": 1.3,
+     "height": 1.0,
+     "sill": 1.1
+    },
+    {
+     "id": "t-jan-cozinha-sul",
+     "wallId": "t-cozinha-sul",
+     "kind": "sliding-window",
+     "offset": 0.675,
+     "width": 1.2,
+     "height": 1.0,
+     "sill": 1.1
+    },
+    {
+     "id": "t-porta-varanda",
+     "wallId": "t-cozinha-sul",
+     "kind": "sliding-door",
+     "offset": 3.53,
+     "width": 4.0,
+     "height": 2.5
+    },
+    {
+     "id": "t-porta-escada",
+     "wallId": "t-cozinha-sul",
+     "kind": "sliding-door",
+     "offset": 7.225,
+     "width": 2.8,
+     "height": 2.5
+    },
+    {
+     "id": "t-porta-quarto1",
+     "wallId": "t-quarto1-sul",
+     "kind": "door",
+     "offset": 0.625,
+     "width": 0.95,
+     "height": 2.1,
+     "hinge": "start",
+     "opensTo": "left"
+    },
+    {
+     "id": "t-porta-escritorio",
+     "wallId": "t-escritorio-norte",
+     "kind": "door",
+     "offset": 0.575,
+     "width": 0.9,
+     "height": 2.1,
+     "hinge": "start",
+     "opensTo": "right"
+    },
+    {
+     "id": "t-porta-banho",
+     "wallId": "t-banho-oeste",
+     "kind": "door",
+     "offset": 0.625,
+     "width": 0.8,
+     "height": 2.1,
+     "hinge": "start",
+     "opensTo": "left"
+    },
+    {
+     "id": "t-porta-lavabo",
+     "wallId": "t-banho1-oeste",
+     "kind": "door",
+     "offset": 2.755,
+     "width": 0.7,
+     "height": 2.1,
+     "hinge": "end",
+     "opensTo": "left"
+    },
+    {
+     "id": "t-porta-banho1",
+     "wallId": "t-banho1-sul",
+     "kind": "door",
+     "offset": 0.88,
+     "width": 0.65,
+     "height": 2.1,
+     "hinge": "end",
+     "opensTo": "left"
+    },
+    {
+     "id": "t-jan-ducha",
+     "wallId": "t-bloco-norte",
+     "kind": "window",
+     "offset": 2.78,
+     "width": 0.8,
+     "height": 0.6,
+     "sill": 1.6
+    },
+    {
+     "id": "t-jan-lavabo1",
+     "wallId": "t-bloco-norte",
+     "kind": "window",
+     "offset": 4.43,
+     "width": 0.8,
+     "height": 0.6,
+     "sill": 1.6
+    },
+    {
+     "id": "t-porta-sauna",
+     "wallId": "t-sauna-sul",
+     "kind": "door",
+     "offset": 1.38,
+     "width": 0.8,
+     "height": 2.1,
+     "hinge": "start",
+     "opensTo": "left"
+    },
+    {
+     "id": "t-passagem-ducha",
+     "wallId": "t-bloco-meio",
+     "kind": "passage",
+     "offset": 1.08,
+     "width": 0.8,
+     "height": 2.1
+    },
+    {
+     "id": "t-porta-lavabo1",
+     "wallId": "t-bloco-meio",
+     "kind": "door",
+     "offset": 2.73,
+     "width": 0.8,
+     "height": 2.1,
+     "hinge": "end",
+     "opensTo": "left"
+    }
+   ],
+   "rooms": [
+    {
+     "id": "c-cozinha",
+     "name": "Cozinha e jantar",
+     "type": "kitchen",
+     "polygon": [
+      [
+       25.255,
+       1.225
+      ],
+      [
+       33.965,
+       1.225
+      ],
+      [
+       33.965,
+       4.795
+      ],
+      [
+       25.255,
+       4.795
+      ]
+     ],
+     "floor": {
+      "material": "ceramic/porcelain-white"
+     }
+    },
+    {
+     "id": "c-estar",
+     "name": "Estar",
+     "type": "living",
+     "polygon": [
+      [
+       33.965,
+       1.225
+      ],
+      [
+       37.075,
+       1.225
+      ],
+      [
+       37.075,
+       4.795
+      ],
+      [
+       33.965,
+       4.795
+      ]
+     ],
+     "floor": {
+      "material": "wood/natural-oak"
+     }
+    },
+    {
+     "id": "c-banho1",
+     "name": "Banho",
+     "type": "bathroom",
+     "polygon": [
+      [
+       37.075,
+       1.225
+      ],
+      [
+       38.46,
+       1.225
+      ],
+      [
+       38.46,
+       3.225
+      ],
+      [
+       37.075,
+       3.225
+      ]
+     ],
+     "floor": {
+      "material": "ceramic/white-tile"
+     }
+    },
+    {
+     "id": "c-lavabo",
+     "name": "Lavabo",
+     "type": "bathroom",
+     "polygon": [
+      [
+       37.075,
+       3.225
+      ],
+      [
+       38.46,
+       3.225
+      ],
+      [
+       38.46,
+       4.795
+      ],
+      [
+       37.075,
+       4.795
+      ]
+     ],
+     "floor": {
+      "material": "ceramic/white-tile"
+     }
+    },
+    {
+     "id": "c-quarto1",
+     "name": "Quarto 1",
+     "type": "bedroom",
+     "polygon": [
+      [
+       33.965,
+       4.795
+      ],
+      [
+       38.46,
+       4.795
+      ],
+      [
+       38.46,
+       8.335
+      ],
+      [
+       33.965,
+       8.335
+      ]
+     ],
+     "floor": {
+      "material": "wood/natural-oak"
+     }
+    },
+    {
+     "id": "c-hall",
+     "name": "Lavabo / hall",
+     "type": "hall",
+     "polygon": [
+      [
+       33.965,
+       8.335
+      ],
+      [
+       36.005,
+       8.335
+      ],
+      [
+       36.005,
+       10.335
+      ],
+      [
+       33.965,
+       10.335
+      ]
+     ],
+     "floor": {
+      "material": "ceramic/porcelain-white"
+     }
+    },
+    {
+     "id": "c-banho2",
+     "name": "Banho",
+     "type": "bathroom",
+     "polygon": [
+      [
+       36.005,
+       8.335
+      ],
+      [
+       38.46,
+       8.335
+      ],
+      [
+       38.46,
+       10.335
+      ],
+      [
+       36.005,
+       10.335
+      ]
+     ],
+     "floor": {
+      "material": "ceramic/white-tile"
+     }
+    },
+    {
+     "id": "c-escritorio",
+     "name": "Escritório",
+     "type": "office",
+     "polygon": [
+      [
+       33.965,
+       10.335
+      ],
+      [
+       38.46,
+       10.335
+      ],
+      [
+       38.46,
+       13.765
+      ],
+      [
+       33.965,
+       13.765
+      ]
+     ],
+     "floor": {
+      "material": "wood/natural-oak"
+     }
+    },
+    {
+     "id": "c-varanda",
+     "name": "Varanda",
+     "type": "balcony",
+     "polygon": [
+      [
+       32.28,
+       4.795
+      ],
+      [
+       33.965,
+       4.795
+      ],
+      [
+       33.965,
+       13.765
+      ],
+      [
+       32.28,
+       13.765
+      ]
+     ],
+     "floor": {
+      "material": "wood/deck-cumaru"
+     }
+    },
+    {
+     "id": "c-gourmet",
+     "name": "Área gourmet",
+     "type": "kitchen",
+     "polygon": [
+      [
+       17.1,
+       0.15
+      ],
+      [
+       25.255,
+       0.15
+      ],
+      [
+       25.255,
+       5.49
+      ],
+      [
+       17.1,
+       5.49
+      ]
+     ],
+     "floor": {
+      "material": "stone/granite-grey"
+     }
+    },
+    {
+     "id": "c-sauna",
+     "name": "Sauna",
+     "type": "other",
+     "polygon": [
+      [
+       11.85,
+       1.225
+      ],
+      [
+       13.8,
+       1.225
+      ],
+      [
+       13.8,
+       4.205
+      ],
+      [
+       11.85,
+       4.205
+      ]
+     ],
+     "floor": {
+      "material": "wood/pine"
+     }
+    },
+    {
+     "id": "c-ducha",
+     "name": "Ducha",
+     "type": "bathroom",
+     "polygon": [
+      [
+       13.8,
+       1.225
+      ],
+      [
+       15.45,
+       1.225
+      ],
+      [
+       15.45,
+       2.875
+      ],
+      [
+       13.8,
+       2.875
+      ]
+     ],
+     "floor": {
+      "material": "ceramic/white-tile"
+     }
+    },
+    {
+     "id": "c-lavabo1",
+     "name": "Lavabo",
+     "type": "bathroom",
+     "polygon": [
+      [
+       15.45,
+       1.225
+      ],
+      [
+       17.1,
+       1.225
+      ],
+      [
+       17.1,
+       2.875
+      ],
+      [
+       15.45,
+       2.875
+      ]
+     ],
+     "floor": {
+      "material": "ceramic/white-tile"
+     }
+    },
+    {
+     "id": "c-lavabo2",
+     "name": "Lavabo (pia)",
+     "type": "bathroom",
+     "polygon": [
+      [
+       13.8,
+       2.875
+      ],
+      [
+       17.1,
+       2.875
+      ],
+      [
+       17.1,
+       4.205
+      ],
+      [
+       13.8,
+       4.205
+      ]
+     ],
+     "floor": {
+      "material": "ceramic/white-tile"
+     }
+    }
+   ],
+   "objects": [
+    {
+     "id": "o-balcao-1",
+     "catalogId": "kitchen/counter",
+     "position": [
+      25.82,
+      0,
+      1.6
+     ],
+     "dimensions": {
+      "width": 0.98,
+      "height": 0.9,
+      "depth": 0.6
+     },
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-fogao",
+     "catalogId": "appliance/stove",
+     "position": [
+      26.685,
+      0,
+      1.6
+     ],
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-balcao-2",
+     "catalogId": "kitchen/counter",
+     "position": [
+      27.5,
+      0,
+      1.6
+     ],
+     "dimensions": {
+      "width": 0.88,
+      "height": 0.9,
+      "depth": 0.6
+     },
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-coifa",
+     "catalogId": "appliance/range-hood",
+     "position": [
+      26.685,
+      1.6,
+      1.5
+     ],
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-pia-cozinha",
+     "catalogId": "kitchen/sink-counter",
+     "position": [
+      28.23,
+      0,
+      2.47
+     ],
+     "rotationDeg": -90,
+     "dimensions": {
+      "width": 2.34,
+      "height": 0.9,
+      "depth": 0.6
+     },
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-geladeira",
+     "catalogId": "appliance/fridge",
+     "position": [
+      25.72,
+      0,
+      2.76
+     ],
+     "rotationDeg": 90,
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-banqueta-1",
+     "catalogId": "chair/bar-stool",
+     "position": [
+      28.93,
+      0,
+      1.63
+     ],
+     "rotationDeg": -90,
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-banqueta-2",
+     "catalogId": "chair/bar-stool",
+     "position": [
+      28.93,
+      0,
+      2.2
+     ],
+     "rotationDeg": -90,
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-banqueta-3",
+     "catalogId": "chair/bar-stool",
+     "position": [
+      28.93,
+      0,
+      2.77
+     ],
+     "rotationDeg": -90,
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-banqueta-4",
+     "catalogId": "chair/bar-stool",
+     "position": [
+      28.93,
+      0,
+      3.34
+     ],
+     "rotationDeg": -90,
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-mesa-jantar",
+     "catalogId": "table/dining-rect",
+     "position": [
+      30.73,
+      0,
+      2.85
+     ],
+     "rotationDeg": 90,
+     "dimensions": {
+      "width": 2.1,
+      "height": 0.75,
+      "depth": 1.0
+     },
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-cad-o1",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      29.98,
+      0,
+      2.18
+     ],
+     "rotationDeg": 90,
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-cad-l1",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      31.48,
+      0,
+      2.18
+     ],
+     "rotationDeg": -90,
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-cad-o2",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      29.98,
+      0,
+      2.85
+     ],
+     "rotationDeg": 90,
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-cad-l2",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      31.48,
+      0,
+      2.85
+     ],
+     "rotationDeg": -90,
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-cad-o3",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      29.98,
+      0,
+      3.52
+     ],
+     "rotationDeg": 90,
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-cad-l3",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      31.48,
+      0,
+      3.52
+     ],
+     "rotationDeg": -90,
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-cad-n",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      30.73,
+      0,
+      1.63
+     ],
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-cad-s",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      30.73,
+      0,
+      4.08
+     ],
+     "rotationDeg": 180,
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-pendente-jantar",
+     "catalogId": "lighting/pendant-dome",
+     "position": [
+      30.73,
+      2.2,
+      2.85
+     ],
+     "roomId": "c-cozinha"
+    },
+    {
+     "id": "o-escada-lance1",
+     "catalogId": "stairs/straight",
+     "position": [
+      33.44,
+      0,
+      3.04
+     ],
+     "dimensions": {
+      "width": 0.9,
+      "height": 1.56,
+      "depth": 1.68
+     },
+     "roomId": "c-cozinha",
+     "name": "Escada (1º lance)"
+    },
+    {
+     "id": "o-escada-patamar",
+     "catalogId": "other/box",
+     "position": [
+      32.99,
+      0,
+      1.75
+     ],
+     "dimensions": {
+      "width": 1.8,
+      "height": 1.56,
+      "depth": 0.9
+     },
+     "roomId": "c-cozinha",
+     "name": "Patamar da escada",
+     "materials": {
+      "body": "wood/natural-oak"
+     }
+    },
+    {
+     "id": "o-escada-lance2",
+     "catalogId": "stairs/straight",
+     "position": [
+      32.54,
+      1.56,
+      3.04
+     ],
+     "rotationDeg": 180,
+     "dimensions": {
+      "width": 0.9,
+      "height": 1.56,
+      "depth": 1.68
+     },
+     "roomId": "c-cozinha",
+     "name": "Escada (2º lance)"
+    },
+    {
+     "id": "o-mesa-estar",
+     "catalogId": "table/coffee-round",
+     "position": [
+      35.01,
+      0,
+      1.73
+     ],
+     "dimensions": {
+      "width": 0.6,
+      "height": 0.45,
+      "depth": 0.6
+     },
+     "roomId": "c-estar"
+    },
+    {
+     "id": "o-poltrona-1",
+     "catalogId": "chair/armchair-lounge",
+     "position": [
+      35.72,
+      0,
+      1.73
+     ],
+     "rotationDeg": 180,
+     "roomId": "c-estar"
+    },
+    {
+     "id": "o-poltrona-2",
+     "catalogId": "chair/armchair-lounge",
+     "position": [
+      36.42,
+      0,
+      1.73
+     ],
+     "rotationDeg": 180,
+     "roomId": "c-estar"
+    },
+    {
+     "id": "o-poltrona-3",
+     "catalogId": "chair/armchair-lounge",
+     "position": [
+      34.48,
+      0,
+      2.48
+     ],
+     "rotationDeg": 90,
+     "roomId": "c-estar"
+    },
+    {
+     "id": "o-poltrona-4",
+     "catalogId": "chair/armchair-lounge",
+     "position": [
+      34.48,
+      0,
+      3.28
+     ],
+     "rotationDeg": 90,
+     "roomId": "c-estar"
+    },
+    {
+     "id": "o-banho1-vaso",
+     "catalogId": "bathroom/toilet",
+     "position": [
+      37.53,
+      0,
+      2.83
+     ],
+     "rotationDeg": 180,
+     "roomId": "c-banho1"
+    },
+    {
+     "id": "o-banho1-pia",
+     "catalogId": "bathroom/vanity",
+     "position": [
+      38.13,
+      0,
+      1.58
+     ],
+     "dimensions": {
+      "width": 0.5,
+      "height": 0.85,
+      "depth": 0.4
+     },
+     "roomId": "c-banho1"
+    },
+    {
+     "id": "o-lavabo-pia",
+     "catalogId": "bathroom/vanity",
+     "position": [
+      38.18,
+      0,
+      4.28
+     ],
+     "rotationDeg": -90,
+     "dimensions": {
+      "width": 0.5,
+      "height": 0.85,
+      "depth": 0.4
+     },
+     "roomId": "c-lavabo"
+    },
+    {
+     "id": "o-cama-q1",
+     "catalogId": "bed/queen-modern",
+     "position": [
+      35.82,
+      0,
+      5.86
+     ],
+     "dimensions": {
+      "width": 1.4,
+      "height": 1.0,
+      "depth": 1.95
+     },
+     "roomId": "c-quarto1"
+    },
+    {
+     "id": "o-cabeceira-q1a",
+     "catalogId": "storage/nightstand",
+     "position": [
+      34.83,
+      0,
+      5.08
+     ],
+     "roomId": "c-quarto1"
+    },
+    {
+     "id": "o-cabeceira-q1b",
+     "catalogId": "storage/nightstand",
+     "position": [
+      36.81,
+      0,
+      5.08
+     ],
+     "roomId": "c-quarto1"
+    },
+    {
+     "id": "o-guarda-roupa-q1",
+     "catalogId": "storage/wardrobe-2-door",
+     "position": [
+      38.1,
+      0,
+      6.38
+     ],
+     "rotationDeg": -90,
+     "dimensions": {
+      "width": 2.9,
+      "height": 2.2,
+      "depth": 0.6
+     },
+     "roomId": "c-quarto1"
+    },
+    {
+     "id": "o-hall-pia",
+     "catalogId": "bathroom/vanity",
+     "position": [
+      35.68,
+      0,
+      10.03
+     ],
+     "rotationDeg": 180,
+     "dimensions": {
+      "width": 0.6,
+      "height": 0.85,
+      "depth": 0.45
+     },
+     "roomId": "c-hall"
+    },
+    {
+     "id": "o-banho2-vaso",
+     "catalogId": "bathroom/toilet",
+     "position": [
+      36.76,
+      0,
+      9.93
+     ],
+     "rotationDeg": 180,
+     "roomId": "c-banho2"
+    },
+    {
+     "id": "o-banho2-box",
+     "catalogId": "bathroom/shower-box",
+     "position": [
+      37.96,
+      0,
+      9.33
+     ],
+     "dimensions": {
+      "width": 0.85,
+      "height": 2.0,
+      "depth": 1.85
+     },
+     "roomId": "c-banho2"
+    },
+    {
+     "id": "o-sofa-escritorio",
+     "catalogId": "sofa/three-seat",
+     "position": [
+      35.29,
+      0,
+      13.21
+     ],
+     "rotationDeg": 180,
+     "dimensions": {
+      "width": 2.3,
+      "height": 0.85,
+      "depth": 0.9
+     },
+     "roomId": "c-escritorio"
+    },
+    {
+     "id": "o-mesa-escritorio",
+     "catalogId": "table/coffee-rect",
+     "position": [
+      35.58,
+      0,
+      11.88
+     ],
+     "roomId": "c-escritorio"
+    },
+    {
+     "id": "o-bancada-escritorio",
+     "catalogId": "desk/simple",
+     "position": [
+      38.08,
+      0,
+      12.08
+     ],
+     "rotationDeg": -90,
+     "dimensions": {
+      "width": 2.0,
+      "height": 0.75,
+      "depth": 0.6
+     },
+     "roomId": "c-escritorio"
+    },
+    {
+     "id": "o-cadeira-esc-1",
+     "catalogId": "chair/office",
+     "position": [
+      37.48,
+      0,
+      11.48
+     ],
+     "rotationDeg": 90,
+     "roomId": "c-escritorio"
+    },
+    {
+     "id": "o-cadeira-esc-2",
+     "catalogId": "chair/office",
+     "position": [
+      37.48,
+      0,
+      12.68
+     ],
+     "rotationDeg": 90,
+     "roomId": "c-escritorio"
+    },
+    {
+     "id": "o-pilar-1",
+     "catalogId": "other/box",
+     "position": [
+      32.53,
+      0,
+      7.97
+     ],
+     "dimensions": {
+      "width": 0.15,
+      "height": 3.0,
+      "depth": 0.15
+     },
+     "roomId": "c-varanda",
+     "name": "Pilar",
+     "materials": {
+      "body": "paint/exterior-white"
+     }
+    },
+    {
+     "id": "o-pilar-2",
+     "catalogId": "other/box",
+     "position": [
+      32.53,
+      0,
+      10.83
+     ],
+     "dimensions": {
+      "width": 0.15,
+      "height": 3.0,
+      "depth": 0.15
+     },
+     "roomId": "c-varanda",
+     "name": "Pilar",
+     "materials": {
+      "body": "paint/exterior-white"
+     }
+    },
+    {
+     "id": "o-pilar-3",
+     "catalogId": "other/box",
+     "position": [
+      32.53,
+      0,
+      13.61
+     ],
+     "dimensions": {
+      "width": 0.15,
+      "height": 3.0,
+      "depth": 0.15
+     },
+     "roomId": "c-varanda",
+     "name": "Pilar",
+     "materials": {
+      "body": "paint/exterior-white"
+     }
+    },
+    {
+     "id": "o-g-geladeira",
+     "catalogId": "appliance/fridge",
+     "position": [
+      17.58,
+      0,
+      0.53
+     ],
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-pia",
+     "catalogId": "kitchen/sink-counter",
+     "position": [
+      17.48,
+      0,
+      2.18
+     ],
+     "rotationDeg": 90,
+     "dimensions": {
+      "width": 2.2,
+      "height": 0.9,
+      "depth": 0.6
+     },
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-churrasqueira",
+     "catalogId": "outdoor/bbq",
+     "position": [
+      17.55,
+      0,
+      3.73
+     ],
+     "rotationDeg": 90,
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-ilha",
+     "catalogId": "kitchen/island",
+     "position": [
+      19.47,
+      0,
+      2.23
+     ],
+     "rotationDeg": 90,
+     "dimensions": {
+      "width": 2.4,
+      "height": 0.92,
+      "depth": 1.2
+     },
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-banqueta-1",
+     "catalogId": "chair/bar-stool",
+     "position": [
+      20.38,
+      0,
+      1.43
+     ],
+     "rotationDeg": -90,
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-banqueta-2",
+     "catalogId": "chair/bar-stool",
+     "position": [
+      20.38,
+      0,
+      2.01
+     ],
+     "rotationDeg": -90,
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-banqueta-3",
+     "catalogId": "chair/bar-stool",
+     "position": [
+      20.38,
+      0,
+      2.59
+     ],
+     "rotationDeg": -90,
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-banqueta-4",
+     "catalogId": "chair/bar-stool",
+     "position": [
+      20.38,
+      0,
+      3.11
+     ],
+     "rotationDeg": -90,
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-mesa",
+     "catalogId": "table/dining-rect",
+     "position": [
+      23.02,
+      0,
+      2.26
+     ],
+     "dimensions": {
+      "width": 2.2,
+      "height": 0.75,
+      "depth": 1.0
+     },
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-cad-n1",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      22.26,
+      0,
+      1.53
+     ],
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-cad-s1",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      22.26,
+      0,
+      3.0
+     ],
+     "rotationDeg": 180,
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-cad-n2",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      22.97,
+      0,
+      1.53
+     ],
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-cad-s2",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      22.97,
+      0,
+      3.0
+     ],
+     "rotationDeg": 180,
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-cad-n3",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      23.68,
+      0,
+      1.53
+     ],
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-cad-s3",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      23.68,
+      0,
+      3.0
+     ],
+     "rotationDeg": 180,
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-cad-o",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      21.68,
+      0,
+      2.26
+     ],
+     "rotationDeg": 90,
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-g-cad-l",
+     "catalogId": "chair/dining-wood",
+     "position": [
+      24.36,
+      0,
+      2.26
+     ],
+     "rotationDeg": -90,
+     "roomId": "c-gourmet"
+    },
+    {
+     "id": "o-sauna-banco",
+     "catalogId": "bathroom/sauna-bench",
+     "position": [
+      12.43,
+      0,
+      2.68
+     ],
+     "rotationDeg": 90,
+     "dimensions": {
+      "width": 2.4,
+      "height": 0.9,
+      "depth": 1.0
+     },
+     "roomId": "c-sauna"
+    },
+    {
+     "id": "o-ducha",
+     "catalogId": "bathroom/shower-box",
+     "position": [
+      14.33,
+      0,
+      1.78
+     ],
+     "dimensions": {
+      "width": 1.0,
+      "height": 2.0,
+      "depth": 1.0
+     },
+     "roomId": "c-ducha"
+    },
+    {
+     "id": "o-lavabo1-vaso",
+     "catalogId": "bathroom/toilet",
+     "position": [
+      15.83,
+      0,
+      1.63
+     ],
+     "rotationDeg": 90,
+     "roomId": "c-lavabo1"
+    },
+    {
+     "id": "o-lavabo1-pia",
+     "catalogId": "bathroom/vanity",
+     "position": [
+      15.73,
+      0,
+      2.43
+     ],
+     "rotationDeg": 90,
+     "dimensions": {
+      "width": 0.5,
+      "height": 0.85,
+      "depth": 0.4
+     },
+     "roomId": "c-lavabo1"
+    },
+    {
+     "id": "o-lavabo2-pia",
+     "catalogId": "bathroom/vanity",
+     "position": [
+      14.1,
+      0,
+      3.5
+     ],
+     "rotationDeg": 90,
+     "dimensions": {
+      "width": 0.6,
+      "height": 0.85,
+      "depth": 0.45
+     },
+     "roomId": "c-lavabo2"
+    }
+   ],
+   "groups": [
+    {
+     "id": "g-jantar",
+     "name": "Mesa de jantar com 8 cadeiras",
+     "objectIds": [
+      "o-mesa-jantar",
+      "o-cad-o1",
+      "o-cad-l1",
+      "o-cad-o2",
+      "o-cad-l2",
+      "o-cad-o3",
+      "o-cad-l3",
+      "o-cad-n",
+      "o-cad-s"
+     ]
+    },
+    {
+     "id": "g-gourmet",
+     "name": "Mesa da área gourmet com 8 cadeiras",
+     "objectIds": [
+      "o-g-mesa",
+      "o-g-cad-n1",
+      "o-g-cad-s1",
+      "o-g-cad-n2",
+      "o-g-cad-s2",
+      "o-g-cad-n3",
+      "o-g-cad-s3",
+      "o-g-cad-o",
+      "o-g-cad-l"
+     ]
+    },
+    {
+     "id": "g-escada",
+     "name": "Escada em U",
+     "objectIds": [
+      "o-escada-lance1",
+      "o-escada-patamar",
+      "o-escada-lance2"
+     ]
+    }
+   ],
+   "roofs": [
+    {
+     "id": "r-gourmet",
+     "name": "Cobertura da área gourmet (telha de fibrocimento, 10%)",
+     "kind": "shed",
+     "polygon": [
+      [
+       17.1,
+       0.15
+      ],
+      [
+       25.255,
+       0.15
+      ],
+      [
+       25.255,
+       5.49
+      ],
+      [
+       17.1,
+       5.49
+      ]
+     ],
+     "baseHeight": 2.9,
+     "pitchDeg": 5.7,
+     "ridgeDeg": 90,
+     "overhang": 0.1,
+     "material": "concrete/exposed"
+    },
+    {
+     "id": "r-sauna",
+     "name": "Cobertura da sauna e lavabos (fibrocimento, 10%)",
+     "kind": "shed",
+     "polygon": [
+      [
+       11.77,
+       1.15
+      ],
+      [
+       17.18,
+       1.15
+      ],
+      [
+       17.18,
+       4.28
+      ],
+      [
+       11.77,
+       4.28
+      ]
+     ],
+     "baseHeight": 2.8,
+     "pitchDeg": 5.7,
+     "ridgeDeg": 90,
+     "overhang": 0.2,
+     "material": "concrete/exposed"
+    },
+    {
+     "id": "r-lavanderia",
+     "name": "Cobertura da lavanderia (fibrocimento, 10%)",
+     "kind": "shed",
+     "polygon": [
+      [
+       38.53,
+       0.15
+      ],
+      [
+       40.57,
+       0.15
+      ],
+      [
+       40.57,
+       6.64
+      ],
+      [
+       38.53,
+       6.64
+      ]
+     ],
+     "baseHeight": 2.6,
+     "pitchDeg": 5.7,
+     "ridgeDeg": 0,
+     "overhang": 0.05,
+     "material": "concrete/exposed"
+    }
+   ],
+   "annotations": [
+    {
+     "id": "a-largura-casa",
+     "kind": "dimension",
+     "start": [
+      25.18,
+      1.15
+     ],
+     "end": [
+      38.53,
+      1.15
+     ],
+     "offset": 0.6
+    },
+    {
+     "id": "a-fundo-casa",
+     "kind": "dimension",
+     "start": [
+      38.53,
+      1.15
+     ],
+     "end": [
+      38.53,
+      13.84
+     ],
+     "offset": -0.6
+    }
+   ]
+  },
+  {
+   "id": "superior",
+   "name": "Andar de cima",
+   "elevation": 3.12,
+   "height": 2.8,
+   "slabThickness": 0.12,
+   "walls": [
+    {
+     "id": "s-norte",
+     "start": [
+      25.255,
+      1.225
+     ],
+     "end": [
+      38.46,
+      1.225
+     ]
+    },
+    {
+     "id": "s-leste",
+     "start": [
+      38.46,
+      1.225
+     ],
+     "end": [
+      38.46,
+      13.765
+     ]
+    },
+    {
+     "id": "s-sul",
+     "start": [
+      38.46,
+      13.765
+     ],
+     "end": [
+      33.965,
+      13.765
+     ]
+    },
+    {
+     "id": "s-parede-varanda",
+     "start": [
+      33.965,
+      13.765
+     ],
+     "end": [
+      33.965,
+      4.785
+     ]
+    },
+    {
+     "id": "s-oeste",
+     "start": [
+      25.255,
+      4.785
+     ],
+     "end": [
+      25.255,
+      1.225
+     ]
+    },
+    {
+     "id": "s-sul-frente",
+     "start": [
+      25.255,
+      4.785
+     ],
+     "end": [
+      33.965,
+      4.785
+     ]
+    },
+    {
+     "id": "s-sala-sul",
+     "start": [
+      35.115,
+      4.785
+     ],
+     "end": [
+      38.46,
+      4.785
+     ]
+    },
+    {
+     "id": "s-wc-suite-leste",
+     "start": [
+      27.055,
+      1.225
+     ],
+     "end": [
+      27.055,
+      4.785
+     ]
+    },
+    {
+     "id": "s-suite-leste",
+     "start": [
+      32.015,
+      1.225
+     ],
+     "end": [
+      32.015,
+      4.785
+     ]
+    },
+    {
+     "id": "s-corredor-leste",
+     "start": [
+      35.115,
+      4.785
+     ],
+     "end": [
+      35.115,
+      13.765
+     ]
+    },
+    {
+     "id": "s-quarto2-sul",
+     "start": [
+      35.115,
+      8.335
+     ],
+     "end": [
+      38.46,
+      8.335
+     ]
+    },
+    {
+     "id": "s-quarto3-norte",
+     "start": [
+      35.115,
+      10.335
+     ],
+     "end": [
+      38.46,
+      10.335
+     ]
+    },
+    {
+     "id": "s-guarda-corpo-oeste",
+     "start": [
+      32.43,
+      4.785
+     ],
+     "end": [
+      32.43,
+      13.765
+     ],
+     "kind": "railing",
+     "height": 1.1,
+     "thickness": 0.05
+    },
+    {
+     "id": "s-guarda-corpo-sul",
+     "start": [
+      32.43,
+      13.765
+     ],
+     "end": [
+      33.965,
+      13.765
+     ],
+     "kind": "railing",
+     "height": 1.1,
+     "thickness": 0.05
+    }
+   ],
+   "openings": [
+    {
+     "id": "s-jan-quarto2",
+     "wallId": "s-leste",
+     "kind": "sliding-window",
+     "offset": 5.365,
+     "width": 1.4,
+     "height": 1.0,
+     "sill": 1.1
+    },
+    {
+     "id": "s-jan-wc",
+     "wallId": "s-leste",
+     "kind": "window",
+     "offset": 8.13,
+     "width": 0.6,
+     "height": 0.6,
+     "sill": 1.6
+    },
+    {
+     "id": "s-jan-quarto3",
+     "wallId": "s-leste",
+     "kind": "sliding-window",
+     "offset": 10.83,
+     "width": 1.4,
+     "height": 1.0,
+     "sill": 1.1
+    },
+    {
+     "id": "s-porta-varanda",
+     "wallId": "s-parede-varanda",
+     "kind": "sliding-door",
+     "offset": 4.43,
+     "width": 1.85,
+     "height": 2.1
+    },
+    {
+     "id": "s-jan-wc-suite",
+     "wallId": "s-sul-frente",
+     "kind": "window",
+     "offset": 0.895,
+     "width": 0.6,
+     "height": 0.6,
+     "sill": 1.6
+    },
+    {
+     "id": "s-jan-suite",
+     "wallId": "s-sul-frente",
+     "kind": "sliding-window",
+     "offset": 3.48,
+     "width": 1.4,
+     "height": 1.0,
+     "sill": 1.1
+    },
+    {
+     "id": "s-porta-wc-suite",
+     "wallId": "s-wc-suite-leste",
+     "kind": "door",
+     "offset": 2.985,
+     "width": 0.8,
+     "height": 2.1,
+     "hinge": "end",
+     "opensTo": "left"
+    },
+    {
+     "id": "s-porta-suite",
+     "wallId": "s-suite-leste",
+     "kind": "door",
+     "offset": 3.055,
+     "width": 0.8,
+     "height": 2.1,
+     "hinge": "end",
+     "opensTo": "right"
+    },
+    {
+     "id": "s-porta-quarto2",
+     "wallId": "s-corredor-leste",
+     "kind": "door",
+     "offset": 2.975,
+     "width": 0.8,
+     "height": 2.1,
+     "hinge": "start",
+     "opensTo": "left"
+    },
+    {
+     "id": "s-porta-wc",
+     "wallId": "s-corredor-leste",
+     "kind": "door",
+     "offset": 4.175,
+     "width": 0.8,
+     "height": 2.1,
+     "hinge": "end",
+     "opensTo": "left"
+    },
+    {
+     "id": "s-porta-quarto3",
+     "wallId": "s-corredor-leste",
+     "kind": "door",
+     "offset": 6.125,
+     "width": 0.8,
+     "height": 2.1,
+     "hinge": "start",
+     "opensTo": "left"
+    }
+   ],
+   "rooms": [
+    {
+     "id": "s-wc-suite",
+     "name": "WC suíte",
+     "type": "bathroom",
+     "polygon": [
+      [
+       25.255,
+       1.225
+      ],
+      [
+       27.055,
+       1.225
+      ],
+      [
+       27.055,
+       4.785
+      ],
+      [
+       25.255,
+       4.785
+      ]
+     ],
+     "floor": {
+      "material": "ceramic/white-tile"
+     }
+    },
+    {
+     "id": "s-closet",
+     "name": "Closet",
+     "type": "storage",
+     "polygon": [
+      [
+       27.055,
+       1.225
+      ],
+      [
+       29.1,
+       1.225
+      ],
+      [
+       29.1,
+       4.785
+      ],
+      [
+       27.055,
+       4.785
+      ]
+     ],
+     "floor": {
+      "material": "wood/natural-oak"
+     }
+    },
+    {
+     "id": "s-suite",
+     "name": "Suíte",
+     "type": "bedroom",
+     "polygon": [
+      [
+       29.1,
+       1.225
+      ],
+      [
+       32.015,
+       1.225
+      ],
+      [
+       32.015,
+       4.785
+      ],
+      [
+       29.1,
+       4.785
+      ]
+     ],
+     "floor": {
+      "material": "wood/natural-oak"
+     }
+    },
+    {
+     "id": "s-escada",
+     "name": "Escada",
+     "type": "hall",
+     "polygon": [
+      [
+       32.015,
+       1.225
+      ],
+      [
+       33.965,
+       1.225
+      ],
+      [
+       33.965,
+       4.785
+      ],
+      [
+       32.015,
+       4.785
+      ]
+     ],
+     "floor": {
+      "material": "wood/natural-oak"
+     }
+    },
+    {
+     "id": "s-sala",
+     "name": "Sala de estar",
+     "type": "living",
+     "polygon": [
+      [
+       33.965,
+       1.225
+      ],
+      [
+       38.46,
+       1.225
+      ],
+      [
+       38.46,
+       4.785
+      ],
+      [
+       33.965,
+       4.785
+      ]
+     ],
+     "floor": {
+      "material": "wood/natural-oak"
+     }
+    },
+    {
+     "id": "s-corredor",
+     "name": "Corredor",
+     "type": "hall",
+     "polygon": [
+      [
+       33.965,
+       4.785
+      ],
+      [
+       35.115,
+       4.785
+      ],
+      [
+       35.115,
+       13.765
+      ],
+      [
+       33.965,
+       13.765
+      ]
+     ],
+     "floor": {
+      "material": "wood/natural-oak"
+     }
+    },
+    {
+     "id": "s-quarto2",
+     "name": "Quarto 2",
+     "type": "bedroom",
+     "polygon": [
+      [
+       35.115,
+       4.785
+      ],
+      [
+       38.46,
+       4.785
+      ],
+      [
+       38.46,
+       8.335
+      ],
+      [
+       35.115,
+       8.335
+      ]
+     ],
+     "floor": {
+      "material": "wood/natural-oak"
+     }
+    },
+    {
+     "id": "s-wc-social",
+     "name": "WC social",
+     "type": "bathroom",
+     "polygon": [
+      [
+       35.115,
+       8.335
+      ],
+      [
+       38.46,
+       8.335
+      ],
+      [
+       38.46,
+       10.335
+      ],
+      [
+       35.115,
+       10.335
+      ]
+     ],
+     "floor": {
+      "material": "ceramic/white-tile"
+     }
+    },
+    {
+     "id": "s-quarto3",
+     "name": "Quarto 3",
+     "type": "bedroom",
+     "polygon": [
+      [
+       35.115,
+       10.335
+      ],
+      [
+       38.46,
+       10.335
+      ],
+      [
+       38.46,
+       13.765
+      ],
+      [
+       35.115,
+       13.765
+      ]
+     ],
+     "floor": {
+      "material": "wood/natural-oak"
+     }
+    },
+    {
+     "id": "s-c-varanda",
+     "name": "Varanda",
+     "type": "balcony",
+     "polygon": [
+      [
+       32.43,
+       4.785
+      ],
+      [
+       33.965,
+       4.785
+      ],
+      [
+       33.965,
+       13.765
+      ],
+      [
+       32.43,
+       13.765
+      ]
+     ],
+     "floor": {
+      "material": "wood/deck-cumaru"
+     }
+    }
+   ],
+   "objects": [
+    {
+     "id": "s-wc-suite-box",
+     "catalogId": "bathroom/shower-box",
+     "position": [
+      26.155,
+      0,
+      1.75
+     ],
+     "dimensions": {
+      "width": 1.5,
+      "height": 2.0,
+      "depth": 0.9
+     },
+     "roomId": "s-wc-suite"
+    },
+    {
+     "id": "s-wc-suite-vaso",
+     "catalogId": "bathroom/toilet",
+     "position": [
+      25.68,
+      0,
+      2.78
+     ],
+     "rotationDeg": 90,
+     "roomId": "s-wc-suite"
+    },
+    {
+     "id": "s-wc-suite-pia",
+     "catalogId": "bathroom/vanity",
+     "position": [
+      25.58,
+      0,
+      3.68
+     ],
+     "rotationDeg": 90,
+     "dimensions": {
+      "width": 0.6,
+      "height": 0.85,
+      "depth": 0.45
+     },
+     "roomId": "s-wc-suite"
+    },
+    {
+     "id": "s-closet-armario",
+     "catalogId": "storage/wardrobe-2-door",
+     "position": [
+      28.08,
+      0,
+      1.6
+     ],
+     "dimensions": {
+      "width": 1.9,
+      "height": 2.4,
+      "depth": 0.6
+     },
+     "roomId": "s-closet"
+    },
+    {
+     "id": "s-closet-gaveteiro",
+     "catalogId": "storage/dresser",
+     "position": [
+      28.08,
+      0,
+      3.08
+     ],
+     "dimensions": {
+      "width": 1.2,
+      "height": 0.9,
+      "depth": 0.5
+     },
+     "roomId": "s-closet"
+    },
+    {
+     "id": "s-cama-suite",
+     "catalogId": "bed/queen-modern",
+     "position": [
+      30.51,
+      0,
+      2.38
+     ],
+     "dimensions": {
+      "width": 1.4,
+      "height": 1.0,
+      "depth": 1.97
+     },
+     "roomId": "s-suite"
+    },
+    {
+     "id": "s-cabeceira-suite-a",
+     "catalogId": "storage/nightstand",
+     "position": [
+      29.5,
+      0,
+      1.59
+     ],
+     "roomId": "s-suite"
+    },
+    {
+     "id": "s-cabeceira-suite-b",
+     "catalogId": "storage/nightstand",
+     "position": [
+      31.53,
+      0,
+      1.59
+     ],
+     "roomId": "s-suite"
+    },
+    {
+     "id": "s-rack",
+     "catalogId": "storage/tv-unit",
+     "position": [
+      36.18,
+      0,
+      1.5
+     ],
+     "dimensions": {
+      "width": 2.4,
+      "height": 0.5,
+      "depth": 0.42
+     },
+     "roomId": "s-sala"
+    },
+    {
+     "id": "s-tv",
+     "catalogId": "appliance/tv",
+     "position": [
+      36.31,
+      1.0,
+      1.33
+     ],
+     "dimensions": {
+      "width": 1.4,
+      "height": 0.8,
+      "depth": 0.05
+     },
+     "roomId": "s-sala"
+    },
+    {
+     "id": "s-sofa",
+     "catalogId": "sofa/three-seat",
+     "position": [
+      36.35,
+      0,
+      4.04
+     ],
+     "rotationDeg": 180,
+     "dimensions": {
+      "width": 2.4,
+      "height": 0.85,
+      "depth": 0.95
+     },
+     "roomId": "s-sala"
+    },
+    {
+     "id": "s-poltrona-1",
+     "catalogId": "chair/armchair-lounge",
+     "position": [
+      37.93,
+      0,
+      2.57
+     ],
+     "rotationDeg": -90,
+     "roomId": "s-sala"
+    },
+    {
+     "id": "s-poltrona-2",
+     "catalogId": "chair/armchair-lounge",
+     "position": [
+      37.93,
+      0,
+      3.38
+     ],
+     "rotationDeg": -90,
+     "roomId": "s-sala"
+    },
+    {
+     "id": "s-mesa-centro-1",
+     "catalogId": "table/coffee-round",
+     "position": [
+      36.23,
+      0,
+      2.73
+     ],
+     "roomId": "s-sala"
+    },
+    {
+     "id": "s-mesa-centro-2",
+     "catalogId": "table/coffee-round",
+     "position": [
+      36.88,
+      0,
+      2.58
+     ],
+     "dimensions": {
+      "width": 0.6,
+      "height": 0.35,
+      "depth": 0.6
+     },
+     "roomId": "s-sala"
+    },
+    {
+     "id": "s-mesa-lateral",
+     "catalogId": "table/side",
+     "position": [
+      37.87,
+      0,
+      4.26
+     ],
+     "roomId": "s-sala"
+    },
+    {
+     "id": "s-tapete",
+     "catalogId": "rug/rectangular",
+     "position": [
+      36.33,
+      0,
+      2.88
+     ],
+     "dimensions": {
+      "width": 2.6,
+      "height": 0.01,
+      "depth": 1.8
+     },
+     "roomId": "s-sala"
+    },
+    {
+     "id": "s-cama-q2",
+     "catalogId": "bed/single",
+     "position": [
+      37.37,
+      0,
+      5.85
+     ],
+     "dimensions": {
+      "width": 0.9,
+      "height": 0.95,
+      "depth": 1.9
+     },
+     "roomId": "s-quarto2"
+    },
+    {
+     "id": "s-cabeceira-q2a",
+     "catalogId": "storage/nightstand",
+     "position": [
+      36.63,
+      0,
+      5.08
+     ],
+     "roomId": "s-quarto2"
+    },
+    {
+     "id": "s-cabeceira-q2b",
+     "catalogId": "storage/nightstand",
+     "position": [
+      38.08,
+      0,
+      5.08
+     ],
+     "roomId": "s-quarto2"
+    },
+    {
+     "id": "s-guarda-roupa-q2",
+     "catalogId": "storage/wardrobe-2-door",
+     "position": [
+      35.48,
+      0,
+      6.13
+     ],
+     "rotationDeg": 90,
+     "dimensions": {
+      "width": 2.4,
+      "height": 2.2,
+      "depth": 0.55
+     },
+     "roomId": "s-quarto2"
+    },
+    {
+     "id": "s-wc-pia",
+     "catalogId": "bathroom/vanity",
+     "position": [
+      36.03,
+      0,
+      10.03
+     ],
+     "rotationDeg": 180,
+     "dimensions": {
+      "width": 1.2,
+      "height": 0.85,
+      "depth": 0.45
+     },
+     "roomId": "s-wc-social"
+    },
+    {
+     "id": "s-wc-vaso",
+     "catalogId": "bathroom/toilet",
+     "position": [
+      37.33,
+      0,
+      9.93
+     ],
+     "rotationDeg": 180,
+     "roomId": "s-wc-social"
+    },
+    {
+     "id": "s-wc-box",
+     "catalogId": "bathroom/shower-box",
+     "position": [
+      37.96,
+      0,
+      9.33
+     ],
+     "dimensions": {
+      "width": 0.85,
+      "height": 2.0,
+      "depth": 1.85
+     },
+     "roomId": "s-wc-social"
+    },
+    {
+     "id": "s-cama-q3",
+     "catalogId": "bed/single",
+     "position": [
+      37.37,
+      0,
+      11.37
+     ],
+     "dimensions": {
+      "width": 0.9,
+      "height": 0.95,
+      "depth": 1.9
+     },
+     "roomId": "s-quarto3"
+    },
+    {
+     "id": "s-cabeceira-q3a",
+     "catalogId": "storage/nightstand",
+     "position": [
+      36.63,
+      0,
+      10.63
+     ],
+     "roomId": "s-quarto3"
+    },
+    {
+     "id": "s-cabeceira-q3b",
+     "catalogId": "storage/nightstand",
+     "position": [
+      38.08,
+      0,
+      10.63
+     ],
+     "roomId": "s-quarto3"
+    },
+    {
+     "id": "s-guarda-roupa-q3",
+     "catalogId": "storage/wardrobe-2-door",
+     "position": [
+      35.48,
+      0,
+      12.48
+     ],
+     "rotationDeg": 90,
+     "dimensions": {
+      "width": 2.3,
+      "height": 2.2,
+      "depth": 0.55
+     },
+     "roomId": "s-quarto3"
+    }
+   ],
+   "slabOpenings": [
+    {
+     "id": "s-vao-escada",
+     "polygon": [
+      [
+       32.09,
+       1.3
+      ],
+      [
+       33.89,
+       1.3
+      ],
+      [
+       33.89,
+       3.88
+      ],
+      [
+       32.09,
+       3.88
+      ]
+     ],
+     "railing": true
+    }
+   ],
+   "roofs": [
+    {
+     "id": "r-casa-frente",
+     "name": "Telhado da frente (fibrocimento, 10%)",
+     "kind": "shed",
+     "polygon": [
+      [
+       25.18,
+       1.15
+      ],
+      [
+       38.53,
+       1.15
+      ],
+      [
+       38.53,
+       4.86
+      ],
+      [
+       25.18,
+       4.86
+      ]
+     ],
+     "pitchDeg": 5.7,
+     "ridgeDeg": 90,
+     "overhang": 0.3,
+     "material": "concrete/exposed"
+    },
+    {
+     "id": "r-casa-quartos",
+     "name": "Telhado dos quartos (fibrocimento, 10%)",
+     "kind": "shed",
+     "polygon": [
+      [
+       32.38,
+       4.86
+      ],
+      [
+       38.53,
+       4.86
+      ],
+      [
+       38.53,
+       13.84
+      ],
+      [
+       32.38,
+       13.84
+      ]
+     ],
+     "pitchDeg": 5.7,
+     "ridgeDeg": 0,
+     "overhang": 0.3,
+     "material": "concrete/exposed"
+    }
+   ]
+  }
+ ],
+ "site": {
+  "boundary": [
+   [
+    0.0,
+    0.0
+   ],
+   [
+    40.71,
+    0.0
+   ],
+   [
+    40.71,
+    15.22
+   ],
+   [
+    0.0,
+    15.22
+   ]
+  ],
+  "groundMaterial": "ground/grass",
+  "zones": [
+   {
+    "id": "z-garagem",
+    "name": "Garagem (piso intertravado)",
+    "kind": "paving",
+    "polygon": [
+     [
+      0.15,
+      5.48
+     ],
+     [
+      10.23,
+      5.48
+     ],
+     [
+      10.23,
+      15.03
+     ],
+     [
+      0.15,
+      15.03
+     ]
+    ],
+    "material": "stone/granite-grey"
+   },
+   {
+    "id": "z-caminho",
+    "name": "Caminho (piso intertravado)",
+    "kind": "paving",
+    "polygon": [
+     [
+      10.23,
+      5.48
+     ],
+     [
+      17.1,
+      5.48
+     ],
+     [
+      17.1,
+      7.3
+     ],
+     [
+      10.23,
+      7.3
+     ]
+    ],
+    "material": "stone/granite-grey"
+   },
+   {
+    "id": "z-deck-spa",
+    "name": "Deck do spa (sob o pergolado)",
+    "kind": "deck",
+    "polygon": [
+     [
+      8.58,
+      1.24
+     ],
+     [
+      11.77,
+      1.24
+     ],
+     [
+      11.77,
+      4.28
+     ],
+     [
+      17.1,
+      4.28
+     ],
+     [
+      17.1,
+      5.48
+     ],
+     [
+      8.58,
+      5.48
+     ]
+    ],
+    "material": "wood/deck-cumaru",
+    "elevation": 0.02
+   },
+   {
+    "id": "z-fogueira",
+    "name": "Lounge com fogueira",
+    "kind": "paving",
+    "polygon": [
+     [
+      18.62,
+      7.3
+     ],
+     [
+      21.58,
+      7.3
+     ],
+     [
+      21.58,
+      10.38
+     ],
+     [
+      18.62,
+      10.38
+     ]
+    ],
+    "material": "stone/travertine",
+    "elevation": 0.02
+   },
+   {
+    "id": "z-piscina",
+    "name": "Piscina",
+    "kind": "pool",
+    "polygon": [
+     [
+      21.86,
+      7.54
+     ],
+     [
+      29.41,
+      7.54
+     ],
+     [
+      29.41,
+      11.53
+     ],
+     [
+      21.86,
+      11.53
+     ]
+    ],
+    "material": "water/pool",
+    "depth": 1.4,
+    "edgeMaterial": "stone/travertine"
+   },
+   {
+    "id": "z-piscina-norte",
+    "name": "Calçada da piscina",
+    "kind": "paving",
+    "polygon": [
+     [
+      17.1,
+      5.49
+     ],
+     [
+      32.28,
+      5.49
+     ],
+     [
+      32.28,
+      7.54
+     ],
+     [
+      17.1,
+      7.54
+     ]
+    ],
+    "material": "stone/travertine"
+   },
+   {
+    "id": "z-piscina-leste",
+    "name": "Calçada da piscina",
+    "kind": "paving",
+    "polygon": [
+     [
+      29.41,
+      7.54
+     ],
+     [
+      32.28,
+      7.54
+     ],
+     [
+      32.28,
+      11.53
+     ],
+     [
+      29.41,
+      11.53
+     ]
+    ],
+    "material": "stone/travertine"
+   },
+   {
+    "id": "z-deck-piscina",
+    "name": "Deck da piscina",
+    "kind": "deck",
+    "polygon": [
+     [
+      20.83,
+      11.53
+     ],
+     [
+      32.28,
+      11.53
+     ],
+     [
+      32.28,
+      13.88
+     ],
+     [
+      20.83,
+      13.88
+     ]
+    ],
+    "material": "wood/deck-cumaru",
+    "elevation": 0.02
+   },
+   {
+    "id": "z-canteiro",
+    "name": "Canteiro junto ao muro",
+    "kind": "garden-bed",
+    "polygon": [
+     [
+      20.83,
+      13.88
+     ],
+     [
+      33.89,
+      13.88
+     ],
+     [
+      33.89,
+      15.03
+     ],
+     [
+      20.83,
+      15.03
+     ]
+    ],
+    "material": "ground/soil"
+   },
+   {
+    "id": "z-lavanderia",
+    "name": "Lavanderia",
+    "kind": "paving",
+    "polygon": [
+     [
+      38.61,
+      0.15
+     ],
+     [
+      40.57,
+      0.15
+     ],
+     [
+      40.57,
+      6.64
+     ],
+     [
+      38.61,
+      6.64
+     ]
+    ],
+    "material": "concrete/polished"
+   },
+   {
+    "id": "z-fossa",
+    "name": "Fossa",
+    "kind": "other",
+    "polygon": [
+     [
+      38.61,
+      6.64
+     ],
+     [
+      40.24,
+      6.64
+     ],
+     [
+      40.24,
+      7.87
+     ],
+     [
+      38.61,
+      7.87
+     ]
+    ],
+    "material": "concrete/exposed",
+    "elevation": 0.05
+   },
+   {
+    "id": "z-canil",
+    "name": "Canil",
+    "kind": "paving",
+    "polygon": [
+     [
+      38.61,
+      7.87
+     ],
+     [
+      40.57,
+      7.87
+     ],
+     [
+      40.57,
+      13.84
+     ],
+     [
+      38.61,
+      13.84
+     ]
+    ],
+    "material": "concrete/exposed"
+   },
+   {
+    "id": "z-corredor-fundos",
+    "name": "Corredor dos fundos",
+    "kind": "paving",
+    "polygon": [
+     [
+      17.18,
+      0.15
+     ],
+     [
+      38.53,
+      0.15
+     ],
+     [
+      38.53,
+      1.15
+     ],
+     [
+      17.18,
+      1.15
+     ]
+    ],
+    "material": "concrete/exposed"
+   }
+  ],
+  "walls": [
+   {
+    "id": "m-norte",
+    "name": "Muro (2,50 m)",
+    "kind": "solid",
+    "start": [
+     0.0,
+     0.075
+    ],
+    "end": [
+     40.71,
+     0.075
+    ],
+    "height": 2.5,
+    "thickness": 0.15,
+    "finish": {
+     "left": "paint/exterior-white",
+     "right": "paint/exterior-white"
+    }
+   },
+   {
+    "id": "m-leste",
+    "name": "Muro (2,50 m)",
+    "kind": "solid",
+    "start": [
+     40.635,
+     0.0
+    ],
+    "end": [
+     40.635,
+     15.22
+    ],
+    "height": 2.5,
+    "thickness": 0.15,
+    "finish": {
+     "left": "paint/exterior-white",
+     "right": "paint/exterior-white"
+    }
+   },
+   {
+    "id": "m-sul",
+    "name": "Muro (2,50 m)",
+    "kind": "solid",
+    "start": [
+     40.71,
+     15.145
+    ],
+    "end": [
+     0.0,
+     15.145
+    ],
+    "height": 2.5,
+    "thickness": 0.15,
+    "finish": {
+     "left": "paint/exterior-white",
+     "right": "paint/exterior-white"
+    }
+   },
+   {
+    "id": "m-oeste",
+    "name": "Muro (2,50 m)",
+    "kind": "solid",
+    "start": [
+     0.075,
+     15.22
+    ],
+    "end": [
+     0.075,
+     0.0
+    ],
+    "height": 2.5,
+    "thickness": 0.15,
+    "finish": {
+     "left": "paint/exterior-white",
+     "right": "paint/exterior-white"
+    }
+   },
+   {
+    "id": "m-fossa",
+    "name": "Parede h = 1,60 m",
+    "kind": "solid",
+    "start": [
+     38.53,
+     6.64
+    ],
+    "end": [
+     40.56,
+     6.64
+    ],
+    "height": 1.6,
+    "thickness": 0.15,
+    "finish": {
+     "left": "paint/exterior-white",
+     "right": "paint/exterior-white"
+    }
+   }
+  ],
+  "openings": [
+   {
+    "id": "a-portao",
+    "wallId": "m-oeste",
+    "kind": "garage-door",
+    "offset": 6.12,
+    "width": 3.8,
+    "height": 2.1
+   }
+  ],
+  "objects": [
+   {
+    "id": "o-carro-1",
+    "catalogId": "outdoor/car",
+    "position": [
+     2.87,
+     0,
+     8.39
+    ],
+    "rotationDeg": -90
+   },
+   {
+    "id": "o-carro-2",
+    "catalogId": "outdoor/car",
+    "position": [
+     7.79,
+     0,
+     8.39
+    ],
+    "rotationDeg": -90
+   },
+   {
+    "id": "o-carro-3",
+    "catalogId": "outdoor/car",
+    "position": [
+     2.87,
+     0,
+     12.25
+    ],
+    "rotationDeg": -90
+   },
+   {
+    "id": "o-carro-4",
+    "catalogId": "outdoor/car",
+    "position": [
+     7.79,
+     0,
+     12.25
+    ],
+    "rotationDeg": -90
+   },
+   {
+    "id": "o-spa",
+    "catalogId": "outdoor/hot-tub",
+    "position": [
+     10.38,
+     0.02,
+     2.75
+    ],
+    "dimensions": {
+     "width": 2.2,
+     "height": 0.9,
+     "depth": 2.3
+    },
+    "name": "Spa / hidromassagem"
+   },
+   {
+    "id": "o-pergolado",
+    "catalogId": "outdoor/pergola",
+    "position": [
+     10.18,
+     0.02,
+     3.39
+    ],
+    "dimensions": {
+     "width": 3.1,
+     "height": 2.6,
+     "depth": 4.2
+    }
+   },
+   {
+    "id": "o-fogueira",
+    "catalogId": "outdoor/fire-pit",
+    "position": [
+     20.15,
+     0.02,
+     8.84
+    ],
+    "name": "Fogueira (círculo no projeto)"
+   },
+   {
+    "id": "o-banco-fogueira-1",
+    "catalogId": "outdoor/garden-bench",
+    "position": [
+     20.1,
+     0.02,
+     9.93
+    ],
+    "rotationDeg": 180
+   },
+   {
+    "id": "o-banco-fogueira-2",
+    "catalogId": "outdoor/garden-bench",
+    "position": [
+     19.13,
+     0.02,
+     8.84
+    ],
+    "rotationDeg": 90
+   },
+   {
+    "id": "o-espreguicadeira-1",
+    "catalogId": "outdoor/sun-lounger",
+    "position": [
+     22.93,
+     0.02,
+     12.78
+    ],
+    "rotationDeg": 180
+   },
+   {
+    "id": "o-espreguicadeira-2",
+    "catalogId": "outdoor/sun-lounger",
+    "position": [
+     24.23,
+     0.02,
+     12.78
+    ],
+    "rotationDeg": 180
+   },
+   {
+    "id": "o-espreguicadeira-3",
+    "catalogId": "outdoor/sun-lounger",
+    "position": [
+     25.53,
+     0.02,
+     12.78
+    ],
+    "rotationDeg": 180
+   },
+   {
+    "id": "o-guarda-sol",
+    "catalogId": "outdoor/umbrella",
+    "position": [
+     26.73,
+     0.02,
+     12.78
+    ]
+   },
+   {
+    "id": "o-lava-1",
+    "catalogId": "appliance/washer",
+    "position": [
+     38.91,
+     0,
+     3.36
+    ],
+    "rotationDeg": 90
+   },
+   {
+    "id": "o-lava-2",
+    "catalogId": "appliance/washer",
+    "position": [
+     38.91,
+     0,
+     4.06
+    ],
+    "rotationDeg": 90
+   },
+   {
+    "id": "o-tanque-1",
+    "catalogId": "appliance/laundry-tub",
+    "position": [
+     38.91,
+     0,
+     5.21
+    ],
+    "rotationDeg": 90,
+    "dimensions": {
+     "width": 0.6,
+     "height": 0.85,
+     "depth": 0.55
+    }
+   },
+   {
+    "id": "o-tanque-2",
+    "catalogId": "appliance/laundry-tub",
+    "position": [
+     38.91,
+     0,
+     5.86
+    ],
+    "rotationDeg": 90,
+    "dimensions": {
+     "width": 0.6,
+     "height": 0.85,
+     "depth": 0.55
+    }
+   },
+   {
+    "id": "o-casinha",
+    "catalogId": "outdoor/dog-house",
+    "position": [
+     39.93,
+     0,
+     11.38
+    ],
+    "rotationDeg": -90
+   },
+   {
+    "id": "o-palmeira-n1",
+    "catalogId": "plant/palm",
+    "position": [
+     1.6,
+     0,
+     1.69
+    ]
+   },
+   {
+    "id": "o-palmeira-n2",
+    "catalogId": "plant/palm",
+    "position": [
+     4.24,
+     0,
+     1.54
+    ]
+   },
+   {
+    "id": "o-palmeira-n3",
+    "catalogId": "plant/palm",
+    "position": [
+     6.53,
+     0,
+     1.54
+    ]
+   },
+   {
+    "id": "o-palmeira-n4",
+    "catalogId": "plant/palm",
+    "position": [
+     2.51,
+     0,
+     3.47
+    ]
+   },
+   {
+    "id": "o-palmeira-n5",
+    "catalogId": "plant/palm",
+    "position": [
+     5.31,
+     0,
+     3.72
+    ]
+   },
+   {
+    "id": "o-palmeira-j1",
+    "catalogId": "plant/palm",
+    "position": [
+     12.93,
+     0,
+     9.05
+    ]
+   },
+   {
+    "id": "o-palmeira-j2",
+    "catalogId": "plant/palm",
+    "position": [
+     16.18,
+     0,
+     9.31
+    ]
+   },
+   {
+    "id": "o-palmeira-j3",
+    "catalogId": "plant/palm",
+    "position": [
+     11.15,
+     0,
+     10.58
+    ]
+   },
+   {
+    "id": "o-palmeira-j4",
+    "catalogId": "plant/palm",
+    "position": [
+     14.19,
+     0,
+     10.98
+    ]
+   },
+   {
+    "id": "o-palmeira-j5",
+    "catalogId": "plant/palm",
+    "position": [
+     16.23,
+     0,
+     12.71
+    ]
+   },
+   {
+    "id": "o-palmeira-j6",
+    "catalogId": "plant/palm",
+    "position": [
+     11.76,
+     0,
+     12.76
+    ]
+   },
+   {
+    "id": "o-palmeira-j7",
+    "catalogId": "plant/palm",
+    "position": [
+     19.12,
+     0,
+     12.46
+    ]
+   },
+   {
+    "id": "o-palmeira-c1",
+    "catalogId": "plant/palm",
+    "position": [
+     21.53,
+     0,
+     14.43
+    ],
+    "dimensions": {
+     "width": 1.6,
+     "height": 2.4,
+     "depth": 1.6
+    }
+   },
+   {
+    "id": "o-palmeira-c2",
+    "catalogId": "plant/palm",
+    "position": [
+     24.43,
+     0,
+     14.43
+    ],
+    "dimensions": {
+     "width": 1.6,
+     "height": 2.4,
+     "depth": 1.6
+    }
+   },
+   {
+    "id": "o-palmeira-c3",
+    "catalogId": "plant/palm",
+    "position": [
+     27.73,
+     0,
+     14.43
+    ],
+    "dimensions": {
+     "width": 1.6,
+     "height": 2.4,
+     "depth": 1.6
+    }
+   },
+   {
+    "id": "o-palmeira-c4",
+    "catalogId": "plant/palm",
+    "position": [
+     31.03,
+     0,
+     14.43
+    ],
+    "dimensions": {
+     "width": 1.6,
+     "height": 2.4,
+     "depth": 1.6
+    }
+   },
+   {
+    "id": "o-arbusto-c1",
+    "catalogId": "plant/shrub",
+    "position": [
+     22.83,
+     0,
+     14.48
+    ]
+   },
+   {
+    "id": "o-arbusto-c2",
+    "catalogId": "plant/shrub",
+    "position": [
+     26.03,
+     0,
+     14.48
+    ]
+   },
+   {
+    "id": "o-arbusto-c3",
+    "catalogId": "plant/shrub",
+    "position": [
+     29.33,
+     0,
+     14.48
+    ]
+   },
+   {
+    "id": "o-arbusto-c4",
+    "catalogId": "plant/shrub",
+    "position": [
+     32.53,
+     0,
+     14.48
+    ]
+   }
+  ],
+  "annotations": [
+   {
+    "id": "a-terreno-largura",
+    "kind": "dimension",
+    "start": [
+     0.0,
+     15.22
+    ],
+    "end": [
+     40.71,
+     15.22
+    ],
+    "offset": -0.8
+   },
+   {
+    "id": "a-terreno-fundo",
+    "kind": "dimension",
+    "start": [
+     0.0,
+     0.0
+    ],
+    "end": [
+     0.0,
+     15.22
+    ],
+    "offset": 0.8
+   },
+   {
+    "id": "a-nota-escala",
+    "kind": "label",
+    "start": [
+     2.93,
+     14.48
+    ],
+    "text": "Medidas tiradas da prancha A2 (escala 1/50)"
+   }
+  ]
+ },
+ "views": [
+  {
+   "id": "v-geral",
+   "name": "Vista geral",
+   "position": [
+    19.93,
+    26,
+    27.88
+   ],
+   "target": [
+    22.93,
+    0,
+    7.38
+   ]
+  }
+ ]
+}
