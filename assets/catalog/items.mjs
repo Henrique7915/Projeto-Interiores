@@ -204,6 +204,15 @@ export const items = [
     materialSlots: { pot: slot('Vaso', 'ceramic/terracotta', ['ceramic', 'stone', 'paint']), foliage: slot('Folhagem', 'plant/leaf', ['plant']) }, tags: ['sala', 'varanda'] },
   { id: 'plant/cactus', name: L('Cacto em vaso', 'Potted cactus'), category: 'plant', model: 'procedural/cactus', dimensions: { width: 0.35, height: 0.6, depth: 0.35 }, mount: 'surface', resizable: { height: [0.25, 1.4] },
     materialSlots: { pot: slot('Vaso', 'ceramic/terracotta', ['ceramic', 'stone', 'paint']) }, tags: ['sala', 'varanda'] },
+  // Lazer e serviço (projeto do João)
+  { id: 'outdoor/hot-tub', name: L('Spa / ofurô', 'Hot tub'), category: 'outdoor', model: 'procedural/hot-tub', dimensions: { width: 2.1, height: 0.9, depth: 2.1 }, resizable: { width: [1.4, 3], height: [0.7, 1.1], depth: [1.4, 3] },
+    materialSlots: { shell: slot('Concha', 'ceramic/porcelain-white', ['ceramic', 'stone', 'paint', 'plastic']), skirt: slot('Saia', 'wood/deck-cumaru', ['wood', 'stone', 'paint', 'concrete']) }, tags: ['exterior', 'lazer', 'piscina'] },
+  { id: 'bathroom/sauna-bench', name: L('Banco de sauna (dois degraus)', 'Sauna bench'), category: 'bathroom', model: 'procedural/sauna-bench', dimensions: { width: 1.8, height: 0.9, depth: 1.1 }, resizable: { width: [0.8, 3], height: [0.7, 1.1], depth: [0.7, 1.4] },
+    materialSlots: { wood: slot('Madeira', 'wood/pine', ['wood']) }, tags: ['sauna', 'lazer'] },
+  { id: 'appliance/laundry-tub', name: L('Tanque de lavar roupa', 'Laundry tub'), category: 'appliance', model: 'procedural/laundry-tub', dimensions: { width: 0.7, height: 0.85, depth: 0.55 }, resizable: { width: [0.5, 1.2] },
+    materialSlots: { body: slot('Tanque', 'ceramic/porcelain-white', ['ceramic', 'stone', 'concrete', 'plastic', 'metal']), tap: slot('Torneira', 'metal/chrome', METAL) }, tags: ['lavanderia', 'serviço'] },
+  { id: 'outdoor/dog-house', name: L('Casinha de cachorro', 'Dog house'), category: 'outdoor', model: 'procedural/dog-house', dimensions: { width: 0.8, height: 0.8, depth: 0.9 }, resizable: { width: [0.5, 1.4], height: [0.5, 1.2], depth: [0.5, 1.5] },
+    materialSlots: { body: slot('Paredes', 'wood/pine', ['wood', 'paint', 'plastic']), roof: slot('Telhado', 'ceramic/roof-tile', ['ceramic', 'wood', 'metal', 'paint']) }, tags: ['exterior', 'canil'] },
   // Genérico
   { id: 'other/box', name: L('Caixa', 'Box'), category: 'other', model: 'procedural/box', dimensions: { width: 0.5, height: 0.5, depth: 0.5 }, resizable: { width: [0.05, 10], height: [0.05, 10], depth: [0.05, 10] },
     materialSlots: { body: slot('Material', 'wood/natural-oak') } },
