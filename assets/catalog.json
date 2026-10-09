@@ -4103,7 +4103,8 @@
         "lazer",
         "piscina"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/outdoor-hot-tub.png"
     },
     {
       "id": "bathroom/sauna-bench",
@@ -4145,7 +4146,8 @@
         "sauna",
         "lazer"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/bathroom-sauna-bench.png"
     },
     {
       "id": "appliance/laundry-tub",
@@ -4190,7 +4192,8 @@
         "lavanderia",
         "serviço"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/appliance-laundry-tub.png"
     },
     {
       "id": "outdoor/dog-house",
@@ -4244,7 +4247,8 @@
         "exterior",
         "canil"
       ],
-      "license": "Próprio (gerado por código neste repositório)"
+      "license": "Próprio (gerado por código neste repositório)",
+      "thumbnail": "thumbnails/outdoor-dog-house.png"
     },
     {
       "id": "other/box",
